@@ -73,6 +73,49 @@ PHP_FUNCTION(secp256k1_ecdsa_verify) {
     RETURN_LONG(result);
 }
 
+/** Verify an ECDSA secret key.
+ *  Returns: 1: secret key is valid
+ *           0: secret key is invalid
+ *  In:      seckey: pointer to a 32-byte secret key (cannot be NULL)
+ */
+PHP_FUNCTION(secp256k1_ec_seckey_verify) {
+    unsigned char *seckey;
+    int seckeylen;
+    int result;
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s",
+            &seckey, &seckeylen
+            ) == FAILURE) {
+        php_printf("Invalid parameters passed to secp256k1_ec_seckey_verify()");
+        return;
+    }
+
+    result = secp256k1_ec_seckey_verify((unsigned char const *) seckey);
+    RETURN_LONG(result);
+}
+
+/** Just validate a public key.
+ *  Returns: 1: valid public key
+ *           0: invalid public key
+ *  In:      pubkey:    pointer to a 33-byte or 65-byte public key (cannot be NULL).
+ *           pubkeylen: length of pubkey
+ */
+PHP_FUNCTION(secp256k1_ec_pubkey_verify) {
+    unsigned char *pubkey;
+    int pubkeylen;
+    int result;
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s",
+            &pubkey, &pubkeylen
+            ) == FAILURE) {
+        php_printf("Invalid parameters passed to secp256k1_ec_pubkey_verify()");
+        return;
+    }
+
+    result = secp256k1_ec_pubkey_verify((unsigned char const *) pubkey, pubkeylen);
+    RETURN_LONG(result);
+}
+
 PHP_MINIT_FUNCTION(secp256k1) {
 
     REGISTER_LONG_CONSTANT("SECP256K1_START_VERIFY", SECP256K1_START_VERIFY, CONST_CS | CONST_PERSISTENT);
@@ -111,6 +154,8 @@ PHP_MINFO_FUNCTION(secp256k1) {
 const zend_function_entry secp256k1_functions[] = {
     PHP_FE(secp256k1_start, NULL)
     PHP_FE(secp256k1_stop, NULL)
+    PHP_FE(secp256k1_ec_seckey_verify, NULL)
+    PHP_FE(secp256k1_ec_pubkey_verify, NULL)
     PHP_FE(secp256k1_ecdsa_verify, NULL)
     PHP_FE_END /* Must be the last line in secp256k1_functions[] */
 };
