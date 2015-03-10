@@ -16,22 +16,24 @@ ZEND_DECLARE_MODULE_GLOBALS(secp256k1)
 */
 
 /* True global resources - no need for thread safety here */
-static int le_secp256k1;
+static int le_secp256k1_init = 0;
 
-/* {{{ proto bool secp256k1_start(void)
-*   Enable secp256k1 */
-PHP_FUNCTION(secp256k1_start)
-{
-    secp256k1_start(SECP256K1_START_SIGN | SECP256K1_START_VERIFY);
-    RETURN_TRUE;
+int init(void) {
+    if (le_secp256k1_init == 0) {
+        secp256k1_start(SECP256K1_START_SIGN | SECP256K1_START_VERIFY);
+        le_secp256k1_init = 1;
+    }
+
+    return 1;
 }
 
-/* {{{ proto bool secp256k1_stop(void)
-*   Disable secp256k1 */
-PHP_FUNCTION(secp256k1_stop)
+/**
+* execute secp256k1_start, automatically happens on first function call that needs it
+*  but can be usefull when you're benchmarking
+*/
+PHP_FUNCTION(secp256k1_init)
 {
-    secp256k1_stop();
-    RETURN_TRUE;
+    init();
 }
 
 /**
@@ -49,6 +51,8 @@ PHP_FUNCTION(secp256k1_stop)
 */
 PHP_FUNCTION(secp256k1_ecdsa_verify)
 {
+  init();
+
    unsigned char *msg32 = (unsigned char *) 0 ;
   int msg32len;
   unsigned char *sig = (unsigned char *) 0 ;
@@ -85,7 +89,6 @@ PHP_MSHUTDOWN_FUNCTION(secp256k1)
 }
 
 /* Remove if there's nothing to do at request start */
-/* Maybe we should ecdsa_start in here already? */
 PHP_RINIT_FUNCTION(secp256k1)
 {
 #if defined(COMPILE_DL_SECP256K1) && defined(ZTS)
@@ -112,8 +115,7 @@ PHP_MINFO_FUNCTION(secp256k1)
  * Every user visible function must have an entry in secp256k1_functions[].
  */
 const zend_function_entry secp256k1_functions[] = {
-        PHP_FE(secp256k1_start, NULL)
-        PHP_FE(secp256k1_stop, NULL)
+        PHP_FE(secp256k1_init, NULL)
         PHP_FE(secp256k1_ecdsa_verify, NULL)
 	PHP_FE_END	/* Must be the last line in secp256k1_functions[] */
 };

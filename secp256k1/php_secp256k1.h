@@ -20,8 +20,7 @@ extern zend_module_entry secp256k1_module_entry;
 #include "TSRM.h"
 #endif
 
-PHP_FUNCTION(secp256k1_start);
-PHP_FUNCTION(secp256k1_stop);
+PHP_FUNCTION(secp256k1_init);
 PHP_FUNCTION(secp256k1_ecdsa_verify);
 
 /*
