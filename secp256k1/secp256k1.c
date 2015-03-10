@@ -16,7 +16,16 @@ ZEND_DECLARE_MODULE_GLOBALS(secp256k1)
 */
 
 /* True global resources - no need for thread safety here */
-static int le_secp256k1;
+static int le_secp256k1_init = 0;
+
+int init(void) {
+    if (le_secp256k1_init == 0) {
+        secp256k1_start(SECP256K1_START_SIGN | SECP256K1_START_VERIFY);
+        le_secp256k1_init = 1;
+    }
+
+    return 1;
+}
 
 /* {{{ proto bool secp256k1_start(void)
 *   Enable secp256k1 */
@@ -49,6 +58,8 @@ PHP_FUNCTION(secp256k1_stop)
 */
 PHP_FUNCTION(secp256k1_ecdsa_verify)
 {
+  init();
+
    unsigned char *msg32 = (unsigned char *) 0 ;
   int msg32len;
   unsigned char *sig = (unsigned char *) 0 ;
