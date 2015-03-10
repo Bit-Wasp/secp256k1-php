@@ -27,22 +27,6 @@ int init(void) {
     return 1;
 }
 
-/* {{{ proto bool secp256k1_start(void)
-*   Enable secp256k1 */
-PHP_FUNCTION(secp256k1_start)
-{
-    secp256k1_start(SECP256K1_START_SIGN | SECP256K1_START_VERIFY);
-    RETURN_TRUE;
-}
-
-/* {{{ proto bool secp256k1_stop(void)
-*   Disable secp256k1 */
-PHP_FUNCTION(secp256k1_stop)
-{
-    secp256k1_stop();
-    RETURN_TRUE;
-}
-
 /**
 * Verify an ECDSA signature.
 *
@@ -123,8 +107,6 @@ PHP_MINFO_FUNCTION(secp256k1)
  * Every user visible function must have an entry in secp256k1_functions[].
  */
 const zend_function_entry secp256k1_functions[] = {
-        PHP_FE(secp256k1_start, NULL)
-        PHP_FE(secp256k1_stop, NULL)
         PHP_FE(secp256k1_ecdsa_verify, NULL)
 	PHP_FE_END	/* Must be the last line in secp256k1_functions[] */
 };
