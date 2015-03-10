@@ -37,13 +37,13 @@ var_dump(bin2hex($pubkey), $pubkeylen);
 echo "\n";
 
 echo "Test secp256k1_ec_pubkey_decompress: ";
-//$pubkey2 = pack("H*", '0355764cb81dbb6760e82a39bbb9aef774964da3255724fbbe20a552f77938f539');
+$pubkey2 = pack("H*", '0355764cb81dbb6760e82a39bbb9aef774964da3255724fbbe20a552f77938f539');
 $pubkey = pack("H*", '0355764cb81dbb6760e82a39bbb9aef774964da3255724fbbe20a552f77938f539');
 $pubkeylen = 33;
 $expected = pack("H*", '0455764cb81dbb6760e82a39bbb9aef774964da3255724fbbe20a552f77938f53974f47be9246c0368cafe34d6b9b493f0a1e12ae61e46ab14e0223cac0c0ff417');
 var_dump(secp256k1_ec_pubkey_decompress($pubkey, $pubkeylen));
-//echo "original: " . bin2hex($pubkey2) . "\n";
-//echo "now: " . bin2hex($pubkey) . "\n";
+echo "original: " . bin2hex($pubkey2) . "\n";
+echo "now: " . bin2hex($pubkey) . "\n";
 var_dump(bin2hex($pubkey), $pubkeylen);
 var_dump($pubkey == $expected);
 echo "\n";
