@@ -1,5 +1,5 @@
 <?php
-var_dump(secp256k1_start(1));
+var_dump(secp256k1_start(0));
 
 $privateKey = pack("H*", "");
 $publicKey = pack("H*", "");
@@ -13,4 +13,4 @@ list ($privateKeyLen, $publicKeyLen, $sigLen) =
     strlen($sig)
   );
 
-secp256k1_ecdsa_verify($msg32, $sig, $siglen, $publicKey, $publicKeyLen);
+secp256k1_ecdsa_verify($msg32, $sig, $publicKey);
