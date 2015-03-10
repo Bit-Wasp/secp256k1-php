@@ -28,6 +28,15 @@ int init(void) {
 }
 
 /**
+* execute secp256k1_start, automatically happens on first function call that needs it
+*  but can be usefull when you're benchmarking
+*/
+PHP_FUNCTION(secp256k1_init)
+{
+    init();
+}
+
+/**
 * Verify an ECDSA signature.
 *
 * Returns: 1: correct signature
@@ -80,7 +89,6 @@ PHP_MSHUTDOWN_FUNCTION(secp256k1)
 }
 
 /* Remove if there's nothing to do at request start */
-/* Maybe we should ecdsa_start in here already? */
 PHP_RINIT_FUNCTION(secp256k1)
 {
 #if defined(COMPILE_DL_SECP256K1) && defined(ZTS)
@@ -107,6 +115,7 @@ PHP_MINFO_FUNCTION(secp256k1)
  * Every user visible function must have an entry in secp256k1_functions[].
  */
 const zend_function_entry secp256k1_functions[] = {
+        PHP_FE(secp256k1_init, NULL)
         PHP_FE(secp256k1_ecdsa_verify, NULL)
 	PHP_FE_END	/* Must be the last line in secp256k1_functions[] */
 };
