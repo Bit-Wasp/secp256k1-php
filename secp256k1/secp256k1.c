@@ -100,8 +100,6 @@ PHP_FUNCTION(secp256k1_stop)
 */
 PHP_FUNCTION(secp256k1_ecdsa_verify)
 {
-  php_printf("d: secp256k1_ecdsa_verify()\n");
-
    unsigned char *msg32 = (unsigned char *) 0 ;
   int msg32len;
   unsigned char *sig = (unsigned char *) 0 ;
@@ -118,10 +116,6 @@ PHP_FUNCTION(secp256k1_ecdsa_verify)
     ) == FAILURE) {
         return;
     }
-
-    php_printf("msg %s len; %d \n", msg32, msg32len);
-    php_printf("pubkey %s len; %d \n", pubkey, pubkeylen);
-    php_printf("sig %s len; %d \n", sig, siglen);
 
     result = secp256k1_ecdsa_verify((unsigned char const *)msg32, (unsigned char const *)sig, siglen, (unsigned char const *)pubkey, pubkeylen);
 
