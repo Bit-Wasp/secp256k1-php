@@ -1,21 +1,9 @@
 dnl $Id$
 dnl config.m4 for extension secp256k1
 
-dnl Comments in this file start with the string 'dnl'.
-dnl Remove where necessary. This file will not work
-dnl without editing.
-
-dnl If your extension references something external, use with:
-
 PHP_ARG_WITH(secp256k1, for secp256k1 support,
 dnl Make sure that the comment is aligned:
 [  --with-secp256k1             Include secp256k1 support])
-
-dnl Otherwise use enable:
-
-dnl PHP_ARG_ENABLE(secp256k1, whether to enable secp256k1 support,
-dnl Make sure that the comment is aligned:
-dnl [  --enable-secp256k1           Enable secp256k1 support])
 
 if test "$PHP_SECP256K1" != "no"; then
   dnl Write more examples of tests here...
@@ -23,7 +11,7 @@ if test "$PHP_SECP256K1" != "no"; then
   dnl # --with-secp256k1 -> check with-path
   SEARCH_PATH="/usr/local /usr"     # you might want to change this
   SEARCH_FOR="/include/secp256k1.h"  # you most likely want to change this
-  if test -r $PHP_SECP256K1/$SEARCH_FOR; then # path given as parameter
+  if test -r $WITH_SECP256K1/$SEARCH_FOR; then # path given as parameter
     SECP256K1_DIR=$PHP_SECP256K1
   else # search default path list
     AC_MSG_CHECKING([for secp256k1 files in default path])

@@ -65,7 +65,7 @@ PHP_FUNCTION(confirm_secp256k1_compiled)
 
 	len = spprintf(&strg, 0, "Congratulations! You have successfully modified ext/%.78s/config.m4. Module %.78s is now compiled into PHP.", "secp256k1", arg);
 
-	RETVAL_STRINGL(strg, len);
+	RETVAL_STRING(strg, len);
 	efree(strg);
 }
 
@@ -73,16 +73,7 @@ PHP_FUNCTION(confirm_secp256k1_compiled)
 *   Print a message to show how much PHP extensions rock */
 PHP_FUNCTION(secp256k1_start)
 {
-    php_printf("d: secp256k1_start()\n");
-    unsigned int flags;
-    int len;
-
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s",
-                              &flags, &len) == FAILURE) {
-        zend_error(E_ERROR, "secp256k1_start(): Missing flags");
-    }
-
-    secp256k1_start(1);
+    secp256k1_start(SECP256K1_START_SIGN | SECP256K1_START_VERIFY);
     RETURN_TRUE;
 }
 
@@ -94,9 +85,24 @@ PHP_FUNCTION(secp256k1_stop)
     RETURN_TRUE;
 }
 
+/**
+* Verify an ECDSA signature.
+*
+* Returns: 1: correct signature
+* 0: incorrect signature
+* -1: invalid public key
+* -2: invalid signature
+*
+* In: msg32: the 32-byte message hash being verified (cannot be NULL)
+* sig: the signature being verified (cannot be NULL)
+* pubkey: the public key to verify with (cannot be NULL)
+* Requires starting using SECP256K1_START_VERIFY.
+*/
+PHP_FUNCTION(secp256k1_ecdsa_verify)
+{
+  php_printf("d: secp256k1_ecdsa_verify()\n");
 
-PHP_FUNCTION(secp256k1_ecdsa_verify) {
-  unsigned char *msg32 = (unsigned char *) 0 ;
+   unsigned char *msg32 = (unsigned char *) 0 ;
   int msg32len;
   unsigned char *sig = (unsigned char *) 0 ;
   int siglen ;
@@ -113,11 +119,13 @@ PHP_FUNCTION(secp256k1_ecdsa_verify) {
         return;
     }
 
-    result = (int)secp256k1_ecdsa_verify((unsigned char const *)msg32,(unsigned char const *)sig,siglen,(unsigned char const *)pubkey,pubkeylen);
-    {
-       ZVAL_LONG(return_value,result);
-    }
-    return;
+    php_printf("msg %s len; %d \n", msg32, msg32len);
+    php_printf("pubkey %s len; %d \n", pubkey, pubkeylen);
+    php_printf("sig %s len; %d \n", sig, siglen);
+
+    result = secp256k1_ecdsa_verify((unsigned char const *)msg32, (unsigned char const *)sig, siglen, (unsigned char const *)pubkey, pubkeylen);
+
+    RETURN_LONG(result);
 fail:
   zend_error_noreturn(SWIG_ErrorCode(),"%s",SWIG_ErrorMsg());
 }
