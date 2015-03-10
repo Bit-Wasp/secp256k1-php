@@ -1,4 +1,4 @@
-33/*
+/*
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
@@ -73,15 +73,16 @@ PHP_FUNCTION(confirm_secp256k1_compiled)
 *   Print a message to show how much PHP extensions rock */
 PHP_FUNCTION(secp256k1_start)
 {
-    php_printf("start!\n");
+    php_printf("d: secp256k1_start()\n");
     unsigned int flags;
     int len;
+
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s",
                               &flags, &len) == FAILURE) {
         zend_error(E_ERROR, "secp256k1_start(): Missing flags");
     }
 
-    secp256k1_start(flags);
+    secp256k1_start(1);
     RETURN_TRUE;
 }
 
@@ -92,6 +93,36 @@ PHP_FUNCTION(secp256k1_stop)
     secp256k1_stop();
     RETURN_TRUE;
 }
+
+
+PHP_FUNCTION(secp256k1_ecdsa_verify) {
+  unsigned char *msg32 = (unsigned char *) 0 ;
+  int msg32len;
+  unsigned char *sig = (unsigned char *) 0 ;
+  int siglen ;
+  unsigned char *pubkey = (unsigned char *) 0 ;
+  int pubkeylen ;
+  zval **args[5];
+  int result;
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sss", 
+        &msg32, &msg32len,
+        &sig, &siglen,
+        &pubkey, &pubkeylen
+    ) == FAILURE) {
+        return;
+    }
+
+    result = (int)secp256k1_ecdsa_verify((unsigned char const *)msg32,(unsigned char const *)sig,siglen,(unsigned char const *)pubkey,pubkeylen);
+    {
+       ZVAL_LONG(return_value,result);
+    }
+    return;
+fail:
+  zend_error_noreturn(SWIG_ErrorCode(),"%s",SWIG_ErrorMsg());
+}
+
+
 
 /* }}} */
 /* }}} */
@@ -179,6 +210,7 @@ const zend_function_entry secp256k1_functions[] = {
 	PHP_FE(confirm_secp256k1_compiled,	NULL)		/* For testing, remove later. */
         PHP_FE(secp256k1_start, NULL)
         PHP_FE(secp256k1_stop, NULL)
+        PHP_FE(secp256k1_ecdsa_verify, NULL)
 	PHP_FE_END	/* Must be the last line in secp256k1_functions[] */
 };
 /* }}} */

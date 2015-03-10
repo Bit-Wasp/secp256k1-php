@@ -40,6 +40,7 @@ extern zend_module_entry secp256k1_module_entry;
 
 PHP_FUNCTION(secp256k1_start);
 PHP_FUNCTION(secp256k1_stop);
+PHP_FUNCTION(secp256k1_ecdsa_verify);
 
 /*
   	Declare any global variables you may need between the BEGIN
