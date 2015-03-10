@@ -25,7 +25,9 @@ PHP_FUNCTION(secp256k1_stop);
 PHP_FUNCTION(secp256k1_ecdsa_verify);
 PHP_FUNCTION(secp256k1_ec_seckey_verify);
 PHP_FUNCTION(secp256k1_ec_pubkey_verify);
-
+PHP_FUNCTION(secp256k1_ec_pubkey_create);
+PHP_FUNCTION(secp256k1_ec_pubkey_decompress);
+PHP_FUNCTION(secp256k1_test_by_reference);
 /*
         Declare any global variables you may need between the BEGIN
         and END macros here:
