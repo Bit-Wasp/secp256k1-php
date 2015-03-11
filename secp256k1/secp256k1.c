@@ -101,6 +101,7 @@ PHP_FUNCTION(secp256k1_ec_seckey_verify) {
  */
 PHP_FUNCTION(secp256k1_ec_pubkey_verify) {
     secp256k1_start(SECP256K1_START_SIGN);
+    
     unsigned char *pubkey;
     int pubkeylen;
     int result;
@@ -127,9 +128,9 @@ PHP_FUNCTION(secp256k1_test_by_reference) {
     RETURN_TRUE;
 }
 
-PHP_FUNCTION(secp256k1_ec_pubkey_create)
-{
-    // Broken? requires ec_privkey_import?
+PHP_FUNCTION(secp256k1_ec_pubkey_create) {
+    secp256k1_start(SECP256K1_START_SIGN);
+    
     zval *pubkey;
     zval *pubkeylen;
     unsigned char newpubkey[65];
@@ -145,8 +146,8 @@ PHP_FUNCTION(secp256k1_ec_pubkey_create)
       ) == FAILURE)
        return;
 
-    php_printf("Secret key %s", seckey);
     result = secp256k1_ec_pubkey_create(newpubkey, &newpubkeylen, (unsigned char const *)seckey, (int) compressed);
+    
     ZVAL_STRING(pubkey, newpubkey, 1);
     ZVAL_LONG(pubkeylen, newpubkeylen);
 
@@ -176,9 +177,6 @@ PHP_FUNCTION(secp256k1_ec_pubkey_decompress) {
     }
     RETURN_LONG(result);
 }
-
-
-
 
 PHP_MINIT_FUNCTION(secp256k1) {
 
