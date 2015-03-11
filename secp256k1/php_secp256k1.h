@@ -28,20 +28,6 @@ PHP_FUNCTION(secp256k1_ec_pubkey_verify);
 PHP_FUNCTION(secp256k1_ec_pubkey_create);
 PHP_FUNCTION(secp256k1_ec_pubkey_decompress);
 PHP_FUNCTION(secp256k1_test_by_reference);
-/*
-        Declare any global variables you may need between the BEGIN
-        and END macros here:
-
-ZEND_BEGIN_MODULE_GLOBALS(secp256k1)
-        zend_long  global_value;
-        char *global_string;
-ZEND_END_MODULE_GLOBALS(secp256k1)
- */
-
-/* Always refer to the globals in your function as SECP256K1_G(variable).
-   You are encouraged to rename these macros something shorter, see
-   examples in any other php module directory.
- */
 
 #ifdef ZTS
 #define SECP256K1_G(v) ZEND_TSRMG(secp256k1_globals_id, zend_secp256k1_globals *, v)
