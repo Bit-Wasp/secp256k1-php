@@ -26,14 +26,34 @@ class Secp256k1Test extends \PHPUnit_Framework_TestCase {
     
     public function testCreatePubKey() {
         foreach ($this->fixtures as $vector) {
+            // compressed
             $pubKey = null;
             $pubKeyLen = null;
             $this->assertEquals(1, secp256k1_ec_pubkey_create($pubKey, $pubKeyLen, pack("H*", $vector['secKey']), 1));
-
             // @TODO: can we move this to C?
             $pubKey = substr($pubKey, 0, $pubKeyLen);
-            
             $this->assertEquals($vector['pubKey'], bin2hex($pubKey));
+            
+            // uncompressed
+            $pubKey = null;
+            $pubKeyLen = null;
+            $this->assertEquals(1, secp256k1_ec_pubkey_create($pubKey, $pubKeyLen, pack("H*", $vector['secKey']), 0));
+            // @TODO: can we move this to C?
+            $pubKey = substr($pubKey, 0, $pubKeyLen);
+            $this->assertEquals($vector['pubKeyUncompressed'], bin2hex($pubKey));
+        }
+    }
+    
+    public function testDecompressPubKey() {
+        foreach ($this->fixtures as $vector) {
+            $pubKey = pack("H*", $vector['pubKey']);
+            $pubKeyLen = strlen($pubKey);
+            
+            $this->assertEquals(1, secp256k1_ec_pubkey_decompress($pubKey, $pubKeyLen));
+            
+            // @TODO: can we move this to C?
+            $pubKey = substr($pubKey, 0, $pubKeyLen);
+            $this->assertEquals($vector['pubKeyUncompressed'], bin2hex($pubKey));
         }
     }
 
@@ -42,5 +62,4 @@ class Secp256k1Test extends \PHPUnit_Framework_TestCase {
             $this->assertEquals(1, secp256k1_ecdsa_verify(pack("H*", $vector['msg']), pack("H*", $vector['sig']), pack("H*", $vector['pubKey'])));
         }
     }
-
 }

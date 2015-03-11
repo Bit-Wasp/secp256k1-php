@@ -148,6 +148,8 @@ PHP_FUNCTION(secp256k1_ec_pubkey_create) {
 }
 
 PHP_FUNCTION(secp256k1_ec_pubkey_decompress) {
+    secp256k1_start(SECP256K1_START_SIGN | SECP256K1_START_VERIFY);
+
     zval *pubkey;
     zval *pubkeylen;
     unsigned char *newpubkey;
