@@ -23,10 +23,13 @@ extern zend_module_entry secp256k1_module_entry;
 PHP_FUNCTION(secp256k1_start);
 PHP_FUNCTION(secp256k1_stop);
 PHP_FUNCTION(secp256k1_ecdsa_verify);
+PHP_FUNCTION(secp256k1_ecdsa_sign);
 PHP_FUNCTION(secp256k1_ec_seckey_verify);
 PHP_FUNCTION(secp256k1_ec_pubkey_verify);
 PHP_FUNCTION(secp256k1_ec_pubkey_create);
 PHP_FUNCTION(secp256k1_ec_pubkey_decompress);
+PHP_FUNCTION(secp256k1_ec_privkey_import);
+PHP_FUNCTION(secp256k1_ec_privkey_export);
 PHP_FUNCTION(secp256k1_test_by_reference);
 
 #ifdef ZTS

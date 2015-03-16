@@ -17,7 +17,13 @@ class Secp256k1Test extends \PHPUnit_Framework_TestCase {
             $this->assertEquals(1, secp256k1_ec_pubkey_verify(pack("H*", $vector['pubKey'])));
         }
     }
-    
+    public function testCreateSig() {
+        foreach ($this->fixtures as $vector) {
+            $sig = '';
+            $siglen = 0;
+            $this->assertEquals(1, secp256k1_ecdsa_sign(pack("H*", $vector['msg']), $sig, $siglen, pack("H*", $vector['secKey'])));
+        }
+    }
     public function testVerifySecKey() {
         foreach ($this->fixtures as $vector) {
             $this->assertEquals(1, secp256k1_ec_seckey_verify(pack("H*", $vector['secKey'])));
