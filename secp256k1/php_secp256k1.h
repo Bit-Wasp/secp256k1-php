@@ -30,6 +30,10 @@ PHP_FUNCTION(secp256k1_ec_pubkey_create);
 PHP_FUNCTION(secp256k1_ec_pubkey_decompress);
 PHP_FUNCTION(secp256k1_ec_privkey_import);
 PHP_FUNCTION(secp256k1_ec_privkey_export);
+PHP_FUNCTION(secp256k1_ec_privkey_tweak_add);
+PHP_FUNCTION(secp256k1_ec_privkey_tweak_mul);
+PHP_FUNCTION(secp256k1_ec_pubkey_tweak_add);
+PHP_FUNCTION(secp256k1_ec_pubkey_tweak_mul);
 PHP_FUNCTION(secp256k1_test_by_reference);
 
 #ifdef ZTS

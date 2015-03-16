@@ -311,7 +311,78 @@ PHP_FUNCTION (secp256k1_ec_privkey_export) {
     RETURN_LONG(result);
 }
 
+/** Tweak a private key by adding tweak to it. */
+PHP_FUNCTION (secp256k1_ec_privkey_tweak_add) {
+    zval *seckey;
+    unsigned char *newseckey, *tweak;
+    int tweaklen, result;
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zs", seckey, tweak, &tweaklen) == FAILURE) {
+        return;
+    }
 
+    newseckey = Z_STRVAL_P(seckey);
+    result = secp256k1_ec_privkey_tweak_add(newseckey, (unsigned const char*) tweak);
+    if (result) {
+        newseckey[32] = '\0';
+        ZVAL_STRING(seckey, newseckey, 1);
+    }
+    RETURN_LONG(result);
+}
+
+/** Tweak a public key by adding tweak times the generator to it */
+PHP_FUNCTION (secp256k1_ec_pubkey_tweak_add) {
+    secp256k1_start(SECP256K1_START_VERIFY);
+    zval *pubkey;
+    unsigned char *newpubkey, *tweak;
+    int tweaklen, newpubkeylen, result;
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zs", pubkey, tweak, &tweaklen) == FAILURE) {
+        return;
+    }
+
+    newpubkey = Z_STRVAL_P(pubkey);
+    result = secp256k1_ec_pubkey_tweak_add(newpubkey, newpubkeylen, (unsigned const char*) tweak);
+    if (result) {
+        newpubkey[newpubkeylen] = '\0';
+        ZVAL_STRING(pubkey, newpubkey, 1);
+    }
+    RETURN_LONG(result);
+}
+
+/** Tweak a private key by multiplying it with tweak. */
+PHP_FUNCTION (secp256k1_ec_privkey_tweak_mul) {
+    zval *seckey;
+    unsigned char *newseckey, *tweak;
+    int tweaklen, result;
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zs", seckey, tweak, &tweaklen) == FAILURE) {
+        return;
+    }
+    newseckey = Z_STRVAL_P(seckey);
+    result = secp256k1_ec_privkey_tweak_mul(newseckey, tweak);
+    if (result) {
+        newseckey[32] = '\0';
+        ZVAL_STRING(seckey, newseckey, 1);
+    }
+    RETURN_LONG(result);
+}
+
+/** Tweak a public key by multiplying it with tweak */
+PHP_FUNCTION (secp256k1_ec_pubkey_tweak_mul) {
+    secp256k1_start(SECP256K1_START_VERIFY);
+    zval *pubkey;
+    unsigned char *newpubkey, *tweak;
+    int newpubkeylen, tweaklen, result, pubkeylen;
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zls", pubkey, &pubkeylen, tweak, &tweaklen) == FAILURE) {
+        return;
+    }
+
+    newpubkey = Z_STRVAL_P(pubkey);
+    result = secp256k1_ec_pubkey_tweak_mul(newpubkey, pubkeylen, (unsigned const char*) tweak);
+    if (result) {
+        newpubkey[pubkeylen] = '\0';
+        ZVAL_STRING(pubkey, newpubkey, 1);
+    }
+    RETURN_LONG(result);
+}
 
 
 
@@ -354,14 +425,18 @@ PHP_MINFO_FUNCTION(secp256k1) {
 const zend_function_entry secp256k1_functions[] = {
     PHP_FE(secp256k1_start, NULL)
     PHP_FE(secp256k1_stop, NULL)
+    PHP_FE(secp256k1_ecdsa_sign, NULL)
+    PHP_FE(secp256k1_ecdsa_verify, NULL)
     PHP_FE(secp256k1_ec_seckey_verify, NULL)
     PHP_FE(secp256k1_ec_pubkey_verify, NULL)
     PHP_FE(secp256k1_ec_pubkey_create, NULL)
     PHP_FE(secp256k1_ec_pubkey_decompress, NULL)
     PHP_FE(secp256k1_ec_privkey_import, NULL)
     PHP_FE(secp256k1_ec_privkey_export, NULL)
-    PHP_FE(secp256k1_ecdsa_verify, NULL)
-    PHP_FE(secp256k1_ecdsa_sign, NULL)
+    PHP_FE(secp256k1_ec_privkey_tweak_add, NULL)
+    PHP_FE(secp256k1_ec_privkey_tweak_mul, NULL)
+    PHP_FE(secp256k1_ec_pubkey_tweak_add, NULL)
+    PHP_FE(secp256k1_ec_pubkey_tweak_mul, NULL)
     PHP_FE(secp256k1_test_by_reference, NULL)
     PHP_FE_END /* Must be the last line in secp256k1_functions[] */
 };
