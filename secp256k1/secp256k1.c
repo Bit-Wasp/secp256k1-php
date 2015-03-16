@@ -13,7 +13,6 @@
 #include <secp256k1.h>
 
 PHP_FUNCTION(secp256k1_start) {
-
     long mode;
 
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l",
@@ -54,16 +53,11 @@ PHP_FUNCTION(secp256k1_ecdsa_verify) {
     zval **args[5];
     int result;
 
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sss",
-            &msg32, &msg32len,
-            &sig, &siglen,
-            &pubkey, &pubkeylen
-            ) == FAILURE)
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sss", &msg32, &msg32len, &sig, &siglen, &pubkey, &pubkeylen) == FAILURE) {
         return;
-
+    }
 
     result = secp256k1_ecdsa_verify(msg32, sig, siglen, pubkey, pubkeylen);
-
     RETURN_LONG(result);
 }
 
@@ -142,9 +136,7 @@ PHP_FUNCTION(secp256k1_ec_seckey_verify) {
     int seckeylen;
     int result;
 
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s",
-            &seckey, &seckeylen
-            ) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &seckey, &seckeylen) == FAILURE) {
         return;
     }
 
@@ -165,9 +157,7 @@ PHP_FUNCTION(secp256k1_ec_pubkey_verify) {
     int pubkeylen;
     int result;
 
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s",
-            &pubkey, &pubkeylen
-            ) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &pubkey, &pubkeylen) == FAILURE) {
         return;
     }
 
@@ -178,8 +168,9 @@ PHP_FUNCTION(secp256k1_ec_pubkey_verify) {
 PHP_FUNCTION(secp256k1_test_by_reference) {
     zval *parameter;
 
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &parameter) == FAILURE)
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &parameter) == FAILURE) {
         return;
+    }
 
     /* make changes to the parameter */
     ZVAL_LONG(parameter, 10);
@@ -207,13 +198,9 @@ PHP_FUNCTION(secp256k1_ec_pubkey_create) {
     unsigned char *seckey;
     int seckeylen, compressed, result;
 
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zzsb",
-            &pubkey,
-            &pubkeylen,
-            &seckey, &seckeylen,
-            &compressed
-            ) == FAILURE)
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zzsb", &pubkey, &pubkeylen, &seckey, &seckeylen, &compressed) == FAILURE) {
         return;
+    }
 
     result = secp256k1_ec_pubkey_create(newpubkey, &newpubkeylen, (unsigned char const *) seckey, (int) compressed);
     if (result) {
@@ -242,10 +229,7 @@ PHP_FUNCTION(secp256k1_ec_pubkey_decompress) {
     int newpubkeylen = 33;
     int result;
 
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zz",
-            &pubkey,
-            &pubkeylen
-            ) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zz", &pubkey, &pubkeylen) == FAILURE) {
         return;
     }
 
@@ -268,14 +252,10 @@ PHP_FUNCTION (secp256k1_ec_privkey_import) {
     zval *seckey;
     long compressed;
 
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zsl",
-            seckey,
-            &privkey,
-            &privkeylen,
-            compressed
-            ) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zsl", seckey, &privkey, &privkeylen, compressed) == FAILURE) {
         return;
     }
+
     result = secp256k1_ec_privkey_import(newseckey, privkey, compressed);
     if (result) {
         newseckey[33] = '\0';
@@ -293,12 +273,7 @@ PHP_FUNCTION (secp256k1_ec_privkey_export) {
     zval *privkeylen;
     long compressed;
 
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "szzl",
-            &seckey, &seckeylen,
-            privkey,
-            privkeylen,
-            compressed
-            ) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "szzl", &seckey, &seckeylen, privkey, privkeylen, compressed) == FAILURE) {
         return;
     }
 
