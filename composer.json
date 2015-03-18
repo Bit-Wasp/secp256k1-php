@@ -12,9 +12,15 @@
             "email": "thomas.kerin@gmail.com"
         }
     ],
+    "autoload": {
+      "psr-4": {
+        "Afk11\\Secp256k1Tests\\": "tests/"
+      }
+    },
     "require": {},
     "require-dev": {
-        "phpunit/phpunit": "4.3.*"
+        "phpunit/phpunit": "4.3.*",
+        "symfony/yaml": "*"
     },
     "license": "MIT"
 }
