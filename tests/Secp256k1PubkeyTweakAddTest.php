@@ -3,7 +3,7 @@
 namespace Afk11\Secp256k1Tests;
 
 use Symfony\Component\Yaml\Yaml;
-    
+
 class Secp256k1PubkeyTweakAddTest extends TestCase
 {
 

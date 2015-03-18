@@ -302,7 +302,7 @@ PHP_FUNCTION (secp256k1_ec_privkey_tweak_add) {
     RETURN_LONG(result);
 }
 
-/** Tweak a public key by adding tweak times the generator to it */
+/** Tweak a public key by adding tweak times the generator to it (Tested) */
 PHP_FUNCTION (secp256k1_ec_pubkey_tweak_add) {
     secp256k1_start(SECP256K1_START_VERIFY);
 
