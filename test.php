@@ -76,13 +76,9 @@ echo $signature."\n";
 
 echo "Test secp256k1_ec_privkey_export: ";
 $seckey = pack("H*", 'ea0a18f3173de342029afd1d8ded525d51f72edcbb13250e627c316f8cf3f1b7');
-echo "(a)\n";
-$der = '';
-echo "(b)\n";
-$derlen = '';
-echo "(c)\n";
-$compressed = true;
-echo "(d)\n";
+$der = 'a';
+$derlen = strlen($der);
+$compressed = 1;
 var_dump(secp256k1_ec_privkey_export($seckey, $der, $derlen, $compressed));
 var_dump(bin2hex($der), $derlen);
 echo "(e)\n";

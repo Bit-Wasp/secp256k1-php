@@ -259,21 +259,22 @@ PHP_FUNCTION (secp256k1_ec_privkey_import) {
 
 /** Export a private key in DER format. */
 PHP_FUNCTION (secp256k1_ec_privkey_export) {
+    zval *derkey, *derkeylen;
     unsigned char *seckey, *newkey;
-    int seckeylen, newkeylen, result;
-    zval *privkey, *privkeylen;
-    int compressed;
+    int seckeylen, newkeylen, result, compressed;
 
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "szzl", &seckey, &seckeylen, privkey, privkeylen, compressed) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "szzl", &seckey, &seckeylen, &derkey, &derkeylen, &compressed) == FAILURE) {
         return;
     }
 
+    newkey = Z_STRVAL_P(derkey);
+    newkeylen = Z_LVAL_P(derkeylen);
     result = secp256k1_ec_privkey_export(seckey, newkey, &newkeylen, compressed);
 
     if (result) {
         newkey[newkeylen] = 0U;
-        ZVAL_STRING(privkey, newkey, 1);
-        ZVAL_LONG(privkeylen, newkeylen);
+        ZVAL_STRINGL(derkey, newkey, newkeylen, 0);
+        ZVAL_LONG(derkeylen, newkeylen);
     }
 
     RETURN_LONG(result);
