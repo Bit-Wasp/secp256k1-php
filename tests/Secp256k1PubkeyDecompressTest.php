@@ -64,9 +64,8 @@ class Secp256k1PubkeyDecompressTest extends TestCase
     /**
      * @dataProvider getVectors
      */
-    public function testSecp256k1_ec_pubkey_decompress($publickey, $expectedUncompressed)
+    public function testDecompressesPubkey($publickey, $expectedUncompressed)
     {
-
         $publickey = $this->toBinary32($publickey);
         $pubkeylen = strlen($publickey);
 
@@ -74,8 +73,5 @@ class Secp256k1PubkeyDecompressTest extends TestCase
         $this->assertEquals(1, $result);
         $this->assertEquals(bin2hex($publickey), $expectedUncompressed);
         $this->assertEquals(65, $pubkeylen);
-        unset($publickey);
-        unset($pubkeylen);
-
     }
 }

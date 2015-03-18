@@ -33,7 +33,7 @@ class Secp256k1PrivkeyTweakMulTest extends \PHPUnit_Framework_TestCase
     /**
      * @dataProvider getVectors
      */
-    public function testSecp256k1_ec_privkey_tweak_mul($privkey, $tweak, $expectedTweaked)
+    public function testTweaksPrivatekeyMul($privkey, $tweak, $expectedTweaked)
     {
         $privkey = $this->toBinary32($privkey);
         $tweak = $this->toBinary32($tweak);

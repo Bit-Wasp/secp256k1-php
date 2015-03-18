@@ -22,7 +22,7 @@ class Secp256k1PubkeyCreateTest extends TestCase
     /**
      * @dataProvider getVectors
      */
-    public function testSecp256k1_ec_pubkey_create($hexPrivKey, $compressed, $expectedPubKey)
+    public function testCreatesPubkey($hexPrivKey, $compressed, $expectedPubKey)
     {
         $pubkey = '';
         $pubkeylen = 0;

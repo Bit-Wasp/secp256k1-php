@@ -7,6 +7,9 @@ use Symfony\Component\Yaml\Yaml;
 class Secp256k1EcdsaVerifyTest extends TestCase
 {
 
+    /**
+     * @return array
+     */
     public function getVectors()
     {
         $parser = new Yaml();
@@ -23,7 +26,7 @@ class Secp256k1EcdsaVerifyTest extends TestCase
      * Testing return value 1
      * @dataProvider getVectors
      */
-    public function testSecp256k1_ecdsa_verify($hexPrivKey, $msg, $sig)
+    public function testEcdsaVerify($hexPrivKey, $msg, $sig)
     {
         $this->genericTest(
             $hexPrivKey,
@@ -37,7 +40,7 @@ class Secp256k1EcdsaVerifyTest extends TestCase
     /**
      * Testing return value 0
      */
-    public function testFindsInvalidSig()
+    public function testVerifyFindsInvalidSig()
     {
         $this->genericTest(
             '17a2209250b59f07a25b560aa09cb395a183eb260797c0396b82904f918518d5',
@@ -52,7 +55,7 @@ class Secp256k1EcdsaVerifyTest extends TestCase
     /**
      * Testing return value -1
      */
-    public function testRejectsInvalidPubkey()
+    public function testVerifyRejectsInvalidPubkey()
     {
         $pubkey = '';
         $sig = $this->toBinary32('3046022100f4c79330af03ab386d45e2b906dbfd01252b4266db48caa60a528e0832839b21022100a66c26642e616c8d85def781c3cf7e2c65902f23de4e1928b67667fefa650ce601');
@@ -63,7 +66,7 @@ class Secp256k1EcdsaVerifyTest extends TestCase
     /**
      * Testing return value -2
      */
-    public function testRejectsInvalidSignature()
+    public function testVerifyRejectsInvalidSignature()
     {
         $this->genericTest(
             '17a2209250b59f07a25b560aa09cb395a183eb260797c0396b82904f918518d5',

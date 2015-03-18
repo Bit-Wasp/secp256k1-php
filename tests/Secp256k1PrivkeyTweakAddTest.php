@@ -25,7 +25,7 @@ class Secp256k1PrivkeyTweakAddTest extends TestCase
     /**
      * @dataProvider getVectors
      */
-    public function testSecp256k1_ec_privkey_tweak_add($privkey, $tweak, $expectedTweaked)
+    public function testTweaksPrivateKeyAdd($privkey, $tweak, $expectedTweaked)
     {
         $privkey = $this->toBinary32($privkey);
         $tweak = $this->toBinary32($tweak);

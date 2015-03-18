@@ -22,10 +22,18 @@ class Secp256k1PubkeyVerifyTest extends TestCase
     /**
      * @dataProvider getVectors
      */
-    public function testSecp256k1_ec_pubkey_verify($pubkey)
-    {#
-        $pubkey = $this->toBinary32($pubkey);
+    public function testVerifiesPublicKey($pubkey)
+    {
+        $this->genericTest($pubkey, 1);
+    }
 
-        $this->assertEquals(1, secp256k1_ec_pubkey_verify($pubkey));
+    /**
+     * @param $pubkey
+     * @param $eVerify
+     */
+    private function genericTest($pubkey, $eVerify)
+    {
+        $pubkey = $this->toBinary32($pubkey);
+        $this->assertEquals($eVerify, secp256k1_ec_pubkey_verify($pubkey));
     }
 }

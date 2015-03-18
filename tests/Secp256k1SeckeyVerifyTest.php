@@ -21,10 +21,19 @@ class Secp256k1SeckeyVerifyTest extends TestCase
     /**
      * @dataProvider getVectors
      */
-    public function testSecp256k1_ec_seckey_verify($hexPrivKey)
+    public function testVerfiesSeckey($hexPrivKey)
     {
-        $sec = $this->toBinary32($hexPrivKey);
-        $this->assertEquals(1, \secp256k1_ec_seckey_verify($sec));
+        $this->genericTest($hexPrivKey, 1);
+    }
+
+    /**
+     * @param string $privkey
+     * @param bool $eVerify
+     */
+    public function genericTest($privkey, $eVerify)
+    {
+        $sec = $this->toBinary32($privkey);
+        $this->assertEquals($eVerify, \secp256k1_ec_seckey_verify($sec));
     }
 
 }
