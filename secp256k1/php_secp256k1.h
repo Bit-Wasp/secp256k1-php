@@ -34,7 +34,6 @@ PHP_FUNCTION(secp256k1_ec_privkey_tweak_add);
 PHP_FUNCTION(secp256k1_ec_privkey_tweak_mul);
 PHP_FUNCTION(secp256k1_ec_pubkey_tweak_add);
 PHP_FUNCTION(secp256k1_ec_pubkey_tweak_mul);
-PHP_FUNCTION(secp256k1_test_by_reference);
 
 #ifdef ZTS
 #define SECP256K1_G(v) ZEND_TSRMG(secp256k1_globals_id, zend_secp256k1_globals *, v)

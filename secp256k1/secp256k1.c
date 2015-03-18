@@ -29,7 +29,7 @@ PHP_FUNCTION(secp256k1_stop) {
 }
 
 /**
- * Verify an ECDSA signature.
+ * Verify an ECDSA signature. (Tested)
  *
  * Returns: 1: correct signature
  * 0: incorrect signature
@@ -50,7 +50,6 @@ PHP_FUNCTION(secp256k1_ecdsa_verify) {
     int siglen;
     unsigned char *pubkey = (unsigned char *) 0;
     int pubkeylen;
-    zval **args[5];
     int result;
 
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sss", &msg32, &msg32len, &sig, &siglen, &pubkey, &pubkeylen) == FAILURE) {
@@ -165,54 +164,42 @@ PHP_FUNCTION(secp256k1_ec_pubkey_verify) {
     RETURN_LONG(result);
 }
 
-PHP_FUNCTION(secp256k1_test_by_reference) {
-    zval *parameter;
-
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &parameter) == FAILURE) {
-        return;
-    }
-
-    /* make changes to the parameter */
-    ZVAL_LONG(parameter, 10);
-
-    RETURN_TRUE;
-}
-
-/** Compute the public key for a secret key.
+/** Compute the public key for a secret key. (Tested)
  *  In:     compressed: whether the computed public key should be compressed
  *          seckey:     pointer to a 32-byte private key (cannot be NULL)
  *  Out:    pubkey:     pointer to a 33-byte (if compressed) or 65-byte (if uncompressed)
  *                      area to store the public key (cannot be NULL)
  *          pubkeylen:  pointer to int that will be updated to contains the pubkey's
  *                      length (cannot be NULL)
- *  Returns: 1: secret was valid, public key stores
+ *  Returns: 1: secret was valid, public key stored
  *           0: secret was invalid, try again.
  */
 PHP_FUNCTION(secp256k1_ec_pubkey_create) {
     secp256k1_start(SECP256K1_START_SIGN);
 
-    zval *pubkey;
-    zval *pubkeylen;
-    unsigned char newpubkey[65];
-    int newpubkeylen;
-    unsigned char *seckey;
+    zval *pubkey, *pubkeylen;
+    unsigned char *newpubkey, *seckey;
     int seckeylen, compressed, result;
+    int newpubkeylen = 65;
 
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zzsb", &pubkey, &pubkeylen, &seckey, &seckeylen, &compressed) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zzsl", &pubkey, &pubkeylen, &seckey, &seckeylen, &compressed) == FAILURE) {
         return;
     }
 
-    result = secp256k1_ec_pubkey_create(newpubkey, &newpubkeylen, (unsigned char const *) seckey, (int) compressed);
+    newpubkey = Z_STRVAL_P(pubkey);
+    //newpubkey = emalloc((compressed) ? 33 : 65);
+    result = secp256k1_ec_pubkey_create(newpubkey, &newpubkeylen, seckey, compressed);
     if (result) {
-        newpubkey[newpubkeylen] = '\0';
-        ZVAL_STRING(pubkey, newpubkey, 1);
+        newpubkey[newpubkeylen] = 0U;
+        //ZVAL_STRING(pubkey, strdup(newpubkey), 1);
+        ZVAL_STRINGL(pubkey, newpubkey, newpubkeylen, 0);
         ZVAL_LONG(pubkeylen, newpubkeylen);
     }
 
     RETURN_LONG(result);
 }
 
-/** Decompress a public key.
+/** Decompress a public key. (Tested, but hidden SEG FAULT somewhere..)
  * In/Out: pubkey:    pointer to a 65-byte array to put the decompressed public key.
                       It must contain a 33-byte or 65-byte public key already (cannot be NULL)
  *         pubkeylen: pointer to the size of the public key pointed to by pubkey (cannot be NULL)
@@ -222,12 +209,9 @@ PHP_FUNCTION(secp256k1_ec_pubkey_create) {
  */
 PHP_FUNCTION(secp256k1_ec_pubkey_decompress) {
     secp256k1_start(SECP256K1_START_SIGN | SECP256K1_START_VERIFY);
-
-    zval *pubkey;
-    zval *pubkeylen;
-    unsigned char* newpubkey;
-    int newpubkeylen = 33;
-    int result;
+    zval *pubkey, *pubkeylen;
+    int newpubkeylen, result;
+    unsigned char* newpubkey; // will be either 33 or 65 bytes
 
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zz", &pubkey, &pubkeylen) == FAILURE) {
         return;
@@ -235,10 +219,11 @@ PHP_FUNCTION(secp256k1_ec_pubkey_decompress) {
 
     newpubkey = Z_STRVAL_P(pubkey);
     newpubkeylen = Z_LVAL_P(pubkeylen);
+
     result = secp256k1_ec_pubkey_decompress(newpubkey, &newpubkeylen);
     if (result == 1) {
-        newpubkey[newpubkeylen] = '\0';
-        ZVAL_STRING(pubkey, newpubkey, 1);
+		newpubkey[newpubkeylen] = 0U;
+		ZVAL_STRINGL(pubkey, newpubkey, newpubkeylen, 0);
         ZVAL_LONG(pubkeylen, newpubkeylen);
     }
     RETURN_LONG(result);
@@ -258,9 +243,12 @@ PHP_FUNCTION (secp256k1_ec_privkey_import) {
 
     result = secp256k1_ec_privkey_import(newseckey, privkey, compressed);
     if (result) {
-        newseckey[33] = '\0';
+        newseckey[32] = 0U;
         ZVAL_STRING(seckey, newseckey, 1);
+    } else {
+        efree(newseckey);
     }
+
     RETURN_LONG(result);
 }
 
@@ -279,27 +267,29 @@ PHP_FUNCTION (secp256k1_ec_privkey_export) {
 
     result = secp256k1_ec_privkey_export(seckey, newkey, &newkeylen, compressed);
     if (result) {
-        newkey[newkeylen] = '\0';
+        newkey[newkeylen] = 0U;
         ZVAL_STRING(privkey, newkey, 1);
         ZVAL_LONG(privkeylen, newkeylen);
     }
     RETURN_LONG(result);
 }
 
-/** Tweak a private key by adding tweak to it. */
+/** Tweak a private key by adding tweak to it. (Tested) */
 PHP_FUNCTION (secp256k1_ec_privkey_tweak_add) {
     zval *seckey;
     unsigned char *newseckey, *tweak;
     int tweaklen, result;
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zs", seckey, tweak, &tweaklen) == FAILURE) {
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zs", &seckey, &tweak, &tweaklen) == FAILURE) {
         return;
     }
 
     newseckey = Z_STRVAL_P(seckey);
-    result = secp256k1_ec_privkey_tweak_add(newseckey, (unsigned const char*) tweak);
+    result = secp256k1_ec_privkey_tweak_add(newseckey, tweak);
     if (result) {
-        newseckey[32] = '\0';
-        ZVAL_STRING(seckey, newseckey, 1);
+        newseckey[32] = 0U;
+        Z_STRVAL_P(seckey) = newseckey;
+        Z_STRLEN_P(seckey) = 32;
     }
     RETURN_LONG(result);
 }
@@ -310,6 +300,7 @@ PHP_FUNCTION (secp256k1_ec_pubkey_tweak_add) {
     zval *pubkey;
     unsigned char *newpubkey, *tweak;
     int tweaklen, newpubkeylen, result;
+
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zs", pubkey, tweak, &tweaklen) == FAILURE) {
         return;
     }
@@ -317,25 +308,26 @@ PHP_FUNCTION (secp256k1_ec_pubkey_tweak_add) {
     newpubkey = Z_STRVAL_P(pubkey);
     result = secp256k1_ec_pubkey_tweak_add(newpubkey, newpubkeylen, (unsigned const char*) tweak);
     if (result) {
-        newpubkey[newpubkeylen] = '\0';
+        newpubkey[newpubkeylen] = 0U;
         ZVAL_STRING(pubkey, newpubkey, 1);
     }
     RETURN_LONG(result);
 }
 
-/** Tweak a private key by multiplying it with tweak. */
+/** Tweak a private key by multiplying it with tweak. (Tested) */
 PHP_FUNCTION (secp256k1_ec_privkey_tweak_mul) {
     zval *seckey;
     unsigned char *newseckey, *tweak;
     int tweaklen, result;
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zs", seckey, tweak, &tweaklen) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zs", &seckey, &tweak, &tweaklen) == FAILURE) {
         return;
     }
     newseckey = Z_STRVAL_P(seckey);
     result = secp256k1_ec_privkey_tweak_mul(newseckey, tweak);
     if (result) {
-        newseckey[32] = '\0';
-        ZVAL_STRING(seckey, newseckey, 1);
+        newseckey[32] = 0U;
+        Z_STRVAL_P(seckey) = newseckey;
+        Z_STRLEN_P(seckey) = 32;
     }
     RETURN_LONG(result);
 }
@@ -353,14 +345,11 @@ PHP_FUNCTION (secp256k1_ec_pubkey_tweak_mul) {
     newpubkey = Z_STRVAL_P(pubkey);
     result = secp256k1_ec_pubkey_tweak_mul(newpubkey, pubkeylen, (unsigned const char*) tweak);
     if (result) {
-        newpubkey[pubkeylen] = '\0';
+        newpubkey[pubkeylen] = 0U;
         ZVAL_STRING(pubkey, newpubkey, 1);
     }
     RETURN_LONG(result);
 }
-
-
-
 
 PHP_MINIT_FUNCTION(secp256k1) {
 
@@ -412,7 +401,6 @@ const zend_function_entry secp256k1_functions[] = {
     PHP_FE(secp256k1_ec_privkey_tweak_mul, NULL)
     PHP_FE(secp256k1_ec_pubkey_tweak_add, NULL)
     PHP_FE(secp256k1_ec_pubkey_tweak_mul, NULL)
-    PHP_FE(secp256k1_test_by_reference, NULL)
     PHP_FE_END /* Must be the last line in secp256k1_functions[] */
 };
 
