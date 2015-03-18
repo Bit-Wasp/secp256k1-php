@@ -1,6 +1,5 @@
 <?php
 
-
 echo "Test secp256k1_ecdsa_verify: ";
 $publicKey = pack("H*", "0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798");
 $msg = pack("H*", "fb3a3384783921e1bc394229481209f29f70c588f1c8092cb7e43fdcadcfe241");
@@ -22,20 +21,22 @@ var_dump(secp256k1_ec_seckey_verify($msg));
 echo "\n";
 
 
-echo "Test secp256k1_test_by_reference: (10?) ";
-$v = 'asdf';
-secp256k1_test_by_reference($v);
-var_dump($v);
-echo "\n";
-
 echo "Test secp256k1_ec_pubkey_create: ";
-$seckey = 'ea0a18f3173de342029afd1d8ded525d51f72edcbb13250e627c316f8cf3f1b7';
-$pubkey = 0;
+$seckey = pack("H*", 'ea0a18f3173de342029afd1d8ded525d51f72edcbb13250e627c316f8cf3f1b7');
+$pubkey = '';
 $pubkeylen = 0;
 var_dump(secp256k1_ec_pubkey_create($pubkey, $pubkeylen, $seckey, 0));
 var_dump(bin2hex($pubkey), $pubkeylen);
 echo "\n";
 
+
+
+echo "Test secp256k1_ec_privkey_tweak_Add: \n";
+$seckey = pack("H*", '17a2209250b59f07a25b560aa09cb395a183eb260797c0396b82904f918518d5');
+$tweak  = pack("H*", '0101010101010101010101010101010101010101010101010101010101010101');
+var_dump(secp256k1_ec_privkey_tweak_add($seckey, $tweak));
+var_dump(bin2hex($seckey));
+echo "\n";
 
 echo "Test secp256k1_ec_pubkey_decompress: ";
 $pubkey = pack("H*", '0355764cb81dbb6760e82a39bbb9aef774964da3255724fbbe20a552f77938f539');
@@ -72,7 +73,7 @@ echo "(c)\n";
 $compressed = true;
 echo "(d)\n";
 var_dump(secp256k1_ec_privkey_export($seckey, $der, $derlen, $compressed));
+var_dump(bin2hex($der), $derlen);
 echo "(e)\n";
-var_dump($der);
 
 
