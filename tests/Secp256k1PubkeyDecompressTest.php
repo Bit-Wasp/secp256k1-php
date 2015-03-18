@@ -70,7 +70,7 @@ class Secp256k1PubkeyDecompressTest extends TestCase
         $pubkeylen = strlen($publickey);
 
         $result = secp256k1_ec_pubkey_decompress($publickey, $pubkeylen);
-        $this->assertEquals(1, $result);
+        $this->assertEquals(1, $result, 'check for success');
         $this->assertEquals(bin2hex($publickey), $expectedUncompressed);
         $this->assertEquals(65, $pubkeylen);
     }

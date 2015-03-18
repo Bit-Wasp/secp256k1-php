@@ -31,6 +31,17 @@ echo "\n";
 
 
 
+
+echo "Test secp256k1_ec_pubkey_tweak_mul: \n";
+$seckey = pack("H*", '17a2209250b59f07a25b560aa09cb395a183eb260797c0396b82904f918518d5');
+$tweak  = pack("H*", '0101010101010101010101010101010101010101010101010101010101010101');
+$pub = '';
+$publen = 0;
+$r = secp256k1_ec_pubkey_create($pub, $publen, $seckey, 0);
+var_dump(secp256k1_ec_pubkey_tweak_mul($pub, $publen, $tweak));
+var_dump(bin2hex($pubkey));
+echo "\n";
+
 echo "Test secp256k1_ec_privkey_tweak_Add: \n";
 $seckey = pack("H*", '17a2209250b59f07a25b560aa09cb395a183eb260797c0396b82904f918518d5');
 $tweak  = pack("H*", '0101010101010101010101010101010101010101010101010101010101010101');
