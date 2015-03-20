@@ -199,6 +199,10 @@ PHP_FUNCTION(secp256k1_ec_pubkey_create) {
     RETURN_LONG(result);
 }
 
+ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ec_pubkey_decompress, 0)
+    ZEND_ARG_INFO(1, publicKey)
+ZEND_END_ARG_INFO();
+
 /** Decompress a public key. (Tested, but hidden SEG FAULT somewhere..)
  * In/Out: pubkey:    pointer to a 65-byte array to put the decompressed public key.
                       It must contain a 33-byte or 65-byte public key already (cannot be NULL)
@@ -425,7 +429,7 @@ const zend_function_entry secp256k1_functions[] = {
     PHP_FE(secp256k1_ec_seckey_verify, NULL)
     PHP_FE(secp256k1_ec_pubkey_verify, NULL)
     PHP_FE(secp256k1_ec_pubkey_create, NULL)
-    PHP_FE(secp256k1_ec_pubkey_decompress, NULL)
+    PHP_FE(secp256k1_ec_pubkey_decompress, arginfo_secp256k1_ec_pubkey_decompress)
     PHP_FE(secp256k1_ec_privkey_import, NULL)
     PHP_FE(secp256k1_ec_privkey_export, NULL)
     PHP_FE(secp256k1_ec_privkey_tweak_add, NULL)
