@@ -399,9 +399,6 @@ PHP_MSHUTDOWN_FUNCTION(secp256k1) {
 
 /* Remove if there's nothing to do at request start */
 PHP_RINIT_FUNCTION(secp256k1) {
-#if defined(COMPILE_DL_SECP256K1) && defined(ZTS)
-    ZEND_TSRMLS_CACHE_UPDATE();
-#endif
     return SUCCESS;
 }
 
@@ -452,8 +449,5 @@ zend_module_entry secp256k1_module_entry = {
 };
 
 #ifdef COMPILE_DL_SECP256K1
-#ifdef ZTS
-ZEND_TSRMLS_CACHE_DEFINE();
-#endif
 ZEND_GET_MODULE(secp256k1)
 #endif
