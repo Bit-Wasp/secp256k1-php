@@ -26,10 +26,6 @@ class Secp256k1PubkeyDecompressTest extends TestCase
             "046bf17c5d160f0d71e0f4cad6b0e519a0c29c1857ea1a4adedaa2e58bf9caf4b5641d10a1c7e0369b449e2840d937fe28227dba5a2bcbd164c1a87c84e047c948"
         ],
         [
-            "031ea828f50080022338541438770f307edf9ee8fbe665b6411db8a44b393e9c35",
-            "041ea828f50080022338541438770f307edf9ee8fbe665b6411db8a44b393e9c358df5c5940095233acf0b7451e3daed3e34bfc1ec16fd541ccf67af6fe84c6abf"
-        ],
-        [
             "031e738ae43e720c0a6daacb9831f9571c554b1563f3d7d7aefeb04b1b605df1df",
             "041e738ae43e720c0a6daacb9831f9571c554b1563f3d7d7aefeb04b1b605df1dfb8754f06152f01511eeafa723ef1b44070c06a2b7fd1a83a3c7aecee8782dd1f"
         ],
@@ -48,6 +44,13 @@ class Secp256k1PubkeyDecompressTest extends TestCase
         [
             "021ad18624812e8ef10ecd52f8c3c2c7c17f9d17d17e3a7de41da0076298509cea",
             "041ad18624812e8ef10ecd52f8c3c2c7c17f9d17d17e3a7de41da0076298509ceaeb80f99bb189f8a545a7546313a1bc7906566a94e9c42e7dd3ac3906d349c2a0"
+        ]
+    ];
+    
+    private $fixturesWithNullBytes = [       
+        [
+            "031ea828f50080022338541438770f307edf9ee8fbe665b6411db8a44b393e9c35",
+            "041ea828f50080022338541438770f307edf9ee8fbe665b6411db8a44b393e9c358df5c5940095233acf0b7451e3daed3e34bfc1ec16fd541ccf67af6fe84c6abf"
         ],
         [
             "030093c6ece7bb692f370971a583bf7cf3ee7cf874c7e00ab18ae086dc70387230",
@@ -55,23 +58,37 @@ class Secp256k1PubkeyDecompressTest extends TestCase
         ]
     ];
 
-
     public function getVectors()
     {
         return $this->fixtures;
     }
 
+    public function getVectorsWithNullBytes()
+    {
+        return $this->fixturesWithNullBytes;
+    }
+
     /**
      * @dataProvider getVectors
      */
-    public function testDecompressesPubkey($publickey, $expectedUncompressed)
+    public function testDecompressesPubkey($pubKeyHex, $expectedUncompressed)
     {
-        $publickey = $this->toBinary32($publickey);
-        $pubkeylen = strlen($publickey);
-
-        $result = secp256k1_ec_pubkey_decompress($publickey, $pubkeylen);
+        $publickey = $this->toBinary32($pubKeyHex);
+        
+        $result = secp256k1_ec_pubkey_decompress($publickey);
         $this->assertEquals(1, $result, 'check for success');
-        $this->assertEquals(bin2hex($publickey), $expectedUncompressed);
-        $this->assertEquals(65, $pubkeylen);
+        $this->assertEquals($expectedUncompressed, bin2hex($publickey));
+    }
+
+    /**
+     * @dataProvider getVectorsWithNullBytes
+     */
+    public function testDecompressesPubkeyWithNullBytes($pubKeyHex, $expectedUncompressed)
+    {
+        $publickey = $this->toBinary32($pubKeyHex);
+        
+        $result = secp256k1_ec_pubkey_decompress($publickey);
+        $this->assertEquals(1, $result, 'check for success');
+        $this->assertEquals($expectedUncompressed, bin2hex($publickey));
     }
 }

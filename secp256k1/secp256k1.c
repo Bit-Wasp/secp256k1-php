@@ -210,25 +210,31 @@ PHP_FUNCTION(secp256k1_ec_pubkey_create) {
 PHP_FUNCTION(secp256k1_ec_pubkey_decompress) {
     secp256k1_start(SECP256K1_START_SIGN);
 
-    zval *pubkey, *pubkeylen;
-    unsigned char* newpubkey;
-    int newpubkeylen;
+    zval *zPubKey;
+    unsigned char* pubkey;
+    unsigned char newpubkey[65];
+    int pubkeylen;
     int result;
 
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zz", &pubkey, &pubkeylen) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &zPubKey) == FAILURE) {
         return;
     }
 
-    newpubkey = Z_STRVAL_P(pubkey);
-    newpubkeylen = Z_LVAL_P(pubkeylen);
-    result = secp256k1_ec_pubkey_decompress(newpubkey, &newpubkeylen);
+    pubkey = Z_STRVAL_P(zPubKey);
+    pubkeylen = Z_STRLEN_P(zPubKey);
+    
+    // php_printf("decompress1 %s(%d)(%d) \n", pubkey, pubkeylen, strlen(pubkey));
+    
+    strncpy(newpubkey, pubkey, pubkeylen);
+    
+    // php_printf("decompress2 %s(%d)(%d) \n", newpubkey, pubkeylen, strlen(newpubkey));
+    
+    result = secp256k1_ec_pubkey_decompress(newpubkey, &pubkeylen);
 
+    // php_printf("decompress3 %d! %s(%d) \n", result, newpubkey, pubkeylen);
+    
     if (result == 1) {
-        newpubkey[newpubkeylen] = 0U;
-        ZVAL_STRINGL(pubkey, newpubkey, newpubkeylen, 0);
-        ZVAL_LONG(pubkeylen, newpubkeylen);
-    } else {
-        efree(newpubkey);
+        ZVAL_STRINGL(zPubKey, newpubkey, pubkeylen, 1);
     }
 
     RETURN_LONG(result);
