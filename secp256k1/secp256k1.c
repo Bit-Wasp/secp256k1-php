@@ -223,15 +223,15 @@ PHP_FUNCTION(secp256k1_ec_pubkey_decompress) {
     pubkey = Z_STRVAL_P(zPubKey);
     pubkeylen = Z_STRLEN_P(zPubKey);
     
-    // php_printf("decompress1 %s(%d)(%d) \n", pubkey, pubkeylen, strlen(pubkey));
+    // php_printf("decompress1; "); PHPWRITE(pubkey, pubkeylen); php_printf(" (%d) \n", pubkeylen);
     
-    strncpy(newpubkey, pubkey, pubkeylen);
+    memcpy(newpubkey, pubkey, pubkeylen);
     
-    // php_printf("decompress2 %s(%d)(%d) \n", newpubkey, pubkeylen, strlen(newpubkey));
+    // php_printf("decompress2; "); PHPWRITE(newpubkey, pubkeylen); php_printf(" (%d) \n", pubkeylen);
     
     result = secp256k1_ec_pubkey_decompress(newpubkey, &pubkeylen);
 
-    // php_printf("decompress3 %d! %s(%d) \n", result, newpubkey, pubkeylen);
+    // php_printf("decompress3; "); PHPWRITE(newpubkey, pubkeylen); php_printf(" (%d) \n", pubkeylen);
     
     if (result == 1) {
         ZVAL_STRINGL(zPubKey, newpubkey, pubkeylen, 1);
