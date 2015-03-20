@@ -71,4 +71,18 @@ class Secp256k1PubkeyDecompressTest extends TestCase
         $this->assertEquals(1, $result, 'check for success');
         $this->assertEquals($expectedUncompressed, bin2hex($publickey));
     }
+    
+    public function testByRef()
+    {
+        $o = $this->toBinary32("03ca473d3c0cccbf600d1c89fa33b7f6b1f2b4c66f1f11986701f4b6cc4f54c360");
+        $a = $this->toBinary32("03ca473d3c0cccbf600d1c89fa33b7f6b1f2b4c66f1f11986701f4b6cc4f54c360");
+        $b = $a;
+        
+        $r = secp256k1_ec_pubkey_decompress($b);
+        
+        $this->assertEquals(1, $r);
+        $this->assertTrue($b != $o, '$b is decompressed');
+        $this->assertTrue($a == $o, '$a is not decompressed');
+        
+    }
 }
