@@ -4,7 +4,7 @@ namespace Afk11\Secp256k1Tests;
 
 use Symfony\Component\Yaml\Yaml;
 
-class Secp256k1EcdsaVerifyTest extends TestCase
+class Secp256k1EcdsaSignTest extends TestCase
 {
 
     /**
