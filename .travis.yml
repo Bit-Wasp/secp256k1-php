@@ -21,4 +21,4 @@ install:
     - composer update
 
 script:
-    - php -dextension=secp256k1.so vendor/phpunit/phpunit/phpunit tests/
+    - php -dextension=secp256k1.so vendor/phpunit/phpunit/phpunit --debug tests/
