@@ -67,9 +67,9 @@ $msg = pack("H*", "fb3a3384783921e1bc394229481209f29f70c588f1c8092cb7e43fdcadcfe
 echo "(b)\n";
 $signature = '';
 echo "(c)\n";
-$siglen = 0;
+
 echo "(start_sign)\n";
-$sign = secp256k1_ecdsa_sign($msg, $signature, $siglen, $seckey);
+$sign = secp256k1_ecdsa_sign($msg, $signature, $seckey);
 var_dump(bin2hex($signature), $siglen);
 echo $signature."\n";
 

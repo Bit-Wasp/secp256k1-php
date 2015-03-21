@@ -48,7 +48,7 @@ class Secp256k1EcdsaSignTest extends TestCase
         $msg = $this->toBinary32($msg);
 
         $signature = '';
-        $siglen = 64;
+        $siglen = 0;
         $sign = \secp256k1_ecdsa_sign($msg, $signature, $siglen, $privkey);
         $this->assertEquals($eSigCreate, $sign);
         $this->assertEquals($expectedSig, bin2hex($signature));
