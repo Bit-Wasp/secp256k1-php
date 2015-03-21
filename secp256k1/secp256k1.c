@@ -12,12 +12,69 @@
 
 #include <secp256k1.h>
 
+ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_start)
+    ZEND_ARG_INFO(0, flags)
+ZEND_END_ARG_INFO();
+
+ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ecdsa_verify, 0)
+    ZEND_ARG_INFO(0, msg32)
+    ZEND_ARG_INFO(0, signature)
+    ZEND_ARG_INFO(0, publicKey)
+ZEND_END_ARG_INFO();
+
+ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ecdsa_sign, 0)
+    ZEND_ARG_INFO(0, msg32)
+    ZEND_ARG_INFO(1, signature)
+    ZEND_ARG_INFO(1, signatureLen)
+    ZEND_ARG_INFO(0, secretKey)
+ZEND_END_ARG_INFO();
+
+ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ec_seckey_verify, 0)
+    ZEND_ARG_INFO(0, secretKey)
+ZEND_END_ARG_INFO();
+
+ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ec_pubkey_verify, 0)
+    ZEND_ARG_INFO(0, publicKey)
+ZEND_END_ARG_INFO();
+
+ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ec_pubkey_create, 0)
+    ZEND_ARG_INFO(1, publicKey)
+    ZEND_ARG_INFO(1, publicKeyLength)
+    ZEND_ARG_INFO(0, secretKey)
+    ZEND_ARG_INFO(0, compressed)
+ZEND_END_ARG_INFO();
+
+ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ec_pubkey_decompress, 0)
+    ZEND_ARG_INFO(1, publicKey)
+ZEND_END_ARG_INFO();
+
+ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ec_privkey_tweak_add, 0)
+    ZEND_ARG_INFO(1, seckey)
+    ZEND_ARG_INFO(0, tweak)
+ZEND_END_ARG_INFO();
+
+ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ec_pubkey_tweak_add, 0)
+    ZEND_ARG_INFO(1, publicKey)
+    ZEND_ARG_INFO(0, tweak)
+ZEND_END_ARG_INFO();
+
+ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ec_privkey_tweak_mul, 0)
+    ZEND_ARG_INFO(1, seckey)
+    ZEND_ARG_INFO(0, tweak)
+ZEND_END_ARG_INFO();
+
+ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ec_pubkey_tweak_mul, 0)
+    ZEND_ARG_INFO(1, publicKey)
+    ZEND_ARG_INFO(0, publicKeyLength)
+    ZEND_ARG_INFO(0, tweak)
+ZEND_END_ARG_INFO();
+
+
+
 PHP_FUNCTION(secp256k1_start) {
     long mode;
 
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l",
-            &mode
-            ) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &mode) == FAILURE) {
         return;
     }
 
@@ -59,6 +116,7 @@ PHP_FUNCTION(secp256k1_ecdsa_verify) {
     result = secp256k1_ecdsa_verify(msg32, sig, siglen, pubkey, pubkeylen);
     RETURN_LONG(result);
 }
+
 
 /** Create an ECDSA signature.
  *  Returns: 1: signature created
@@ -140,6 +198,7 @@ PHP_FUNCTION(secp256k1_ec_seckey_verify) {
     }
 
     result = secp256k1_ec_seckey_verify(seckey);
+
     RETURN_LONG(result);
 }
 
@@ -153,8 +212,7 @@ PHP_FUNCTION(secp256k1_ec_pubkey_verify) {
     secp256k1_start(SECP256K1_START_SIGN);
 
     unsigned char *pubkey;
-    int pubkeylen;
-    int result;
+    int pubkeylen, result;
 
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &pubkey, &pubkeylen) == FAILURE) {
         return;
@@ -164,6 +222,7 @@ PHP_FUNCTION(secp256k1_ec_pubkey_verify) {
 
     RETURN_LONG(result);
 }
+
 
 /** Compute the public key for a secret key. (Tested)
  *  In:     compressed: whether the computed public key should be compressed
@@ -199,9 +258,6 @@ PHP_FUNCTION(secp256k1_ec_pubkey_create) {
     RETURN_LONG(result);
 }
 
-ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ec_pubkey_decompress, 0)
-    ZEND_ARG_INFO(1, publicKey)
-ZEND_END_ARG_INFO();
 
 /** Decompress a public key. (Tested, but hidden SEG FAULT somewhere..)
  * In/Out: pubkey:    pointer to a 65-byte array to put the decompressed public key.
@@ -220,7 +276,7 @@ PHP_FUNCTION(secp256k1_ec_pubkey_decompress) {
     int pubkeylen;
     int result;
 
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &zPubKey) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z/", &zPubKey) == FAILURE) {
         return;
     }
 
@@ -290,6 +346,8 @@ PHP_FUNCTION (secp256k1_ec_privkey_export) {
     RETURN_LONG(result);
 }
 
+
+
 /** Tweak a private key by adding tweak to it. (Tested) */
 PHP_FUNCTION (secp256k1_ec_privkey_tweak_add) {
     zval *seckey;
@@ -311,6 +369,8 @@ PHP_FUNCTION (secp256k1_ec_privkey_tweak_add) {
 
     RETURN_LONG(result);
 }
+
+
 
 /** Tweak a public key by adding tweak times the generator to it (Tested) */
 PHP_FUNCTION (secp256k1_ec_pubkey_tweak_add) {
@@ -338,6 +398,7 @@ PHP_FUNCTION (secp256k1_ec_pubkey_tweak_add) {
     RETURN_LONG(result);
 }
 
+
 /** Tweak a private key by multiplying it with tweak. (Tested) */
 PHP_FUNCTION (secp256k1_ec_privkey_tweak_mul) {
     zval *seckey;
@@ -361,6 +422,7 @@ PHP_FUNCTION (secp256k1_ec_privkey_tweak_mul) {
 
     RETURN_LONG(result);
 }
+
 
 /** Tweak a public key by multiplying it with tweak (Tested) */
 PHP_FUNCTION (secp256k1_ec_pubkey_tweak_mul) {
@@ -422,20 +484,20 @@ PHP_MINFO_FUNCTION(secp256k1) {
  * Every user visible function must have an entry in secp256k1_functions[].
  */
 const zend_function_entry secp256k1_functions[] = {
-    PHP_FE(secp256k1_start, NULL)
-    PHP_FE(secp256k1_stop, NULL)
-    PHP_FE(secp256k1_ecdsa_sign, NULL)
-    PHP_FE(secp256k1_ecdsa_verify, NULL)
-    PHP_FE(secp256k1_ec_seckey_verify, NULL)
-    PHP_FE(secp256k1_ec_pubkey_verify, NULL)
-    PHP_FE(secp256k1_ec_pubkey_create, NULL)
+    PHP_FE(secp256k1_start, arginfo_secp256k1_start)
+    PHP_FE(secp256k1_stop, arginfo_secp256k1_stop)
+    PHP_FE(secp256k1_ecdsa_sign, arginfo_secp256k1_ecdsa_sign)
+    PHP_FE(secp256k1_ecdsa_verify, arginfo_secp256k1_ecdsa_verify)
+    PHP_FE(secp256k1_ec_seckey_verify, arginfo_secp256k1_ec_seckey_verify)
+    PHP_FE(secp256k1_ec_pubkey_verify, arginfo_secp256k1_ec_pubkey_verify)
+    PHP_FE(secp256k1_ec_pubkey_create, arginfo_secp256k1_ec_pubkey_create)
     PHP_FE(secp256k1_ec_pubkey_decompress, arginfo_secp256k1_ec_pubkey_decompress)
-    PHP_FE(secp256k1_ec_privkey_import, NULL)
-    PHP_FE(secp256k1_ec_privkey_export, NULL)
-    PHP_FE(secp256k1_ec_privkey_tweak_add, NULL)
-    PHP_FE(secp256k1_ec_privkey_tweak_mul, NULL)
-    PHP_FE(secp256k1_ec_pubkey_tweak_add, NULL)
-    PHP_FE(secp256k1_ec_pubkey_tweak_mul, NULL)
+    PHP_FE(secp256k1_ec_privkey_import, arginfo_secp256k1_ec_privkey_import)
+    PHP_FE(secp256k1_ec_privkey_export, arginfo_secp256k1_ec_privkey_export)
+    PHP_FE(secp256k1_ec_privkey_tweak_add, arginfo_secp256k1_ec_privkey_tweak_add)
+    PHP_FE(secp256k1_ec_privkey_tweak_mul, arginfo_secp256k1_ec_privkey_tweak_mul)
+    PHP_FE(secp256k1_ec_pubkey_tweak_add, arginfo_secp256k1_ec_pubkey_tweak_add)
+    PHP_FE(secp256k1_ec_pubkey_tweak_mul, arginfo_secp256k1_ec_pubkey_tweak_mul)
     PHP_FE_END /* Must be the last line in secp256k1_functions[] */
 };
 
