@@ -13,11 +13,11 @@ class Secp256k1EcdsaSignTest extends TestCase
     public function getVectors()
     {
         $parser = new Yaml();
-        $data = $parser->parse(__DIR__ . '/data/signatures.yml');
+        $data = $parser->parse(__DIR__ . '/data/deterministicSignatures.yml');
 
         $fixtures = [];
-        foreach ($data['signatures'] as $vector) {
-            $fixtures[] = [$vector['privkey'], $vector['msg'], $vector['sig']];
+        foreach ($data['vectors'] as $vector) {
+            $fixtures[] = [$vector['privkey'], $vector['msg'], substr($vector['sig'], 0, strlen($vector['sig'])-2)];
         }
         return $fixtures;
     }
@@ -26,72 +26,38 @@ class Secp256k1EcdsaSignTest extends TestCase
      * Testing return value 1
      * @dataProvider getVectors
      */
-    public function testEcdsaVerify($hexPrivKey, $msg, $sig)
+    public function testEcdsaSign($hexPrivKey, $msg, $sig)
     {
         $this->genericTest(
             $hexPrivKey,
             $msg,
             $sig,
-            1,
             1
         );
     }
 
     /**
-     * Testing return value 0
-     */
-    public function testVerifyFindsInvalidSig()
-    {
-        $this->genericTest(
-            '17a2209250b59f07a25b560aa09cb395a183eb260797c0396b82904f918518d5',
-            '6c9504d3cb2f8fa684139adaac5b02f0400be6d1fb293c80cb78598e2402a77f',
-            '3046022100f4c79320af03ab386d45e2b906dbfd01252b4266db48caa60a528e0832839b21022100a66c26642e616c8d85def781c3cf7e2c65902f23de4e1928b67667fefa650ce601',
-            1,
-            0
-        );
-
-    }
-
-    /**
-     * Testing return value -1
-     */
-    public function testVerifyRejectsInvalidPubkey()
-    {
-        $pubkey = '';
-        $sig = $this->toBinary32('3046022100f4c79330af03ab386d45e2b906dbfd01252b4266db48caa60a528e0832839b21022100a66c26642e616c8d85def781c3cf7e2c65902f23de4e1928b67667fefa650ce601');
-        $msg = $this->toBinary32('6c9504d3cb2f8fa684139adaac5b02f0400be6d1fb293c80cb78598e2402a77f');
-        $this->assertEquals(-1, secp256k1_ecdsa_verify($msg, $sig, $pubkey));
-    }
-
-    /**
-     * Testing return value -2
-     */
-    public function testVerifyRejectsInvalidSignature()
-    {
-        $this->genericTest(
-            '17a2209250b59f07a25b560aa09cb395a183eb260797c0396b82904f918518d5',
-            '6c9504d3cb2f8fa684139adaac5b02f0400be6d1fb293c80cb78598e2402a77f',
-            '',
-            1,
-            -2
-        );
-    }
-
-    /**
-     * @param $privkey
+     * @param $privkeyhex
      * @param $msg
-     * @param $sig
-     * @param $ePubCreate
+     * @param $expectedSig
      * @param $eSigCreate
      */
-    private function genericTest($privkey, $msg, $sig, $ePubCreate, $eSigCreate)
+    private function genericTest($privkeyhex, $msg, $expectedSig, $eSigCreate)
     {
-        $seckey = $this->toBinary32($privkey);
+        $privkey = $this->toBinary32($privkeyhex);
         $msg = $this->toBinary32($msg);
-        $sig = $this->toBinary32($sig);
-        $pubkey = '';
-        $pubkeylen = 0;
-        $this->assertEquals($ePubCreate, secp256k1_ec_pubkey_create($pubkey, $pubkeylen, $seckey, 0));
-        $this->assertEquals($eSigCreate, secp256k1_ecdsa_verify($msg, $sig, $pubkey));
+
+        $signature = '';
+        $siglen = 64;
+        $sign = \secp256k1_ecdsa_sign($msg, $signature, $siglen, $privkey);
+        $this->assertEquals($eSigCreate, $sign);
+        $this->assertEquals($expectedSig, bin2hex($signature));
+
+        if ($eSigCreate == 1) {
+            $pubkey = '';
+            $pubkeylen = 0;
+            $this->assertEquals(1, secp256k1_ec_pubkey_create($pubkey, $pubkeylen, $privkey, 0));
+            $this->assertEquals(1, secp256k1_ecdsa_verify($msg, $signature, $pubkey));
+        }
     }
 }
