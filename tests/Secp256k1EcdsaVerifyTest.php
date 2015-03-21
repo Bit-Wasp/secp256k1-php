@@ -1,4 +1,4 @@
-a<?php
+<?php
 
 namespace BitWasp\Secp256k1Tests;
 
