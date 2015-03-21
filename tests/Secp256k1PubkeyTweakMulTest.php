@@ -1,6 +1,6 @@
 <?php
 
-namespace Afk11\Secp256k1Tests;
+namespace BitWasp\Secp256k1Tests;
 
 
 use Symfony\Component\Yaml\Yaml;
