@@ -6,7 +6,9 @@ use Symfony\Component\Yaml\Yaml;
 
 class Secp256k1PubkeyCreateTest extends TestCase
 {
-
+    /**
+     * @return array
+     */
     public function getVectors()
     {
         $parser = new Yaml();
@@ -22,17 +24,28 @@ class Secp256k1PubkeyCreateTest extends TestCase
     /**
      * @dataProvider getVectors
      */
-    public function testCreatesPubkey($hexPrivKey, $compressed, $expectedPubKey)
+    public function testCreatesPubkey($hexPrivKey, $expectedCompressed, $expectedPubKey)
     {
+        $this->genericTest($hexPrivKey, 1, $expectedCompressed, 1);
+        $this->genericTest($hexPrivKey, 0, $expectedPubKey, 1);
+    }
+
+    /**
+     * @param $hexPrivkey
+     * @param $fcompressed
+     * @param $expectedKey
+     * @param $eResult
+     */
+    public function genericTest($hexPrivkey, $fcompressed, $expectedKey, $eResult)
+    {
+        $secretKey = $this->toBinary32($hexPrivkey);
+
         $pubkey = '';
         $pubkeylen = 0;
-        $sec = $this->toBinary32($hexPrivKey);
-
-        $this->assertEquals(1, secp256k1_ec_pubkey_create($pubkey, $pubkeylen, $sec, $compressed));
-        $this->assertEquals(bin2hex($pubkey), $expectedPubKey);
-        $this->assertEquals(($compressed ? 33 : 65), $pubkeylen);
+        $this->assertEquals($eResult, secp256k1_ec_pubkey_create($pubkey, $pubkeylen, $secretKey, $fcompressed));
+        $this->assertEquals(bin2hex($pubkey), $expectedKey);
+        $this->assertEquals(($fcompressed ? 33 : 65), $pubkeylen);
         unset($pubkey);
         unset($pubkeylen);
-
     }
 }
