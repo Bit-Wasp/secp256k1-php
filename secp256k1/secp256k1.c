@@ -189,12 +189,12 @@ PHP_FUNCTION(secp256k1_ecdsa_sign) {
 
     zval *signature, *signatureLen;
     unsigned char *seckey, *msg32;
-    int seckeylen,msg32len;
+    int seckeylen, msg32len;
     if (zend_parse_parameters(ZEND_NUM_ARGS(), "szzs", &msg32, &msg32len, &signature, &signatureLen, &seckey, &seckeylen) == FAILURE) {
        return;
     }
 
-    unsigned char newsig[64];
+    unsigned char newsig[70];
     int newsiglen, result;
     result = secp256k1_ecdsa_sign(msg32, newsig, &newsiglen, seckey, NULL, NULL);
 
