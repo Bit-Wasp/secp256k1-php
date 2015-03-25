@@ -1,5 +1,25 @@
 <?php
 
+$seckey = pack("H*", '28643478ecadc013275ec19233e5c9bbf5e41a6748af9e6dbf89a0c21f3aaeec');
+
+$message = 'dotest0';
+$messageHash = "\x18Bitcoin Signed Message:\n" .
+    decbin(strlen($message))  .
+    $message;
+$messageHash = hash('sha256', hash('sha256', $messageHash, true), true);
+$messageHash = pack("H*", "0fa8b0d6c0c19b1e51b34761218bc1d28b64080946c2683dff44dbd4c13b0522");
+$signature = '';
+$signatureLen = 0;
+$recid = 0;
+var_dump(secp256k1_ecdsa_sign_compact($messageHash, $signature, $signatureLen, $seckey, $recid));
+
+$pubkey = '';
+var_dump(secp256k1_ecdsa_recover_compact($messageHash, $signature, $recid, false, $pubkey));
+var_dump(bin2hex($pubkey));
+
+
+/*secp256k1_ecdsa_recover_compact($msg32, $signature, $recid, $compressed, $publicKey)
+
 echo "Test secp256k1_ecdsa_verify: ";
 $publicKey = pack("H*", "0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798");
 $msg = pack("H*", "fb3a3384783921e1bc394229481209f29f70c588f1c8092cb7e43fdcadcfe241");
@@ -84,3 +104,4 @@ var_dump(bin2hex($der), $derlen);
 echo "(e)\n";
 
 
+*/

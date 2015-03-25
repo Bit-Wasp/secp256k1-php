@@ -29,6 +29,22 @@ ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ecdsa_sign, 0)
     ZEND_ARG_INFO(0, secretKey)
 ZEND_END_ARG_INFO();
 
+ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ecdsa_sign_compact, 0)
+    ZEND_ARG_INFO(0, msg32)
+    ZEND_ARG_INFO(1, signature)
+    ZEND_ARG_INFO(1, signatureLen)
+    ZEND_ARG_INFO(0, secretKey)
+    ZEND_ARG_INFO(1, recid)
+ZEND_END_ARG_INFO();
+
+ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ecdsa_recover_compact, 0)
+    ZEND_ARG_INFO(0, msg32)
+    ZEND_ARG_INFO(0, signature)
+    ZEND_ARG_INFO(0, recid)
+    ZEND_ARG_INFO(0, compressed)
+    ZEND_ARG_INFO(1, publicKey)
+ZEND_END_ARG_INFO();
+
 ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ec_seckey_verify, 0)
     ZEND_ARG_INFO(0, secretKey)
 ZEND_END_ARG_INFO();
@@ -227,16 +243,15 @@ PHP_FUNCTION(secp256k1_ecdsa_sign_compact) {
        return;
     }
 
-    unsigned char *newsig = Z_STRVAL_P(signature);
-    int newsiglen = Z_STRLEN_P(signature);
-    int newrecid, result;
+    unsigned char newsig[64];
+    int newsiglen, newrecid, result;
     result = secp256k1_ecdsa_sign_compact(msg32, newsig, seckey, NULL, NULL, &newrecid);
 
     if (result) {
-       newsig[newsiglen] = '\0';
-       ZVAL_STRING(signature, newsig, 1);
-       ZVAL_LONG(signatureLen, newsiglen);
-       ZVAL_LONG(recid, newrecid);
+        newsig[newsiglen] = 0U;
+        ZVAL_STRINGL(signature, newsig, 64, 1);
+        ZVAL_LONG(signatureLen, 64);
+        ZVAL_LONG(recid, newrecid);
     }
 
     RETURN_LONG(result);
@@ -251,7 +266,8 @@ PHP_FUNCTION(secp256k1_ecdsa_sign_compact) {
  *           recid:      the recovery id (0-3, as returned by ecdsa_sign_compact)
  *  Out:     pubkey:     pointer to a 33 or 65 byte array to put the pubkey (cannot be NULL)
  *           pubkeylen:  pointer to an int that will contain the pubkey length (cannot be NULL)
- * Requires starting using SECP256K1_START_VERIFY.
+ *
+ * => secp256k1_ecdsa_recover_compact($msg32, $signature, $recid, $compressed, $publicKey)
  */
 PHP_FUNCTION(secp256k1_ecdsa_recover_compact) {
     secp256k1_start(SECP256K1_START_VERIFY);
@@ -263,7 +279,7 @@ PHP_FUNCTION(secp256k1_ecdsa_recover_compact) {
        return;
     }
 
-    unsigned char *newpubkey = Z_STRVAL_P(publicKey);
+    unsigned char newpubkey[(compressed ? 33 : 65)];
     int newpubkeylen, result;
     result = secp256k1_ecdsa_recover_compact(msg32, signature, newpubkey, &newpubkeylen, compressed, recid);
 
@@ -560,6 +576,8 @@ const zend_function_entry secp256k1_functions[] = {
     PHP_FE(secp256k1_stop, NULL)
     PHP_FE(secp256k1_ecdsa_sign, arginfo_secp256k1_ecdsa_sign)
     PHP_FE(secp256k1_ecdsa_verify, arginfo_secp256k1_ecdsa_verify)
+    PHP_FE(secp256k1_ecdsa_sign_compact, arginfo_secp256k1_ecdsa_sign_compact)
+    PHP_FE(secp256k1_ecdsa_recover_compact, arginfo_secp256k1_ecdsa_recover_compact)
     PHP_FE(secp256k1_ec_seckey_verify, arginfo_secp256k1_ec_seckey_verify)
     PHP_FE(secp256k1_ec_pubkey_verify, arginfo_secp256k1_ec_pubkey_verify)
     PHP_FE(secp256k1_ec_pubkey_create, arginfo_secp256k1_ec_pubkey_create)
