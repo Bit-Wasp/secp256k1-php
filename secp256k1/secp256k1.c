@@ -108,13 +108,13 @@ void print_string(unsigned char *string, int stringlen)
   php_printf("\n");
 }
 /**
- *  NOTE: This extension automatically initializes secp256k1 for the
- *  desired operation - you don't need to call this yourself.
+ * NOTE: This extension automatically initializes secp256k1 for the
+ * desired operation - you don't need to call this yourself.
  *
- *  Initialize the library. This may take some time (10-100 ms).
- *  You need to call this before calling any other function.
- *  It cannot run in parallel with any other functions, but once
- *  secp256k1_start() returns, all other functions are thread-safe.
+ * Initialize the library. This may take some time (10-100 ms).
+ * You need to call this before calling any other function.
+ * It cannot run in parallel with any other functions, but once
+ * secp256k1_start() returns, all other functions are thread-safe.
  */
 PHP_FUNCTION(secp256k1_start) {
     long mode;
@@ -126,25 +126,27 @@ PHP_FUNCTION(secp256k1_start) {
     secp256k1_start(mode);
 }
 
-/** Free all memory associated with this library. After this, no
- *  functions can be called anymore, except secp256k1_start()
+/** 
+ * Free all memory associated with this library. After this, no
+ * functions can be called anymore, except secp256k1_start()
  */
 PHP_FUNCTION(secp256k1_stop) {
     secp256k1_stop();
 }
 
 /**
- * Verify an ECDSA signature. (Tested)
+ * Verify an ECDSA signature.
  *
- * Returns: 1: correct signature
- * 0: incorrect signature
+ * Returns: 
+ *  1: correct signature
+ *  0: incorrect signature
  * -1: invalid public key
  * -2: invalid signature
  *
- * In: msg32: the 32-byte message hash being verified (cannot be NULL)
- * sig: the signature being verified (cannot be NULL)
- * pubkey: the public key to verify with (cannot be NULL)
- * Requires starting using SECP256K1_START_VERIFY.
+ * In: 
+ *  msg32: the 32-byte message hash being verified (cannot be NULL)
+ *  sig: the signature being verified (cannot be NULL)
+ *  pubkey: the public key to verify with (cannot be NULL)
  */
 PHP_FUNCTION(secp256k1_ecdsa_verify) {
     secp256k1_start(SECP256K1_START_VERIFY);
@@ -161,19 +163,21 @@ PHP_FUNCTION(secp256k1_ecdsa_verify) {
     RETURN_LONG(result);
 }
 
-/** Create an ECDSA signature.
- *  Returns: 1: signature created
- *           0: the nonce generation function failed, the private key was invalid, or there is not
- *              enough space in the signature (as indicated by siglen).
- *  In:      msg32:  the 32-byte message hash being signed (cannot be NULL)
- *           seckey: pointer to a 32-byte secret key (cannot be NULL)
- *           noncefp:pointer to a nonce generation function. If NULL, secp256k1_nonce_function_default is used
- *           ndata:  pointer to arbitrary data used by the nonce generation function (can be NULL)
- *  Out:     sig:    pointer to an array where the signature will be placed (cannot be NULL)
- *  In/Out:  siglen: pointer to an int with the length of sig, which will be updated
- *                   to contain the actual signature length (<=72). If 0 is returned, this will be
- *                   set to zero.
- *
+/** 
+ * Create an ECDSA signature.
+ * 
+ * Returns: 
+ *  1: signature created
+ *  0: the nonce generation function failed, the private key was invalid, or there is not
+ *     enough space in the signature (as indicated by siglen).
+ * 
+ * In: 
+ *  msg32:  the 32-byte message hash being signed (cannot be NULL)
+ *  seckey: pointer to a 32-byte secret key (cannot be NULL)
+ * 
+ * Out:     
+ *  sig:    pointer to an array where the signature will be placed (cannot be NULL)
+ * 
  * The sig always has an s value in the lower half of the range (From 0x1
  * to 0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF5D576E7357A4501DDFE92F46681B20A0,
  * inclusive), unlike many other implementations.
@@ -203,10 +207,10 @@ PHP_FUNCTION(secp256k1_ecdsa_verify) {
 PHP_FUNCTION(secp256k1_ecdsa_sign) {
     secp256k1_start(SECP256K1_START_SIGN);
 
-    zval *signature, *signatureLen;
+    zval *signature;
     unsigned char *seckey, *msg32;
     int seckeylen, msg32len;
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "szzs", &msg32, &msg32len, &signature, &signatureLen, &seckey, &seckeylen) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ssz", &msg32, &msg32len, &signature, &seckey, &seckeylen, signature) == FAILURE) {
        return;
     }
 
@@ -218,22 +222,26 @@ PHP_FUNCTION(secp256k1_ecdsa_sign) {
 
     if (result) {
         ZVAL_STRINGL(signature, newsig, newsiglen, 1);
-        ZVAL_LONG(signatureLen, newsiglen);
     }
 
     RETURN_LONG(result);
 }
 
-/** Create a compact ECDSA signature (64 byte + recovery id).
- *  Returns: 1: signature created
- *           0: the nonce generation function failed, or the secret key was invalid.
- *  In:      msg32:  the 32-byte message hash being signed (cannot be NULL)
- *           seckey: pointer to a 32-byte secret key (cannot be NULL)
- *           noncefp:pointer to a nonce generation function. If NULL, secp256k1_nonce_function_default is used
- *           ndata:  pointer to arbitrary data used by the nonce generation function (can be NULL)
- *  Out:     sig:    pointer to a 64-byte array where the signature will be placed (cannot be NULL)
- *                   In case 0 is returned, the returned signature length will be zero.
- *           recid:  pointer to an int, which will be updated to contain the recovery id (can be NULL)
+/** 
+ * Create a compact ECDSA signature (64 byte + recovery id).
+ * 
+ * Returns: 
+ *  1: signature created
+ *  0: the nonce generation function failed, or the secret key was invalid.
+ *  
+ * In:      
+ *  msg32:  the 32-byte message hash being signed (cannot be NULL)
+ *  seckey: pointer to a 32-byte secret key (cannot be NULL)
+ * 
+ * Out:     
+ *  sig:    pointer to a 64-byte array where the signature will be placed (cannot be NULL)
+ *          In case 0 is returned, the returned signature length will be zero.
+ *  recid:  pointer to an int, which will be updated to contain the recovery id (can be NULL)
  */
 PHP_FUNCTION(secp256k1_ecdsa_sign_compact) {
     secp256k1_start(SECP256K1_START_SIGN);
@@ -241,7 +249,7 @@ PHP_FUNCTION(secp256k1_ecdsa_sign_compact) {
     unsigned char *seckey, *msg32;
     int seckeylen, msg32len;
     zval *signature, *signatureLen, *recid;
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "szzsz", &msg32, &msg32len, &signature, &signatureLen, &seckey, &seckeylen, &recid) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sszz", &msg32, &msg32len, &seckey, &seckeylen, &signature, &recid) == FAILURE) {
        return;
     }
 
@@ -250,24 +258,28 @@ PHP_FUNCTION(secp256k1_ecdsa_sign_compact) {
     result = secp256k1_ecdsa_sign_compact(msg32, newsig, seckey, NULL, NULL, &newrecid);
 
     if (result) {
-        newsig[newsiglen] = 0U;
         ZVAL_STRINGL(signature, newsig, 64, 1);
-        ZVAL_LONG(signatureLen, 64);
         ZVAL_LONG(recid, newrecid);
     }
 
     RETURN_LONG(result);
 }
 
-/** Recover an ECDSA public key from a compact signature.
- *  Returns: 1: public key successfully recovered (which guarantees a correct signature).
- *           0: otherwise.
- *  In:      msg32:      the 32-byte message hash assumed to be signed (cannot be NULL)
- *           sig64:      signature as 64 byte array (cannot be NULL)
- *           compressed: whether to recover a compressed or uncompressed pubkey
- *           recid:      the recovery id (0-3, as returned by ecdsa_sign_compact)
- *  Out:     pubkey:     pointer to a 33 or 65 byte array to put the pubkey (cannot be NULL)
- *           pubkeylen:  pointer to an int that will contain the pubkey length (cannot be NULL)
+/** 
+ * Recover an ECDSA public key from a compact signature.
+ * 
+ * Returns: 
+ *  1: public key successfully recovered (which guarantees a correct signature).
+ *  0: otherwise.
+ *  
+ * In:      
+ *  msg32:      the 32-byte message hash assumed to be signed (cannot be NULL)
+ *  sig64:      signature as 64 byte array (cannot be NULL)
+ *              compressed: whether to recover a compressed or uncompressed pubkey
+ *  recid:      the recovery id (0-3, as returned by ecdsa_sign_compact)
+ * 
+ * Out:
+ *  pubkey:     pointer to a 33 or 65 byte array to put the pubkey (cannot be NULL)
  *
  * => secp256k1_ecdsa_recover_compact($msg32, $signature, $recid, $compressed, $publicKey)
  */
@@ -292,10 +304,14 @@ PHP_FUNCTION(secp256k1_ecdsa_recover_compact) {
     RETURN_LONG(result);
 }
 
-/** Verify an ECDSA secret key.
- *  Returns: 1: secret key is valid
- *           0: secret key is invalid
- *  In:      seckey: pointer to a 32-byte secret key (cannot be NULL)
+/** 
+ * Verify an ECDSA secret key.
+ * 
+ * Returns: 
+ *  1: secret key is valid
+ *  0: secret key is invalid
+ * In:      
+ *  seckey: pointer to a 32-byte secret key (cannot be NULL)
  */
 PHP_FUNCTION(secp256k1_ec_seckey_verify) {
     unsigned char *seckey;
@@ -311,11 +327,16 @@ PHP_FUNCTION(secp256k1_ec_seckey_verify) {
     RETURN_LONG(result);
 }
 
-/** Just validate a public key.
- *  Returns: 1: valid public key
- *           0: invalid public key
- *  In:      pubkey:    pointer to a 33-byte or 65-byte public key (cannot be NULL).
- *           pubkeylen: length of pubkey
+/** 
+ * Just validate a public key.
+ * 
+ * Returns: 
+ *  1: valid public key
+ *  0: invalid public key
+ * 
+ * In:      
+ *  pubkey:    pointer to a 33-byte or 65-byte public key (cannot be NULL).
+ *  pubkeylen: length of pubkey
  */
 PHP_FUNCTION(secp256k1_ec_pubkey_verify) {
     secp256k1_start(SECP256K1_START_SIGN);
@@ -332,15 +353,20 @@ PHP_FUNCTION(secp256k1_ec_pubkey_verify) {
     RETURN_LONG(result);
 }
 
-/** Compute the public key for a secret key. (Tested)
- *  In:     compressed: whether the computed public key should be compressed
- *          seckey:     pointer to a 32-byte private key (cannot be NULL)
- *  Out:    pubkey:     pointer to a 33-byte (if compressed) or 65-byte (if uncompressed)
- *                      area to store the public key (cannot be NULL)
- *          pubkeylen:  pointer to int that will be updated to contains the pubkey's
- *                      length (cannot be NULL)
- *  Returns: 1: secret was valid, public key stored
- *           0: secret was invalid, try again.
+/** 
+ * Compute the public key for a secret key. (Tested)
+ * 
+ * In:     
+ *  compressed: whether the computed public key should be compressed
+ *  seckey:     pointer to a 32-byte private key (cannot be NULL)
+ *  
+ * Out:
+ *  pubkey:     pointer to a 33-byte (if compressed) or 65-byte (if uncompressed)
+ *              area to store the public key (cannot be NULL)
+ * 
+ * Returns: 
+ *  1: secret was valid, public key stored
+ *  0: secret was invalid, try again.
  */
 PHP_FUNCTION(secp256k1_ec_pubkey_create) {
     secp256k1_start(SECP256K1_START_SIGN);
@@ -350,7 +376,7 @@ PHP_FUNCTION(secp256k1_ec_pubkey_create) {
     int seckeylen, compressed;
     int newpubkeylen = 65;
 
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zzsl", &pubkey, &pubkeylen, &seckey, &seckeylen, &compressed) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "slz", &seckey, &seckeylen, &compressed, &pubkey) == FAILURE) {
         return;
     }
 
@@ -367,13 +393,16 @@ PHP_FUNCTION(secp256k1_ec_pubkey_create) {
     RETURN_LONG(result);
 }
 
-/** Decompress a public key. (Tested, but hidden SEG FAULT somewhere..)
- * In/Out: pubkey:    pointer to a 65-byte array to put the decompressed public key.
-                      It must contain a 33-byte or 65-byte public key already (cannot be NULL)
- *         pubkeylen: pointer to the size of the public key pointed to by pubkey (cannot be NULL)
-                      It will be updated to reflect the new size.
- * Returns: 0 if the passed public key was invalid, 1 otherwise. If 1 is returned, the
-            pubkey is replaced with its decompressed version.
+/** 
+ * Decompress a public key. (Tested, but hidden SEG FAULT somewhere..)
+ * 
+ * In/Out: 
+ *  pubkey:    pointer to a 65-byte array to put the decompressed public key.
+               It must contain a 33-byte or 65-byte public key already (cannot be NULL)
+ * 
+ * Returns: 
+ *  0 if the passed public key was invalid, 1 otherwise. 
+ *  If 1 is returned, the pubkey is replaced with its decompressed version.
  */
 PHP_FUNCTION(secp256k1_ec_pubkey_decompress) {
     secp256k1_start(SECP256K1_START_SIGN);
@@ -398,7 +427,9 @@ PHP_FUNCTION(secp256k1_ec_pubkey_decompress) {
     RETURN_LONG(result);
 }
 
-/** Import a private key in DER dormat. */
+/** 
+ * Import a private key in DER format. 
+ */
 PHP_FUNCTION (secp256k1_ec_privkey_import) {
 
     zval *seckey;
