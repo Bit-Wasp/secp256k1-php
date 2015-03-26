@@ -206,12 +206,14 @@ PHP_FUNCTION(secp256k1_ecdsa_sign) {
     zval *signature, *signatureLen;
     unsigned char *seckey, *msg32;
     int seckeylen, msg32len;
-    if (zend_parse_parameters(ZEND_NUM_ARGS(), "szzs", &msg32, &msg32len, &signature, &signatureLen, &seckey, &seckeylen) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "szzs", &msg32, &msg32len, &signature, &signatureLen, &seckey, &seckeylen) == FAILURE) {
        return;
     }
 
-    unsigned char newsig[70];
-    int newsiglen, result;
+    unsigned char newsig[72];
+    int newsiglen = 72;
+    int result;
+    
     result = secp256k1_ecdsa_sign(msg32, newsig, &newsiglen, seckey, NULL, NULL);
 
     if (result) {
@@ -239,7 +241,7 @@ PHP_FUNCTION(secp256k1_ecdsa_sign_compact) {
     unsigned char *seckey, *msg32;
     int seckeylen, msg32len;
     zval *signature, *signatureLen, *recid;
-    if (zend_parse_parameters(ZEND_NUM_ARGS(), "szzsz", &msg32, &msg32len, &signature, &signatureLen, &seckey, &seckeylen, &recid) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "szzsz", &msg32, &msg32len, &signature, &signatureLen, &seckey, &seckeylen, &recid) == FAILURE) {
        return;
     }
 
@@ -275,7 +277,7 @@ PHP_FUNCTION(secp256k1_ecdsa_recover_compact) {
     unsigned char *msg32, *signature;
     int msg32len, signatureLen, compressed, recid;
     zval *publicKey;
-    if (zend_parse_parameters(ZEND_NUM_ARGS(), "ssllz", &msg32, &msg32len, &signature, &signatureLen, &recid, &compressed, &publicKey) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ssllz", &msg32, &msg32len, &signature, &signatureLen, &recid, &compressed, &publicKey) == FAILURE) {
        return;
     }
 
