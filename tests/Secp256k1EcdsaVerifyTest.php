@@ -89,9 +89,9 @@ class Secp256k1EcdsaVerifyTest extends TestCase
         $seckey = $this->toBinary32($privkey);
         $msg = $this->toBinary32($msg);
         $sig = $this->toBinary32($sig);
+        
         $pubkey = '';
-        $pubkeylen = 0;
-        $this->assertEquals($ePubCreate, secp256k1_ec_pubkey_create($pubkey, $pubkeylen, $seckey, 0));
+        $this->assertEquals($ePubCreate, secp256k1_ec_pubkey_create($seckey, 0, $pubkey));
         $this->assertEquals($eSigCreate, secp256k1_ecdsa_verify($msg, $sig, $pubkey));
     }
 }

@@ -25,6 +25,10 @@ before_script:
     - phpenv version-name
 
 script:
+    - |
+        cd libsecp256k1 \
+        && make test \
+        && cd ..
     - php -dextension=secp256k1.so vendor/phpunit/phpunit/phpunit --debug tests/
 
 notifications:
