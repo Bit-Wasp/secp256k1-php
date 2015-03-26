@@ -19,7 +19,7 @@ class Secp256k1PrivkeyTweakMulTest extends \PHPUnit_Framework_TestCase
     {
         $parser = new Yaml();
         $data = $parser->parse(__DIR__ . '/data/secp256k1_privkey_tweak_mul.yml');
-        $fixtures = [];
+        $fixtures = array();
         foreach ($data['vectors'] as $vector) {
             $fixtures[] = [
                 $vector['privkey'],

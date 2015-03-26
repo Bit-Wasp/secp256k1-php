@@ -11,7 +11,7 @@ class Secp256k1PrivkeyTweakAddTest extends TestCase
     {
         $parser = new Yaml();
         $data = $parser->parse(__DIR__ . '/data/secp256k1_privkey_tweak_add.yml');
-        $fixtures = [];
+        $fixtures = array();
         foreach ($data['vectors'] as $vector) {
             $fixtures[] = [
                 $vector['privkey'],

@@ -18,7 +18,7 @@ class Secp256k1PubkeyTweakMulTest extends TestCase
         $parser = new Yaml();
         $data = $parser->parse(__DIR__ . '/data/secp256k1_pubkey_tweak_mul.yml');
 
-        $fixtures = [];
+        $fixtures = array();
         foreach ($data['vectors'] as $c => $vector) {
             if ($limit && $c >= $limit) {
                 break;

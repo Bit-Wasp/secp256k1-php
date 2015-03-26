@@ -15,7 +15,7 @@ class Secp256k1EcdsaSignTest extends TestCase
         $parser = new Yaml();
         $data = $parser->parse(__DIR__ . '/data/deterministicSignatures.yml');
 
-        $fixtures = [];
+        $fixtures = array();
         foreach ($data['vectors'] as $vector) {
             $fixtures[] = [$vector['privkey'], $vector['msg'], substr($vector['sig'], 0, strlen($vector['sig'])-2)];
         }

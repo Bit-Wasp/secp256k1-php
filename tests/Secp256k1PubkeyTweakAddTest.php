@@ -16,7 +16,7 @@ class Secp256k1PubkeyTweakAddTest extends TestCase
         $parser = new Yaml();
         $data = $parser->parse(__DIR__ . '/data/secp256k1_pubkey_tweak_add.yml');
 
-        $fixtures = [];
+        $fixtures = array();
         foreach ($data['vectors'] as $c => $vector) {
             if ($stop && $c >= 2)
                 break;

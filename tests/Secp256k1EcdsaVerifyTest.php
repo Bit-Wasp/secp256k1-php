@@ -15,7 +15,7 @@ class Secp256k1EcdsaVerifyTest extends TestCase
         $parser = new Yaml();
         $data = $parser->parse(__DIR__ . '/data/signatures.yml');
 
-        $fixtures = [];
+        $fixtures = array();
         foreach ($data['signatures'] as $vector) {
             $fixtures[] = [$vector['privkey'], $vector['msg'], $vector['sig']];
         }

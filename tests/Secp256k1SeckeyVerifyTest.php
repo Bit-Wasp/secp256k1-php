@@ -11,7 +11,7 @@ class Secp256k1SeckeyVerifyTest extends TestCase
         $parser = new Yaml();
         $data = $parser->parse(__DIR__ . '/data/pubkey_create.yml');
 
-        $fixtures = [];
+        $fixtures = array();
         foreach ($data['vectors'] as $vector) {
             $fixtures[] = [$vector['seckey']];
         }
