@@ -17,7 +17,7 @@ class Secp256k1EcdsaVerifyTest extends TestCase
 
         $fixtures = array();
         foreach ($data['signatures'] as $vector) {
-            $fixtures[] = [$vector['privkey'], $vector['msg'], $vector['sig']];
+            $fixtures[] = array($vector['privkey'], $vector['msg'], $vector['sig']);
         }
         return $fixtures;
     }

@@ -13,7 +13,7 @@ class Secp256k1SeckeyVerifyTest extends TestCase
 
         $fixtures = array();
         foreach ($data['vectors'] as $vector) {
-            $fixtures[] = [$vector['seckey']];
+            $fixtures[] = array($vector['seckey']);
         }
         return $fixtures;
     }

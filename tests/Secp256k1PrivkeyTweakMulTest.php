@@ -21,11 +21,11 @@ class Secp256k1PrivkeyTweakMulTest extends \PHPUnit_Framework_TestCase
         $data = $parser->parse(__DIR__ . '/data/secp256k1_privkey_tweak_mul.yml');
         $fixtures = array();
         foreach ($data['vectors'] as $vector) {
-            $fixtures[] = [
+            $fixtures[] = array(
                 $vector['privkey'],
                 $vector['tweak'],
                 $vector['tweaked']
-            ];
+            );
         }
         return $fixtures;
     }
@@ -40,7 +40,6 @@ class Secp256k1PrivkeyTweakMulTest extends \PHPUnit_Framework_TestCase
         $expectedTweaked = $this->toBinary32($expectedTweaked);
 
         $result = secp256k1_ec_privkey_tweak_mul($privkey, $tweak);
-        $result = 1;
         $this->assertEquals(1, $result);
         $this->assertEquals($privkey, $expectedTweaked);
 

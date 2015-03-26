@@ -13,11 +13,11 @@ class Secp256k1PrivkeyTweakAddTest extends TestCase
         $data = $parser->parse(__DIR__ . '/data/secp256k1_privkey_tweak_add.yml');
         $fixtures = array();
         foreach ($data['vectors'] as $vector) {
-            $fixtures[] = [
+            $fixtures[] = array(
                 $vector['privkey'],
                 $vector['tweak'],
                 $vector['tweaked']
-            ];
+            );
         }
         return $fixtures;
     }

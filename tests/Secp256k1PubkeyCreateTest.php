@@ -16,7 +16,11 @@ class Secp256k1PubkeyCreateTest extends TestCase
 
         $fixtures = array();
         foreach ($data['vectors'] as $vector) {
-            $fixtures[] = [$vector['seckey'], $vector['compressed'], $vector['pubkey']];
+            $fixtures[] = array(
+                $vector['seckey'],
+                $vector['compressed'],
+                $vector['pubkey']
+            );
         }
         return $fixtures;
     }

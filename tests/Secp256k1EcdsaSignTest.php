@@ -17,7 +17,7 @@ class Secp256k1EcdsaSignTest extends TestCase
 
         $fixtures = array();
         foreach ($data['vectors'] as $vector) {
-            $fixtures[] = [$vector['privkey'], $vector['msg'], substr($vector['sig'], 0, strlen($vector['sig'])-2)];
+            $fixtures[] = array($vector['privkey'], $vector['msg'], substr($vector['sig'], 0, strlen($vector['sig'])-2));
         }
         return $fixtures;
     }

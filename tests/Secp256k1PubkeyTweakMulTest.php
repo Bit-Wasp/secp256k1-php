@@ -23,7 +23,11 @@ class Secp256k1PubkeyTweakMulTest extends TestCase
             if ($limit && $c >= $limit) {
                 break;
             }
-            $fixtures[] = [$vector['publicKey'], $vector['tweak'], $vector['tweaked']];
+            $fixtures[] = array(
+                $vector['publicKey'],
+                $vector['tweak'],
+                $vector['tweaked']
+            );
         }
         return $fixtures;
     }

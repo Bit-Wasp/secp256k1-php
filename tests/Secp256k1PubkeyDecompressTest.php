@@ -16,7 +16,10 @@ class Secp256k1PubkeyDecompressTest extends TestCase
 
         $fixtures = array();
         foreach ($data['vectors'] as $vector) {
-            $fixtures[] = [$vector['compressed'], $vector['pubkey']];
+            $fixtures[] = array(
+                $vector['compressed'],
+                $vector['pubkey']
+            );
         }
         return $fixtures;
     }
