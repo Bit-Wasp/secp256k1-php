@@ -5,7 +5,6 @@
 #endif
 
 #include "php.h"
-#include "zend_string.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
 #include "php_secp256k1.h"
