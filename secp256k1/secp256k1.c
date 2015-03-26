@@ -24,16 +24,14 @@ ZEND_END_ARG_INFO();
 
 ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ecdsa_sign, 0)
     ZEND_ARG_INFO(0, msg32)
-    ZEND_ARG_INFO(1, signature)
-    ZEND_ARG_INFO(1, signatureLen)
     ZEND_ARG_INFO(0, secretKey)
+    ZEND_ARG_INFO(1, signature)
 ZEND_END_ARG_INFO();
 
 ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ecdsa_sign_compact, 0)
     ZEND_ARG_INFO(0, msg32)
-    ZEND_ARG_INFO(1, signature)
-    ZEND_ARG_INFO(1, signatureLen)
     ZEND_ARG_INFO(0, secretKey)
+    ZEND_ARG_INFO(1, signature)
     ZEND_ARG_INFO(1, recid)
 ZEND_END_ARG_INFO();
 
@@ -54,10 +52,9 @@ ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ec_pubkey_verify, 0)
 ZEND_END_ARG_INFO();
 
 ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ec_pubkey_create, 0)
-    ZEND_ARG_INFO(1, publicKey)
-    ZEND_ARG_INFO(1, publicKeyLength)
     ZEND_ARG_INFO(0, secretKey)
     ZEND_ARG_INFO(0, compressed)
+    ZEND_ARG_INFO(1, publicKey)
 ZEND_END_ARG_INFO();
 
 ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ec_pubkey_decompress, 0)
@@ -65,16 +62,15 @@ ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ec_pubkey_decompress, 0)
 ZEND_END_ARG_INFO();
 
 ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ec_privkey_import, 0)
-    ZEND_ARG_INFO(1, seckey)
     ZEND_ARG_INFO(0, privkey)
     ZEND_ARG_INFO(0, compressed)
+    ZEND_ARG_INFO(1, seckey)
 ZEND_END_ARG_INFO();
 
 ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ec_privkey_export, 0)
     ZEND_ARG_INFO(0, seckey)
-    ZEND_ARG_INFO(1, derkey)
-    ZEND_ARG_INFO(1, derkeylen)
     ZEND_ARG_INFO(0, compressed)
+    ZEND_ARG_INFO(1, derkey)
 ZEND_END_ARG_INFO();
 
 ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ec_privkey_tweak_add, 0)
@@ -126,7 +122,7 @@ PHP_FUNCTION(secp256k1_start) {
     secp256k1_start(mode);
 }
 
-/** 
+/**
  * Free all memory associated with this library. After this, no
  * functions can be called anymore, except secp256k1_start()
  */
@@ -137,16 +133,16 @@ PHP_FUNCTION(secp256k1_stop) {
 /**
  * Verify an ECDSA signature.
  *
- * Returns: 
+ * In:
+ *  msg32: the 32-byte message hash being verified (cannot be NULL)
+ *  sig: the signature being verified (cannot be NULL)
+ *  pubkey: the public key to verify with (cannot be NULL)
+
+ * Returns:
  *  1: correct signature
  *  0: incorrect signature
  * -1: invalid public key
  * -2: invalid signature
- *
- * In: 
- *  msg32: the 32-byte message hash being verified (cannot be NULL)
- *  sig: the signature being verified (cannot be NULL)
- *  pubkey: the public key to verify with (cannot be NULL)
  */
 PHP_FUNCTION(secp256k1_ecdsa_verify) {
     secp256k1_start(SECP256K1_START_VERIFY);
@@ -163,21 +159,21 @@ PHP_FUNCTION(secp256k1_ecdsa_verify) {
     RETURN_LONG(result);
 }
 
-/** 
+/**
  * Create an ECDSA signature.
- * 
- * Returns: 
- *  1: signature created
- *  0: the nonce generation function failed, the private key was invalid, or there is not
- *     enough space in the signature (as indicated by siglen).
- * 
- * In: 
+ *
+ * In:
  *  msg32:  the 32-byte message hash being signed (cannot be NULL)
  *  seckey: pointer to a 32-byte secret key (cannot be NULL)
- * 
- * Out:     
+ *
+ * Out:
  *  sig:    pointer to an array where the signature will be placed (cannot be NULL)
- * 
+ *
+ * Returns:
+ *  1: signature created
+ *  0: the nonce generation function failed, the private key was invalid, or there is not
+ *     enough space in the signature.
+ *
  * The sig always has an s value in the lower half of the range (From 0x1
  * to 0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF5D576E7357A4501DDFE92F46681B20A0,
  * inclusive), unlike many other implementations.
@@ -210,14 +206,14 @@ PHP_FUNCTION(secp256k1_ecdsa_sign) {
     zval *signature;
     unsigned char *seckey, *msg32;
     int seckeylen, msg32len;
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ssz", &msg32, &msg32len, &signature, &seckey, &seckeylen, signature) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ssz", &msg32, &msg32len, &seckey, &seckeylen, &signature) == FAILURE) {
        return;
     }
 
     unsigned char newsig[72];
     int newsiglen = 72;
     int result;
-    
+
     result = secp256k1_ecdsa_sign(msg32, newsig, &newsiglen, seckey, NULL, NULL);
 
     if (result) {
@@ -227,28 +223,28 @@ PHP_FUNCTION(secp256k1_ecdsa_sign) {
     RETURN_LONG(result);
 }
 
-/** 
+/**
  * Create a compact ECDSA signature (64 byte + recovery id).
- * 
- * Returns: 
- *  1: signature created
- *  0: the nonce generation function failed, or the secret key was invalid.
- *  
- * In:      
+ *
+ * In:
  *  msg32:  the 32-byte message hash being signed (cannot be NULL)
  *  seckey: pointer to a 32-byte secret key (cannot be NULL)
- * 
- * Out:     
+ *
+ * Out:
  *  sig:    pointer to a 64-byte array where the signature will be placed (cannot be NULL)
  *          In case 0 is returned, the returned signature length will be zero.
  *  recid:  pointer to an int, which will be updated to contain the recovery id (can be NULL)
+ *
+ * Returns:
+ *  1: signature created
+ *  0: the nonce generation function failed, or the secret key was invalid.
  */
 PHP_FUNCTION(secp256k1_ecdsa_sign_compact) {
     secp256k1_start(SECP256K1_START_SIGN);
 
     unsigned char *seckey, *msg32;
     int seckeylen, msg32len;
-    zval *signature, *signatureLen, *recid;
+    zval *signature, *recid;
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sszz", &msg32, &msg32len, &seckey, &seckeylen, &signature, &recid) == FAILURE) {
        return;
     }
@@ -265,23 +261,23 @@ PHP_FUNCTION(secp256k1_ecdsa_sign_compact) {
     RETURN_LONG(result);
 }
 
-/** 
+/**
  * Recover an ECDSA public key from a compact signature.
- * 
- * Returns: 
- *  1: public key successfully recovered (which guarantees a correct signature).
- *  0: otherwise.
- *  
- * In:      
+ *
+ * In:
  *  msg32:      the 32-byte message hash assumed to be signed (cannot be NULL)
  *  sig64:      signature as 64 byte array (cannot be NULL)
  *              compressed: whether to recover a compressed or uncompressed pubkey
  *  recid:      the recovery id (0-3, as returned by ecdsa_sign_compact)
- * 
+ *
  * Out:
  *  pubkey:     pointer to a 33 or 65 byte array to put the pubkey (cannot be NULL)
  *
  * => secp256k1_ecdsa_recover_compact($msg32, $signature, $recid, $compressed, $publicKey)
+ *
+ * Returns:
+ *  1: public key successfully recovered (which guarantees a correct signature).
+ *  0: otherwise.
  */
 PHP_FUNCTION(secp256k1_ecdsa_recover_compact) {
     secp256k1_start(SECP256K1_START_VERIFY);
@@ -304,14 +300,15 @@ PHP_FUNCTION(secp256k1_ecdsa_recover_compact) {
     RETURN_LONG(result);
 }
 
-/** 
+/**
  * Verify an ECDSA secret key.
- * 
- * Returns: 
+
+ * In:
+ *  seckey: pointer to a 32-byte secret key (cannot be NULL)
+ *
+ * Returns:
  *  1: secret key is valid
  *  0: secret key is invalid
- * In:      
- *  seckey: pointer to a 32-byte secret key (cannot be NULL)
  */
 PHP_FUNCTION(secp256k1_ec_seckey_verify) {
     unsigned char *seckey;
@@ -327,16 +324,16 @@ PHP_FUNCTION(secp256k1_ec_seckey_verify) {
     RETURN_LONG(result);
 }
 
-/** 
+/**
  * Just validate a public key.
- * 
- * Returns: 
- *  1: valid public key
- *  0: invalid public key
- * 
- * In:      
+ *
+ * In:
  *  pubkey:    pointer to a 33-byte or 65-byte public key (cannot be NULL).
  *  pubkeylen: length of pubkey
+ *
+ * Returns:
+ *  1: valid public key
+ *  0: invalid public key
  */
 PHP_FUNCTION(secp256k1_ec_pubkey_verify) {
     secp256k1_start(SECP256K1_START_SIGN);
@@ -353,25 +350,25 @@ PHP_FUNCTION(secp256k1_ec_pubkey_verify) {
     RETURN_LONG(result);
 }
 
-/** 
- * Compute the public key for a secret key. (Tested)
- * 
- * In:     
+/**
+ * Compute the public key for a secret key.
+ *
+ * In:
  *  compressed: whether the computed public key should be compressed
  *  seckey:     pointer to a 32-byte private key (cannot be NULL)
- *  
+ *
  * Out:
  *  pubkey:     pointer to a 33-byte (if compressed) or 65-byte (if uncompressed)
  *              area to store the public key (cannot be NULL)
- * 
- * Returns: 
+ *
+ * Returns:
  *  1: secret was valid, public key stored
  *  0: secret was invalid, try again.
  */
 PHP_FUNCTION(secp256k1_ec_pubkey_create) {
     secp256k1_start(SECP256K1_START_SIGN);
 
-    zval *pubkey, *pubkeylen;
+    zval *pubkey;
     unsigned char *seckey;
     int seckeylen, compressed;
     int newpubkeylen = 65;
@@ -385,23 +382,21 @@ PHP_FUNCTION(secp256k1_ec_pubkey_create) {
     result = secp256k1_ec_pubkey_create(newpubkey, &newpubkeylen, seckey, compressed);
 
     if (result) {
-        newpubkey[newpubkeylen] = 0U;
         ZVAL_STRINGL(pubkey, newpubkey, newpubkeylen, 1);
-        ZVAL_LONG(pubkeylen, newpubkeylen);
     }
 
     RETURN_LONG(result);
 }
 
-/** 
+/**
  * Decompress a public key. (Tested, but hidden SEG FAULT somewhere..)
- * 
- * In/Out: 
+ *
+ * In/Out:
  *  pubkey:    pointer to a 65-byte array to put the decompressed public key.
                It must contain a 33-byte or 65-byte public key already (cannot be NULL)
- * 
- * Returns: 
- *  0 if the passed public key was invalid, 1 otherwise. 
+ *
+ * Returns:
+ *  0 if the passed public key was invalid, 1 otherwise.
  *  If 1 is returned, the pubkey is replaced with its decompressed version.
  */
 PHP_FUNCTION(secp256k1_ec_pubkey_decompress) {
@@ -410,7 +405,7 @@ PHP_FUNCTION(secp256k1_ec_pubkey_decompress) {
     zval *zPubKey;
     unsigned char *pubkey, newpubkey[65];
     int pubkeylen;
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z/", &zPubKey) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &zPubKey) == FAILURE) {
         return;
     }
 
@@ -427,8 +422,8 @@ PHP_FUNCTION(secp256k1_ec_pubkey_decompress) {
     RETURN_LONG(result);
 }
 
-/** 
- * Import a private key in DER format. 
+/**
+ * Import a private key in DER format.
  */
 PHP_FUNCTION (secp256k1_ec_privkey_import) {
 
@@ -436,7 +431,7 @@ PHP_FUNCTION (secp256k1_ec_privkey_import) {
     unsigned char *privkey, *newseckey;
     int privkeylen;
     long compressed;
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zsl", &seckey, &privkey, &privkeylen, &compressed) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "slz", &privkey, &privkeylen, &compressed, &seckey) == FAILURE) {
         return;
     }
 
@@ -444,37 +439,40 @@ PHP_FUNCTION (secp256k1_ec_privkey_import) {
     result = secp256k1_ec_privkey_import(newseckey, privkey, compressed);
 
     if (result) {
-        newseckey[32] = 0U;
         ZVAL_STRING(seckey, newseckey, 1);
     }
 
     RETURN_LONG(result);
 }
 
-/** Export a private key in DER format. */
+/**
+ * Export a private key in DER format.
+ */
 PHP_FUNCTION (secp256k1_ec_privkey_export) {
-    zval *derkey, *derkeylen;
+    zval *derkey;
     unsigned char *seckey, *newkey;
     int seckeylen, newkeylen, compressed;
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "szzl", &seckey, &seckeylen, &derkey, &derkeylen, &compressed) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "slz", &seckey, &seckeylen, &compressed, &derkey) == FAILURE) {
         return;
     }
 
     newkey = Z_STRVAL_P(derkey);
-    newkeylen = Z_LVAL_P(derkeylen);
+    newkeylen = 0;
     int result;
     result = secp256k1_ec_privkey_export(seckey, newkey, &newkeylen, compressed);
 
     if (result) {
-        newkey[newkeylen] = 0U;
         ZVAL_STRINGL(derkey, newkey, newkeylen, 0);
-        ZVAL_LONG(derkeylen, newkeylen);
     }
 
     RETURN_LONG(result);
 }
 
-/** Tweak a private key by adding tweak to it. (Tested) */
+/**
+ * Tweak a private key by adding tweak to it.
+ *
+ * @TODO: this can't be right
+ */
 PHP_FUNCTION (secp256k1_ec_privkey_tweak_add) {
 
     zval *seckey;
@@ -489,7 +487,6 @@ PHP_FUNCTION (secp256k1_ec_privkey_tweak_add) {
     result = secp256k1_ec_privkey_tweak_add(newseckey, tweak);
 
     if (result) {
-        newseckey[32] = 0U;
         Z_STRVAL_P(seckey) = newseckey;
         Z_STRLEN_P(seckey) = 32;
     }
@@ -497,7 +494,9 @@ PHP_FUNCTION (secp256k1_ec_privkey_tweak_add) {
     RETURN_LONG(result);
 }
 
-/** Tweak a public key by adding tweak times the generator to it (Tested) */
+/**
+ * Tweak a public key by adding tweak times the generator to it
+ */
 PHP_FUNCTION (secp256k1_ec_pubkey_tweak_add) {
     secp256k1_start(SECP256K1_START_VERIFY);
 
@@ -515,14 +514,15 @@ PHP_FUNCTION (secp256k1_ec_pubkey_tweak_add) {
     result = secp256k1_ec_pubkey_tweak_add(newpubkey, newpubkeylen, tweak);
 
     if (result) {
-        newpubkey[newpubkeylen] = 0U;
         ZVAL_STRINGL(pubkey, newpubkey, newpubkeylen, 0);
     }
 
     RETURN_LONG(result);
 }
 
-/** Tweak a private key by multiplying it with tweak. (Tested) */
+/**
+ * Tweak a private key by multiplying it with tweak.
+ */
 PHP_FUNCTION (secp256k1_ec_privkey_tweak_mul) {
 
     zval *seckey;
@@ -538,7 +538,6 @@ PHP_FUNCTION (secp256k1_ec_privkey_tweak_mul) {
     result = secp256k1_ec_privkey_tweak_mul(newseckey, tweak);
 
     if (result) {
-        newseckey[32] = 0U;
         Z_STRVAL_P(seckey) = newseckey;
         Z_STRLEN_P(seckey) = 32;
     }
@@ -546,7 +545,9 @@ PHP_FUNCTION (secp256k1_ec_privkey_tweak_mul) {
     RETURN_LONG(result);
 }
 
-/** Tweak a public key by multiplying it with tweak (Tested) */
+/**
+ * Tweak a public key by multiplying it with tweak
+ */
 PHP_FUNCTION (secp256k1_ec_pubkey_tweak_mul) {
     secp256k1_start(SECP256K1_START_VERIFY);
 
@@ -565,7 +566,6 @@ PHP_FUNCTION (secp256k1_ec_pubkey_tweak_mul) {
     result = secp256k1_ec_pubkey_tweak_mul(newpubkey, pubkeylen, tweak);
 
     if (result) {
-        newpubkey[pubkeylen] = 0U;
         ZVAL_STRINGL(pubkey, newpubkey, newpubkeylen, 0);
     }
 
