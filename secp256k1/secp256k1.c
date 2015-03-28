@@ -266,7 +266,7 @@ PHP_FUNCTION(secp256k1_ecdsa_sign_compact) {
  * In:
  *  msg32:      the 32-byte message hash assumed to be signed (cannot be NULL)
  *  sig64:      signature as 64 byte array (cannot be NULL)
- *              compressed: whether to recover a compressed or uncompressed pubkey
+ *  compressed: whether to recover a compressed or uncompressed pubkey
  *  recid:      the recovery id (0-3, as returned by ecdsa_sign_compact)
  *
  * Out:
@@ -282,7 +282,8 @@ PHP_FUNCTION(secp256k1_ecdsa_recover_compact) {
     secp256k1_start(SECP256K1_START_VERIFY);
 
     unsigned char *msg32, *signature;
-    int msg32len, signatureLen, compressed, recid;
+    long recid;
+    int msg32len, signatureLen, compressed;
     zval *publicKey;
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ssllz", &msg32, &msg32len, &signature, &signatureLen, &recid, &compressed, &publicKey) == FAILURE) {
        return;
