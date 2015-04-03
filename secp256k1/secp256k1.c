@@ -101,7 +101,11 @@ void writeRefInt(int i, zval *ref)
 
 void writeRefString(unsigned char* string, int stringLen, zval* ref)
 {
+    #if PHP_MAJOR_VERSION>7
+    ZVAL_STRING(ref, tring, stringLen);
+    #else
     ZVAL_STRINGL(ref, string, stringLen, 1);
+    #endif
     return;
 }
 
