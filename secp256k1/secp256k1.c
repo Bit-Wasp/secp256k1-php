@@ -101,9 +101,7 @@ void writeRefInt(int i, zval *ref)
 
 void writeRefString(unsigned char* string, int stringLen, zval* ref)
 {
-    php_printf("%d", PHP_MAJOR_VERSION);
-
-    #if PHP_MAJOR_VERSION>7
+    #if PHP_MAJOR_VERSION>=7
     ZVAL_STRING(ref, string, stringLen);
     #else
     ZVAL_STRINGL(ref, string, stringLen, 1);
@@ -122,7 +120,6 @@ void writeRefString(unsigned char* string, int stringLen, zval* ref)
  */
 PHP_FUNCTION(secp256k1_start) {
     long mode;
-    php_printf("%d", PHP_MAJOR_VERSION);
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &mode) == FAILURE) {
         return;
     }
