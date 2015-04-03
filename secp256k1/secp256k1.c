@@ -93,21 +93,18 @@ ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ec_pubkey_tweak_mul, 0)
     ZEND_ARG_INFO(0, tweak)
 ZEND_END_ARG_INFO();
 
-void writeRefString(unsigned char* string, int stringLen, zval* ref)
+void writeRefInt(int i, zval *ref)
 {
-   ZVAL_STRINGL(ref, string, stringLen, 1);
-   return;
+    ZVAL_LONG(ref, i);
+    return;
 }
 
-void print_string(unsigned char *string, int stringlen)
+void writeRefString(unsigned char* string, int stringLen, zval* ref)
 {
-  int i;
-  php_printf(" string (%d)\n - ", stringlen);
-  for(i=0; i<stringlen; i++) {
-    php_printf("%.2x", string[i]);
-  }
-  php_printf("\n");
+    ZVAL_STRINGL(ref, string, stringLen, 1);
+    return;
 }
+
 /**
  * NOTE: This extension automatically initializes secp256k1 for the
  * desired operation - you don't need to call this yourself.
