@@ -9,12 +9,6 @@
 #include "ext/standard/info.h"
 #include "php_secp256k1.h"
 
-#include <secp256k1.h>
-
-ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_start, 0)
-    ZEND_ARG_INFO(0, flags)
-ZEND_END_ARG_INFO();
-
 ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ecdsa_verify, 0)
     ZEND_ARG_INFO(0, msg32)
     ZEND_ARG_INFO(0, signature)
@@ -93,40 +87,12 @@ ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ec_pubkey_tweak_mul, 0)
     ZEND_ARG_INFO(0, tweak)
 ZEND_END_ARG_INFO();
 
-void print_string(unsigned char *string, int stringlen)
+ZEND_DECLARE_MODULE_GLOBALS(secp256k1)
+static void php_secp256k1_init_globals(zend_secp256k1_globals *secp256k1_globals)
 {
-  int i;
-  php_printf(" string (%d)\n - ", stringlen);
-  for(i=0; i<stringlen; i++) {
-    php_printf("%.2x", string[i]);
-  }
-  php_printf("\n");
-}
-/**
- * NOTE: This extension automatically initializes secp256k1 for the
- * desired operation - you don't need to call this yourself.
- *
- * Initialize the library. This may take some time (10-100 ms).
- * You need to call this before calling any other function.
- * It cannot run in parallel with any other functions, but once
- * secp256k1_start() returns, all other functions are thread-safe.
- */
-PHP_FUNCTION(secp256k1_start) {
-    long mode;
-
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &mode) == FAILURE) {
-        return;
-    }
-
-    secp256k1_start(mode);
-}
-
-/**
- * Free all memory associated with this library. After this, no
- * functions can be called anymore, except secp256k1_start()
- */
-PHP_FUNCTION(secp256k1_stop) {
-    secp256k1_stop();
+    secp256k1_globals->plain_context = secp256k1_context_create(0);
+    secp256k1_globals->sign_context = secp256k1_context_create(SECP256K1_CONTEXT_SIGN);
+    secp256k1_globals->verify_context = secp256k1_context_create(SECP256K1_CONTEXT_VERIFY);
 }
 
 /**
@@ -144,7 +110,7 @@ PHP_FUNCTION(secp256k1_stop) {
  * -2: invalid signature
  */
 PHP_FUNCTION(secp256k1_ecdsa_verify) {
-    secp256k1_start(SECP256K1_START_VERIFY);
+    secp256k1_context_t * context = SECP256K1_G(verify_context);
 
     unsigned char *msg32, *sig, *pubkey;
     int msg32len, siglen, pubkeylen;
@@ -153,7 +119,7 @@ PHP_FUNCTION(secp256k1_ecdsa_verify) {
     }
 
     int result;
-    result = secp256k1_ecdsa_verify(msg32, sig, siglen, pubkey, pubkeylen);
+    result = secp256k1_ecdsa_verify(context, msg32, sig, siglen, pubkey, pubkeylen);
 
     RETURN_LONG(result);
 }
@@ -200,7 +166,7 @@ PHP_FUNCTION(secp256k1_ecdsa_verify) {
  * be taken when this property is required for an application.
  */
 PHP_FUNCTION(secp256k1_ecdsa_sign) {
-    secp256k1_start(SECP256K1_START_SIGN);
+    secp256k1_context_t * context = SECP256K1_G(sign_context);
 
     zval *signature;
     unsigned char *seckey, *msg32;
@@ -213,7 +179,7 @@ PHP_FUNCTION(secp256k1_ecdsa_sign) {
     int newsiglen = 72;
     int result;
 
-    result = secp256k1_ecdsa_sign(msg32, newsig, &newsiglen, seckey, NULL, NULL);
+    result = secp256k1_ecdsa_sign(context, msg32, newsig, &newsiglen, seckey, NULL, NULL);
 
     if (result) {
         ZVAL_STRINGL(signature, newsig, newsiglen, 1);
@@ -239,7 +205,7 @@ PHP_FUNCTION(secp256k1_ecdsa_sign) {
  *  0: the nonce generation function failed, or the secret key was invalid.
  */
 PHP_FUNCTION(secp256k1_ecdsa_sign_compact) {
-    secp256k1_start(SECP256K1_START_SIGN);
+    secp256k1_context_t * context = SECP256K1_G(sign_context);
 
     unsigned char *seckey, *msg32;
     int seckeylen, msg32len;
@@ -250,7 +216,7 @@ PHP_FUNCTION(secp256k1_ecdsa_sign_compact) {
 
     unsigned char newsig[64];
     int newsiglen, newrecid, result;
-    result = secp256k1_ecdsa_sign_compact(msg32, newsig, seckey, NULL, NULL, &newrecid);
+    result = secp256k1_ecdsa_sign_compact(context, msg32, newsig, seckey, NULL, NULL, &newrecid);
 
     if (result) {
         ZVAL_STRINGL(signature, newsig, 64, 1);
@@ -279,7 +245,7 @@ PHP_FUNCTION(secp256k1_ecdsa_sign_compact) {
  *  0: otherwise.
  */
 PHP_FUNCTION(secp256k1_ecdsa_recover_compact) {
-    secp256k1_start(SECP256K1_START_VERIFY);
+    secp256k1_context_t * context = SECP256K1_G(verify_context);
 
     unsigned char *msg32, *signature;
     long recid;
@@ -291,7 +257,7 @@ PHP_FUNCTION(secp256k1_ecdsa_recover_compact) {
 
     unsigned char newpubkey[(compressed ? 33 : 65)];
     int newpubkeylen, result;
-    result = secp256k1_ecdsa_recover_compact(msg32, signature, newpubkey, &newpubkeylen, compressed, recid);
+    result = secp256k1_ecdsa_recover_compact(context, msg32, signature, newpubkey, &newpubkeylen, compressed, recid);
 
     if (result) {
         ZVAL_STRINGL(publicKey, newpubkey, newpubkeylen, 1);
@@ -311,6 +277,7 @@ PHP_FUNCTION(secp256k1_ecdsa_recover_compact) {
  *  0: secret key is invalid
  */
 PHP_FUNCTION(secp256k1_ec_seckey_verify) {
+    secp256k1_context_t * context = SECP256K1_G(plain_context);
     unsigned char *seckey;
     int seckeylen;
 
@@ -319,7 +286,7 @@ PHP_FUNCTION(secp256k1_ec_seckey_verify) {
     }
 
     int result;
-    result = secp256k1_ec_seckey_verify(seckey);
+    result = secp256k1_ec_seckey_verify(context, seckey);
 
     RETURN_LONG(result);
 }
@@ -336,7 +303,7 @@ PHP_FUNCTION(secp256k1_ec_seckey_verify) {
  *  0: invalid public key
  */
 PHP_FUNCTION(secp256k1_ec_pubkey_verify) {
-    secp256k1_start(SECP256K1_START_SIGN);
+    secp256k1_context_t * context = SECP256K1_G(plain_context);
 
     unsigned char *pubkey;
     int pubkeylen;
@@ -345,7 +312,7 @@ PHP_FUNCTION(secp256k1_ec_pubkey_verify) {
     }
 
     int result;
-    result = secp256k1_ec_pubkey_verify(pubkey, pubkeylen);
+    result = secp256k1_ec_pubkey_verify(context, pubkey, pubkeylen);
 
     RETURN_LONG(result);
 }
@@ -366,7 +333,7 @@ PHP_FUNCTION(secp256k1_ec_pubkey_verify) {
  *  0: secret was invalid, try again.
  */
 PHP_FUNCTION(secp256k1_ec_pubkey_create) {
-    secp256k1_start(SECP256K1_START_SIGN);
+    secp256k1_context_t * context = SECP256K1_G(sign_context);
 
     zval *pubkey;
     unsigned char *seckey;
@@ -379,7 +346,7 @@ PHP_FUNCTION(secp256k1_ec_pubkey_create) {
 
     unsigned char newpubkey[compressed ? 33 : 65];
     int result;
-    result = secp256k1_ec_pubkey_create(newpubkey, &newpubkeylen, seckey, compressed);
+    result = secp256k1_ec_pubkey_create(context, newpubkey, &newpubkeylen, seckey, compressed);
 
     if (result) {
         ZVAL_STRINGL(pubkey, newpubkey, newpubkeylen, 1);
@@ -400,7 +367,7 @@ PHP_FUNCTION(secp256k1_ec_pubkey_create) {
  *  If 1 is returned, the pubkey is replaced with its decompressed version.
  */
 PHP_FUNCTION(secp256k1_ec_pubkey_decompress) {
-    secp256k1_start(SECP256K1_START_SIGN);
+    secp256k1_context_t * context = SECP256K1_G(plain_context);
 
     zval *zPubKey;
     unsigned char *pubkey, newpubkey[65];
@@ -413,7 +380,7 @@ PHP_FUNCTION(secp256k1_ec_pubkey_decompress) {
     pubkeylen = Z_STRLEN_P(zPubKey);
     memcpy(newpubkey, pubkey, pubkeylen);
     int result;
-    result = secp256k1_ec_pubkey_decompress(newpubkey, &pubkeylen);
+    result = secp256k1_ec_pubkey_decompress(context, newpubkey, &pubkeylen);
 
     if (result == 1) {
         ZVAL_STRINGL(zPubKey, newpubkey, pubkeylen, 1);
@@ -426,7 +393,7 @@ PHP_FUNCTION(secp256k1_ec_pubkey_decompress) {
  * Import a private key in DER format.
  */
 PHP_FUNCTION (secp256k1_ec_privkey_import) {
-
+    secp256k1_context_t * context = SECP256K1_G(plain_context);
     zval *seckey;
     unsigned char *privkey, *newseckey;
     int privkeylen;
@@ -436,7 +403,7 @@ PHP_FUNCTION (secp256k1_ec_privkey_import) {
     }
 
     int result;
-    result = secp256k1_ec_privkey_import(newseckey, privkey, compressed);
+    result = secp256k1_ec_privkey_import(context, newseckey, privkey, compressed);
 
     if (result) {
         ZVAL_STRING(seckey, newseckey, 1);
@@ -449,6 +416,7 @@ PHP_FUNCTION (secp256k1_ec_privkey_import) {
  * Export a private key in DER format.
  */
 PHP_FUNCTION (secp256k1_ec_privkey_export) {
+    secp256k1_context_t * context = SECP256K1_G(sign_context);
     zval *derkey;
     unsigned char *seckey, *newkey;
     int seckeylen, newkeylen, compressed;
@@ -459,7 +427,7 @@ PHP_FUNCTION (secp256k1_ec_privkey_export) {
     newkey = Z_STRVAL_P(derkey);
     newkeylen = 0;
     int result;
-    result = secp256k1_ec_privkey_export(seckey, newkey, &newkeylen, compressed);
+    result = secp256k1_ec_privkey_export(context, seckey, newkey, &newkeylen, compressed);
 
     if (result) {
         ZVAL_STRINGL(derkey, newkey, newkeylen, 0);
@@ -474,7 +442,7 @@ PHP_FUNCTION (secp256k1_ec_privkey_export) {
  * @TODO: this can't be right
  */
 PHP_FUNCTION (secp256k1_ec_privkey_tweak_add) {
-
+    secp256k1_context_t * context = SECP256K1_G(plain_context);
     zval *seckey;
     unsigned char *newseckey, *tweak;
     int tweaklen;
@@ -484,7 +452,7 @@ PHP_FUNCTION (secp256k1_ec_privkey_tweak_add) {
 
     newseckey = Z_STRVAL_P(seckey);
     int result;
-    result = secp256k1_ec_privkey_tweak_add(newseckey, tweak);
+    result = secp256k1_ec_privkey_tweak_add(context, newseckey, tweak);
 
     if (result) {
         Z_STRVAL_P(seckey) = newseckey;
@@ -498,7 +466,7 @@ PHP_FUNCTION (secp256k1_ec_privkey_tweak_add) {
  * Tweak a public key by adding tweak times the generator to it
  */
 PHP_FUNCTION (secp256k1_ec_pubkey_tweak_add) {
-    secp256k1_start(SECP256K1_START_VERIFY);
+    secp256k1_context_t * context = SECP256K1_G(verify_context);
 
     zval *pubkey;
     unsigned char  *tweak, *newpubkey;
@@ -511,7 +479,7 @@ PHP_FUNCTION (secp256k1_ec_pubkey_tweak_add) {
     newpubkey = Z_STRVAL_P(pubkey);
     newpubkeylen = Z_STRLEN_P(pubkey);
     int result;
-    result = secp256k1_ec_pubkey_tweak_add(newpubkey, newpubkeylen, tweak);
+    result = secp256k1_ec_pubkey_tweak_add(context, newpubkey, newpubkeylen, tweak);
 
     if (result) {
         ZVAL_STRINGL(pubkey, newpubkey, newpubkeylen, 0);
@@ -524,7 +492,7 @@ PHP_FUNCTION (secp256k1_ec_pubkey_tweak_add) {
  * Tweak a private key by multiplying it with tweak.
  */
 PHP_FUNCTION (secp256k1_ec_privkey_tweak_mul) {
-
+    secp256k1_context_t * context = SECP256K1_G(verify_context);
     zval *seckey;
     unsigned char *newseckey, *tweak;
     int tweaklen;
@@ -535,7 +503,7 @@ PHP_FUNCTION (secp256k1_ec_privkey_tweak_mul) {
 
     newseckey = Z_STRVAL_P(seckey);
     int result;
-    result = secp256k1_ec_privkey_tweak_mul(newseckey, tweak);
+    result = secp256k1_ec_privkey_tweak_mul(context, newseckey, tweak);
 
     if (result) {
         Z_STRVAL_P(seckey) = newseckey;
@@ -549,7 +517,7 @@ PHP_FUNCTION (secp256k1_ec_privkey_tweak_mul) {
  * Tweak a public key by multiplying it with tweak
  */
 PHP_FUNCTION (secp256k1_ec_pubkey_tweak_mul) {
-    secp256k1_start(SECP256K1_START_VERIFY);
+    secp256k1_context_t * context = SECP256K1_G(verify_context);
 
     zval *pubkey;
     int pubkeylen;
@@ -563,7 +531,7 @@ PHP_FUNCTION (secp256k1_ec_pubkey_tweak_mul) {
     newpubkey = Z_STRVAL_P(pubkey);
     newpubkeylen = Z_STRLEN_P(pubkey);
     int result;
-    result = secp256k1_ec_pubkey_tweak_mul(newpubkey, pubkeylen, tweak);
+    result = secp256k1_ec_pubkey_tweak_mul(context, newpubkey, pubkeylen, tweak);
 
     if (result) {
         ZVAL_STRINGL(pubkey, newpubkey, newpubkeylen, 0);
@@ -573,10 +541,9 @@ PHP_FUNCTION (secp256k1_ec_pubkey_tweak_mul) {
 }
 
 PHP_MINIT_FUNCTION(secp256k1) {
-
-    REGISTER_LONG_CONSTANT("SECP256K1_START_VERIFY", SECP256K1_START_VERIFY, CONST_CS | CONST_PERSISTENT);
-    REGISTER_LONG_CONSTANT("SECP256K1_START_SIGN", SECP256K1_START_SIGN, CONST_CS | CONST_PERSISTENT);
-
+    REGISTER_LONG_CONSTANT("SECP256K1_CONTEXT_VERIFY", SECP256K1_CONTEXT_VERIFY, CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT("SECP256K1_CONTEXT_SIGN", SECP256K1_CONTEXT_SIGN, CONST_CS | CONST_PERSISTENT);
+    ZEND_INIT_MODULE_GLOBALS(secp256k1, php_secp256k1_init_globals, NULL);
     return SUCCESS;
 }
 
@@ -605,8 +572,6 @@ PHP_MINFO_FUNCTION(secp256k1) {
  * Every user visible function must have an entry in secp256k1_functions[].
  */
 const zend_function_entry secp256k1_functions[] = {
-    PHP_FE(secp256k1_start, arginfo_secp256k1_start)
-    PHP_FE(secp256k1_stop, NULL)
     PHP_FE(secp256k1_ecdsa_sign, arginfo_secp256k1_ecdsa_sign)
     PHP_FE(secp256k1_ecdsa_verify, arginfo_secp256k1_ecdsa_verify)
     PHP_FE(secp256k1_ecdsa_sign_compact, arginfo_secp256k1_ecdsa_sign_compact)
