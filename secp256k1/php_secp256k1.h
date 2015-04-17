@@ -10,9 +10,7 @@ extern zend_module_entry secp256k1_module_entry;
 #define PHP_SECP256K1_VERSION "0.1.0"
 
 ZEND_BEGIN_MODULE_GLOBALS(secp256k1)
-    secp256k1_context_t* plain_context;
-    secp256k1_context_t* sign_context;
-    secp256k1_context_t* verify_context;
+    secp256k1_context_t* context;
 ZEND_END_MODULE_GLOBALS(secp256k1)
 
 #ifdef ZTS
