@@ -4,14 +4,15 @@
 
 PHP bindings for https://github.com/bitcoin/secp256k1
 
-### About
+### Requirements
+Only PHP 5.x is supported at the moment - PHP7 will come soon.  
+
+### About the extension
   - Runs against latest libsecp256k1
-  - Positive tests are present for all currently added functions. The C library also has it's own tests, with some useful edge case tests, which will be ported soon. 
-  - Working on PHP5.x - PHP7 will come soon.
-  - This extension only supports deterministic signatures at present.
-  - In fact, no RNG is utilized in this extension - private keys must be generated elsewhere. 
-  - The extension exposes the same raw API of libsecp256k1. As such, you must pack() and unpack() all data passed to/from the extension.
-  - In keeping with libsecp256k1, this extension returns certain data to the user by writing to a reference, and only returning a code indicating success, or the reason for failure.
+  - Tests are present for all currently added functions. The C library also has it's own tests, with some useful edge case tests, which will be ported soon.
+  - This extension only supports deterministic signatures at present. In fact, no RNG is utilized in this extension - private keys must be generated elsewhere. 
+  - The extension exposes the same raw API of libsecp256k1. As such, you must ensure you are passing the binary representations of each value.   
+  - In keeping with libsecp256k1, this extension returns certain data to the user by writing to a variable reference, and returning a code indicating the failure/success.
   
 ### To Install:
 ```
@@ -70,7 +71,7 @@ $publicKey = pack("H*", "03a34b99f22c790c4e36b2b3c2c35a36db06226e41c692fc82b8b56
 // $publicKey gets modified by this function!
 $result = secp256k1_ec_pubkey_decompress($publicKey);
 if ($result == 1) {
-    echo sprintf("Decompressed key is %s", bin2hex($publicKey));
+    echo sprintf("Decompressed key is %s\n", bin2hex($publicKey));
     // should be 04a34b99f22c790c4e36b2b3c2c35a36db06226e41c692fc82b8b56ac1c540c5bd5b8dec5235a0fa8722476c7709c02559e3aa73aa03918ba2d492eea75abea235
 } else {
     throw new \Exception('secp256k1_ec_pubkey_decompress: public key was invalid');
@@ -87,8 +88,8 @@ $result = secp256k1_ec_seckey_verify($publicKey);
 if ($result == 1) {
     echo "Private key was valid\n";
 } else {
-    echo "Private key was invalid\n";
-}  
+    throw new \Exception("Private key was invalid");
+}
 ```
 
 #### Verify a public key
@@ -101,8 +102,8 @@ $result = secp256k1_ec_pubkey_verify($publicKey);
 if ($result == 1) {
     echo "Public key was valid\n";
 } else {
-    echo "Public key was invalid\n";
-}  
+    throw new \Exception("Public key was invalid");
+}
 ```
 
 #### Private Key tweak by addition
@@ -118,7 +119,7 @@ $result = secp256k1_ec_privkey_tweak_add($privateKey, $tweak);
 if ($result == 1) {
     echo sprintf("Tweaked private key: %s\n", bin2hex($privateKey));
 } else {
-    echo "Invalid private key or augend value\n";
+    throw new \Exception("Invalid private key or augend value");
 }
 ```
 
@@ -128,14 +129,14 @@ adds the point to the `$publicKey` point. The result is written to the provided 
 
 This function is useful for deterministic key derivation. 
 ```
-$publicKey = pack("H*", "03fae8f5e64c9997749ef65c5db9f0ec3e121dc6901096c30da0f105a13212b6db");
+$publicKey = hex2bin("03fae8f5e64c9997749ef65c5db9f0ec3e121dc6901096c30da0f105a13212b6db");
 $tweak = pack("H*", "0000000000000000000000000000000000000000000000000000000000000001");
 
 $result = secp256k1_ec_pubkey_tweak_add($publicKey, $tweak);
 if ($result == 1) {
     echo sprintf("Tweaked public key: %s\n", bin2hex($publicKey));
 } else {
-    echo "Invalid public key or augend value\n";
+    throw new \Exception("Invalid public key or augend value");
 }
 ```
 
@@ -151,6 +152,38 @@ $result = secp256k1_ec_pubkey_tweak_mul($publicKey, strlen($publicKey), $tweak);
 if ($result == 1) {
     echo sprintf("Tweaked public key: %s\n", bin2hex($publicKey));
 } else {
-    echo "Invalid public key or augend value\n";
+    throw new \Exception("Invalid public key or multiplicand value");
+}
+```
+
+#### Sign a message
+`secp256k1_ecdsa_sign(string $msg32, string $privateKey, string & $signature)` takes the given `$msg32` and signs it with
+`$privateKey`. If successful, the signature is written to the memory location of `$signature`. 
+
+```
+$msg32 = hash('sha256', 'this is a message!', true);
+$publicKey = pack("H*", "88b59280e39997e49ebd47ecc9e3850faff5d7df1e2a22248c136cbdd0d60aae");
+$signature = '';
+$result = secp256k1_ecdsa_sign($msg32, $privateKey, $signature);
+if ($result == 1) {
+   echo sprintf("Produced signature: %s \n", bin2hex($signature));
+} else {
+    throw new \Exception("Failed to create signature");
+}
+```
+
+#### Verify a signature
+`secp256k1_ecdsa_verify(string $msg32, string $signature, string $publicKey)` verifies the provided `$msg32` and `$signature` against the provided `$publicKey`. Returns for valid signature, 0 for incorrect signature, -1 for an invalid public key, -2 for an invalid signature. 
+
+```
+$msg32 = hash('sha256', 'this is a message!', true);
+$signature = hex2bin("3044022055ef6953afd139d917d947ba7823ab5dfb9239ba8a26295a218cad88fb7299ef022057147cf4233ff3b87fa64d82a0b9a327e9b6d5d0070ab3f671b795934c4f2074");
+$publicKey = hex2bin('04fae8f5e64c9997749ef65c5db9f0ec3e121dc6901096c30da0f105a13212b6db4315e65a2d63cc667c034fac05cdb3c7bc1abfc2ad90f7f97321613f901758c9');
+
+$result = secp256k1_ecdsa_verify($msg32, $signature, $publicKey);
+if ($result == 1) {
+    echo "Signature was verified\n";
+} else {
+    echo "Signature was NOT VERIFIED\n";
 }
 ```
