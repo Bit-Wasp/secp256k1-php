@@ -392,19 +392,18 @@ PHP_FUNCTION(secp256k1_ec_pubkey_decompress) {
  */
 PHP_FUNCTION (secp256k1_ec_privkey_import) {
     secp256k1_context_t * context = SECP256K1_G(context);
-    zval *seckey;
-    unsigned char *privkey, *newseckey;
-    int privkeylen;
-    long compressed;
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "slz", &privkey, &privkeylen, &compressed, &seckey) == FAILURE) {
+
+    zval *zSecKey;
+    unsigned char *derkey;
+    int derkeylen;
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz", &derkey, &derkeylen, &zSecKey) == FAILURE) {
         return;
     }
 
-    int result;
-    result = secp256k1_ec_privkey_import(context, newseckey, privkey, compressed);
-
+    unsigned char newseckey[32];
+    int result = secp256k1_ec_privkey_import(context, newseckey, derkey, derkeylen);
     if (result) {
-        ZVAL_STRING(seckey, newseckey, 1);
+        ZVAL_STRINGL(zSecKey, newseckey, 32, 1);
     }
 
     RETURN_LONG(result);
@@ -415,20 +414,19 @@ PHP_FUNCTION (secp256k1_ec_privkey_import) {
  */
 PHP_FUNCTION (secp256k1_ec_privkey_export) {
     secp256k1_context_t * context = SECP256K1_G(context);
-    zval *derkey;
-    unsigned char *seckey, *newkey;
-    int seckeylen, newkeylen, compressed;
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "slz", &seckey, &seckeylen, &compressed, &derkey) == FAILURE) {
+
+    zval *zDerKey;
+    unsigned char *seckey;
+    int seckeylen, compressed;
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "slz", &seckey, &seckeylen, &compressed, &zDerKey) == FAILURE) {
         return;
     }
 
-    newkey = Z_STRVAL_P(derkey);
-    newkeylen = 0;
-    int result;
-    result = secp256k1_ec_privkey_export(context, seckey, newkey, &newkeylen, compressed);
-
+    unsigned char newkey[300];
+    int newkeylen;
+    int result = secp256k1_ec_privkey_export(context, seckey, newkey, &newkeylen, compressed ? 1 : 0);
     if (result) {
-        ZVAL_STRINGL(derkey, newkey, newkeylen, 0);
+        ZVAL_STRINGL(zDerKey, newkey, newkeylen, 1);
     }
 
     RETURN_LONG(result);
