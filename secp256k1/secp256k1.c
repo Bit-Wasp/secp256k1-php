@@ -516,18 +516,17 @@ PHP_FUNCTION (secp256k1_ec_pubkey_tweak_mul) {
     secp256k1_context_t * context = SECP256K1_G(context);
 
     zval *pubkey;
-    int pubkeylen;
     unsigned char *tweak, *newpubkey;
     int tweaklen, newpubkeylen;
 
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zls", &pubkey, &pubkeylen, &tweak, &tweaklen) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zs", &pubkey, &tweak, &tweaklen) == FAILURE) {
         return;
     }
 
     newpubkey = Z_STRVAL_P(pubkey);
     newpubkeylen = Z_STRLEN_P(pubkey);
     int result;
-    result = secp256k1_ec_pubkey_tweak_mul(context, newpubkey, pubkeylen, tweak);
+    result = secp256k1_ec_pubkey_tweak_mul(context, newpubkey, newpubkeylen, tweak);
 
     if (result) {
         ZVAL_STRINGL(pubkey, newpubkey, newpubkeylen, 0);
