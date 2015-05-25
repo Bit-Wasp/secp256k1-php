@@ -79,4 +79,12 @@ class Secp256k1PubkeyCreateTest extends TestCase
         $r = \secp256k1_ec_pubkey_create($seckey, $compressed, $pubkey);
     }
 
+    /**
+     * @expectedException PHPUnit_Framework_Error_Warning
+     */
+    public function testCompressedAsAString()
+    {
+        $privateKey = $this->pack('0af79b2b747548d59a4a765fb73a72bc4208d00b43d0606c13d332d5c284b0ef');
+        \secp256k1_ec_pubkey_create($privateKey, 'string', $pubkey);
+    }
 }
