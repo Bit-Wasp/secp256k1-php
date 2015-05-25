@@ -89,4 +89,13 @@ class Secp256k1EcdsaSignCompact extends TestCase
         $r = \secp256k1_ecdsa_sign_compact($msg32, $private, $sig, $recid);
     }
 
+    public function testReferenceTypes()
+    {
+        $private = $this->pack('17a2209250b59f07a25b560aa09cb395a183eb260797c0396b82904f918518d5');
+        $msg32 = $this->pack('0af79b2b747548d59a4a765fb73a72bc4208d00b43d0606c13d332d5c284b0ef');
+        $sig = array();
+        $recid = array();
+        $this->assertEquals(1, \secp256k1_ecdsa_sign_compact($msg32, $private, $sig, $recid));
+    }
+
 }
