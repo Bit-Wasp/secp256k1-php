@@ -46,11 +46,8 @@ class Secp256k1PrivkeyTweakAddTest extends TestCase
             $resource = openssl_pkey_new();
     
             return [
-                [$array, $tweak],
                 [$privateKey, $array],
-                [$resource, $tweak],
                 [$privateKey, $resource],
-                [$class, $tweak],
                 [$privateKey, $class]
             ];
         }
@@ -64,4 +61,13 @@ class Secp256k1PrivkeyTweakAddTest extends TestCase
             $r = \secp256k1_ec_privkey_tweak_add($seckey, $tweak);
         }/**/
 
+    /**
+     * @expectedException \Exception
+     */
+    public function testEnforceZvalString()
+    {
+        $tweak = $this->pack('0af79b2b747548d59a4a765fb73a72bc4208d00b43d0606c13d332d5c284b0ef');
+        $privateKey = array();
+        \secp256k1_ec_privkey_tweak_add($privateKey, $tweak);
+    }
 }

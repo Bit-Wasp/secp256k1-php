@@ -36,32 +36,39 @@ class Secp256k1PrivkeyTweakMulTest extends TestCase
 
     }
 
-        public function getErroneousTypeVectors()
-            {
-                $tweak = $this->pack('0af79b2b747548d59a4a765fb73a72bc4208d00b43d0606c13d332d5c284b0ef');
-                $privateKey = $this->pack('0af79b2b747548d59a4a765fb73a72bc4208d00b43d0606c13d332d5c284b0ef');
+    public function getErroneousTypeVectors()
+    {
+        $tweak = $this->pack('0af79b2b747548d59a4a765fb73a72bc4208d00b43d0606c13d332d5c284b0ef');
+        $privateKey = $this->pack('0af79b2b747548d59a4a765fb73a72bc4208d00b43d0606c13d332d5c284b0ef');
 
-                $array = array();
-                $class = new self;
-                $resource = openssl_pkey_new();
+        $array = array();
+        $class = new self;
+        $resource = openssl_pkey_new();
 
-                return [
-                    [$array, $tweak],
-                    [$privateKey, $array],
-                    [$resource, $tweak],
-                    [$privateKey, $resource],
-                    [$class, $tweak],
-                    [$privateKey, $class]
-                ];
-            }
+        return [
+            // We only test the second parameter here, first is a Zval
+            [$privateKey, $array],
+            [$privateKey, $resource],
+            [$privateKey, $class]
+        ];
+    }
 
-            /**
-             * @dataProvider getErroneousTypeVectors
-             * @expectedException PHPUnit_Framework_Error_Warning
-             */
-            public function testErroneousTypes($seckey, $tweak)
-            {
-                $r = \secp256k1_ec_privkey_tweak_mul($seckey, $tweak);
-            }/**/
+    /**
+     * @dataProvider getErroneousTypeVectors
+     * @expectedException PHPUnit_Framework_Error_Warning
+     */
+    public function testErroneousTypes($seckey, $tweak)
+    {
+        $r = \secp256k1_ec_privkey_tweak_mul($seckey, $tweak);
+    }/**/
 
+    /**
+     * @expectedException \Exception
+     */
+    public function testEnforceZvalString()
+    {
+        $tweak = $this->pack('0af79b2b747548d59a4a765fb73a72bc4208d00b43d0606c13d332d5c284b0ef');
+        $privateKey = array();
+        \secp256k1_ec_privkey_tweak_mul($privateKey, $tweak);
+    }
 }

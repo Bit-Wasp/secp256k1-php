@@ -68,7 +68,7 @@ class Secp256k1PubkeyDecompressTest extends TestCase
 
     /**
      * @dataProvider getErroneousTypeVectors
-     * @expectedException PHPUnit_Framework_Error_Warning
+     * @expectedException \Exception
      *
     public function testErroneousTypes($key)
     {
