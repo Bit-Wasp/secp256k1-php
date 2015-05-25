@@ -430,7 +430,7 @@ PHP_FUNCTION (secp256k1_ec_privkey_export) {
 
     int newkeylen = DERKEY_LENGTH;
     unsigned char newkey[newkeylen];
-    int result = secp256k1_ec_privkey_export(context, seckey, newkey, &newkeylen, compressed ? 1 : 0);
+    int result = secp256k1_ec_privkey_export(context, seckey, newkey, &newkeylen, compressed);
     if (result) {
         ZVAL_STRINGL(zDerKey, newkey, newkeylen, 1);
     }
