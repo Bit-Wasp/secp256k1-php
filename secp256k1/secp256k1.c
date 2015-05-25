@@ -354,7 +354,7 @@ PHP_FUNCTION(secp256k1_ec_pubkey_create) {
 }
 
 /**
- * Decompress a public key. (Tested, but hidden SEG FAULT somewhere..)
+ * Decompress a public key.
  *
  * In/Out:
  *  pubkey:    pointer to a 65-byte array to put the decompressed public key.
@@ -371,6 +371,11 @@ PHP_FUNCTION(secp256k1_ec_pubkey_decompress) {
     unsigned char *pubkey, newpubkey[65];
     int pubkeylen;
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &zPubKey) == FAILURE) {
+        return;
+    }
+
+    if (Z_TYPE_P(zPubKey) != IS_STRING) {
+        zend_error(E_WARNING, "secp256k1_ec_pubkey_decompress() expects parameter 1 to be string");
         return;
     }
 
@@ -434,8 +439,6 @@ PHP_FUNCTION (secp256k1_ec_privkey_export) {
 
 /**
  * Tweak a private key by adding tweak to it.
- *
- * @TODO: this can't be right
  */
 PHP_FUNCTION (secp256k1_ec_privkey_tweak_add) {
     secp256k1_context_t * context = SECP256K1_G(context);
@@ -443,6 +446,11 @@ PHP_FUNCTION (secp256k1_ec_privkey_tweak_add) {
     unsigned char *newseckey, *tweak;
     int tweaklen;
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zs", &seckey, &tweak, &tweaklen) == FAILURE) {
+        return;
+    }
+
+    if (Z_TYPE_P(seckey) != IS_STRING) {
+        zend_error(E_WARNING, "secp256k1_ec_privkey_tweak_add() expects parameter 1 to be string");
         return;
     }
 
@@ -472,6 +480,11 @@ PHP_FUNCTION (secp256k1_ec_pubkey_tweak_add) {
         return;
     }
 
+    if (Z_TYPE_P(pubkey) != IS_STRING) {
+        zend_error(E_WARNING, "secp256k1_ec_pubkey_tweak_add() expects parameter 1 to be string");
+        return;
+    }
+
     newpubkey = Z_STRVAL_P(pubkey);
     newpubkeylen = Z_STRLEN_P(pubkey);
     int result;
@@ -494,6 +507,11 @@ PHP_FUNCTION (secp256k1_ec_privkey_tweak_mul) {
     int tweaklen;
 
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zs", &seckey, &tweak, &tweaklen) == FAILURE) {
+        return;
+    }
+
+    if (Z_TYPE_P(seckey) != IS_STRING) {
+        zend_error(E_WARNING, "secp256k1_ec_privkey_tweak_mul() expects parameter 1 to be string");
         return;
     }
 
@@ -520,6 +538,11 @@ PHP_FUNCTION (secp256k1_ec_pubkey_tweak_mul) {
     int tweaklen, newpubkeylen;
 
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zs", &pubkey, &tweak, &tweaklen) == FAILURE) {
+        return;
+    }
+
+    if (Z_TYPE_P(pubkey) != IS_STRING) {
+        zend_error(E_WARNING, "secp256k1_ec_pubkey_tweak_mul() expects parameter 1 to be string");
         return;
     }
 

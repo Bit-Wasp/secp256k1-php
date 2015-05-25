@@ -57,4 +57,36 @@ class Secp256k1EcdsaSignCompact extends TestCase
         $this->assertEquals($expectedRecid, $recid);
         $this->assertEquals($expectedCompressed, $compressed);
     }
+
+
+    public function getErroneousTypeVectors()
+    {
+        $private = $this->pack('17a2209250b59f07a25b560aa09cb395a183eb260797c0396b82904f918518d5');
+        $msg32 = $this->pack('0af79b2b747548d59a4a765fb73a72bc4208d00b43d0606c13d332d5c284b0ef');
+
+        $array = array();
+        $class = new Secp256k1EcdsaSignCompactTest;
+        $resource = openssl_pkey_new();
+
+        return [
+            [$array, $private],
+            [$msg32, $array],
+            [$resource, $private],
+            [$msg32, $resource],
+            [$class, $private],
+            [$msg32, $class]
+        ];
+    }
+
+    /**
+     * @dataProvider getErroneousTypeVectors
+     * @expectedException PHPUnit_Framework_Error_Warning
+     */
+    public function testErroneousTypes($msg32, $private)
+    {
+        $sig = '';
+        $recid = '';
+        $r = \secp256k1_ecdsa_sign_compact($msg32, $private, $sig, $recid);
+    }
+
 }

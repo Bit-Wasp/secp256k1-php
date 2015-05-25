@@ -77,13 +77,6 @@ class Secp256k1EcdsaVerifyTest extends TestCase
         );
     }
 
-    private function pack($string)
-    {
-        if (strlen($string) % 2 !== 0)
-            $string = '0' . $string;
-
-        return pack("H*", $string);
-    }
     public function getErroneousTypeVectors()
     {
         $private = $this->pack('17a2209250b59f07a25b560aa09cb395a183eb260797c0396b82904f918518d5');
@@ -97,9 +90,9 @@ class Secp256k1EcdsaVerifyTest extends TestCase
         $resource = openssl_pkey_new();
 
         return [
-            [array(), $sig, $public],
-            [$msg32, array(), $public],
-            [$msg32, $sig, array()],
+            [$array, $sig, $public],
+            [$msg32, $array, $public],
+            [$msg32, $sig, $array],
             [$resource, $sig, $public],
             [$msg32, $resource, $public],
             [$msg32, $sig, $resource],
@@ -115,12 +108,11 @@ class Secp256k1EcdsaVerifyTest extends TestCase
      */
     public function testErroneousTypes($msg32, $sig, $public)
     {
-        \secp256k1_ecdsa_verify($msg32, $sig, $public);
+        $r = \secp256k1_ecdsa_verify($msg32, $sig, $public);
     }
 
     public function testVerifyWithInvalidInput()
     {
-
         $private = $this->pack('17a2209250b59f07a25b560aa09cb395a183eb260797c0396b82904f918518d5');
         $msg32 = $this->pack('0af79b2b747548d59a4a765fb73a72bc4208d00b43d0606c13d332d5c284b0ef');
         $sig = $this->pack('304502206af189487988df26eb4c2b2c7d74b78e19822bbb2fc27dada0800019abd20b46022100f0e6c4dabd4970afe125f707fbd6d62e79e950bdb2b4b9700214779ae475b05d01');
