@@ -19,6 +19,14 @@ static zend_class_entry *spl_ce_InvalidArgumentException;
 #define SECRETKEY_LENGTH 32
 #define DERKEY_LENGTH 300
 
+ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_context_create, 0)
+    ZEND_ARG_INFO(0, flags)
+ZEND_END_ARG_INFO();
+
+ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_context_destroy, 0)
+    ZEND_ARG_INFO(0, context)
+ZEND_END_ARG_INFO();
+
 ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ecdsa_verify, 0)
     ZEND_ARG_INFO(0, msg32)
     ZEND_ARG_INFO(0, signature)
@@ -97,15 +105,103 @@ ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ec_pubkey_tweak_mul, 0)
     ZEND_ARG_INFO(0, tweak)
 ZEND_END_ARG_INFO();
 
+int le_ctx_struct;
+
 ZEND_DECLARE_MODULE_GLOBALS(secp256k1)
 static void php_secp256k1_init_globals(zend_secp256k1_globals *secp256k1_globals)
 {
     secp256k1_globals->context = secp256k1_context_create(SECP256K1_CONTEXT_VERIFY | SECP256K1_CONTEXT_SIGN);
 }
 
+static void php_ctx_struct_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
+{
+    php_ctx_struct *wrapper = (php_ctx_struct*)rsrc->ptr;
+    secp256k1_context_destroy(wrapper->ctx);
+}
+
 int pubkeyLengthFromCompressed(int compressed)
 {
     return compressed ? PUBKEY_COMPRESSED_LENGTH : PUBKEY_UNCOMPRESSED_LENGTH;
+}
+
+// () -> registered zval
+// registered zval -> struct
+// struct to context
+
+
+PHP_FUNCTION(secp256k1_context_create)
+{
+    int flags;
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &flags) == FAILURE) {
+        return;
+    }
+
+    secp256k1_context_t *context = secp256k1_context_create(flags);
+    php_ctx_struct *wrapper = (php_ctx_struct*) malloc(sizeof(php_ctx_struct));
+    wrapper->ctx = context;
+
+    zval *zval_p;
+    MAKE_STD_ZVAL(zval_p);
+
+    ZEND_REGISTER_RESOURCE(zval_p, wrapper, le_ctx_struct);
+    RETVAL_ZVAL(zval_p, 0, php_ctx_struct_dtor);
+    return;
+}
+
+PHP_FUNCTION(secp256k1_context_destroy)
+{
+    zval *zResource;
+    php_ctx_struct *wrapper;
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &zResource)) {
+        RETURN_FALSE;
+    }
+
+    ZEND_FETCH_RESOURCE(wrapper, php_ctx_struct*, &zResource, -1, PHP_CTX_STRUCT_RES_NAME, le_ctx_struct);
+    if (!wrapper) {
+        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_context_destroy(): Invalid secp256k1 context");
+        return;
+    }
+
+    secp256k1_context_destroy(wrapper->ctx);
+    return;
+}
+/**
+ * Verify an ECDSA secret key.
+
+ * In:
+ *  seckey: pointer to a 32-byte secret key (cannot be NULL)
+ *
+ * Returns:
+ *  1: secret key is valid
+ *  0: secret key is invalid
+ */
+PHP_FUNCTION(secp256k1_ec_seckey_verify2) {
+
+    zval *zResource;
+    php_ctx_struct *wrapper;
+    unsigned char *seckey;
+    int seckeylen;
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &zResource, &seckey, &seckeylen) == FAILURE) {
+        return;
+    }
+
+    ZEND_FETCH_RESOURCE(wrapper, php_ctx_struct*, &zResource, -1, PHP_CTX_STRUCT_RES_NAME, le_ctx_struct);
+    //(php_ctx_struct *) zend_fetch_resource(&zv TSRMLS_CC, -1, PHP_CTX_STRUCT_RES_NAME, NULL, 1, le_ctx_struct);
+    //php_ctx_struct *wrapper = lookup_ctx(zResource);
+    if (!wrapper) {
+        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_ec_seckey_verify(): Invalid secp256k1 context");
+        return;
+    }
+
+    if (seckeylen != SECRETKEY_LENGTH) {
+        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_ec_seckey_verify(): Parameter 2 should be 32 bytes");
+        return;
+    }
+
+    int result = secp256k1_ec_seckey_verify(wrapper->ctx, seckey);
+    RETURN_LONG(result);
 }
 
 /**
@@ -610,6 +706,8 @@ PHP_MINIT_FUNCTION(secp256k1) {
     REGISTER_LONG_CONSTANT("SECP256K1_CONTEXT_VERIFY", SECP256K1_CONTEXT_VERIFY, CONST_CS | CONST_PERSISTENT);
     REGISTER_LONG_CONSTANT("SECP256K1_CONTEXT_SIGN", SECP256K1_CONTEXT_SIGN, CONST_CS | CONST_PERSISTENT);
     ZEND_INIT_MODULE_GLOBALS(secp256k1, php_secp256k1_init_globals, NULL);
+    le_ctx_struct = zend_register_list_destructors_ex(php_ctx_struct_dtor, NULL, PHP_CTX_STRUCT_RES_NAME, module_number);
+    //le_ctx_struct = zend_register_list_destructors_ex(NULL, NULL, PHP_CTX_STRUCT_RES_NAME, module_number);
     return SUCCESS;
 }
 
@@ -638,11 +736,14 @@ PHP_MINFO_FUNCTION(secp256k1) {
  * Every user visible function must have an entry in secp256k1_functions[].
  */
 const zend_function_entry secp256k1_functions[] = {
+    PHP_FE(secp256k1_context_create, arginfo_secp256k1_context_create)
+    PHP_FE(secp256k1_context_destroy, arginfo_secp256k1_context_destroy)
     PHP_FE(secp256k1_ecdsa_sign, arginfo_secp256k1_ecdsa_sign)
     PHP_FE(secp256k1_ecdsa_verify, arginfo_secp256k1_ecdsa_verify)
     PHP_FE(secp256k1_ecdsa_sign_compact, arginfo_secp256k1_ecdsa_sign_compact)
     PHP_FE(secp256k1_ecdsa_recover_compact, arginfo_secp256k1_ecdsa_recover_compact)
     PHP_FE(secp256k1_ec_seckey_verify, arginfo_secp256k1_ec_seckey_verify)
+    PHP_FE(secp256k1_ec_seckey_verify2, NULL)
     PHP_FE(secp256k1_ec_pubkey_verify, arginfo_secp256k1_ec_pubkey_verify)
     PHP_FE(secp256k1_ec_pubkey_create, arginfo_secp256k1_ec_pubkey_create)
     PHP_FE(secp256k1_ec_pubkey_decompress, arginfo_secp256k1_ec_pubkey_decompress)
