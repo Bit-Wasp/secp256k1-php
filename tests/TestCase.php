@@ -6,8 +6,9 @@ class TestCase extends \PHPUnit_Framework_TestCase
 {
     public function pack($string)
     {
-        if (strlen($string) % 2 !== 0)
+        if (strlen($string) % 2 !== 0) {
             $string = '0' . $string;
+        }
 
         return pack("H*", $string);
     }
@@ -19,10 +20,9 @@ class TestCase extends \PHPUnit_Framework_TestCase
 
     public function getPrivate()
     {
-        do
-        {
+        do {
             $key = \openssl_random_pseudo_bytes(32);
-        } while(secp256k1_ec_seckey_verify($key) == 0);
+        } while (secp256k1_ec_seckey_verify($key) == 0);
         return $key;
     }
 }

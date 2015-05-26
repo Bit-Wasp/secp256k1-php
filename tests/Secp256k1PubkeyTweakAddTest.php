@@ -18,8 +18,9 @@ class Secp256k1PubkeyTweakAddTest extends TestCase
 
         $fixtures = array();
         foreach ($data['vectors'] as $c => $vector) {
-            if ($stop && $c >= 2)
+            if ($stop && $c >= 2) {
                 break;
+            }
             $fixtures[] = array(
                 $vector['publicKey'],
                 $vector['tweak'],

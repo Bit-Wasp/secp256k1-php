@@ -37,7 +37,7 @@ class Secp256k1PrivkeyTweakAddTest extends TestCase
 
     }
     public function getErroneousTypeVectors()
-        {
+    {
             $tweak = $this->pack('0af79b2b747548d59a4a765fb73a72bc4208d00b43d0606c13d332d5c284b0ef');
             $privateKey = $this->pack('0af79b2b747548d59a4a765fb73a72bc4208d00b43d0606c13d332d5c284b0ef');
     
@@ -50,7 +50,7 @@ class Secp256k1PrivkeyTweakAddTest extends TestCase
                 [$privateKey, $resource],
                 [$privateKey, $class]
             ];
-        }
+    }
     
         /**
          * @dataProvider getErroneousTypeVectors
@@ -64,10 +64,10 @@ class Secp256k1PrivkeyTweakAddTest extends TestCase
     /**
      * @expectedException \Exception
      */
-    public function testEnforceZvalString()
-    {
-        $tweak = $this->pack('0af79b2b747548d59a4a765fb73a72bc4208d00b43d0606c13d332d5c284b0ef');
-        $privateKey = array();
-        \secp256k1_ec_privkey_tweak_add($privateKey, $tweak);
-    }
+        public function testEnforceZvalString()
+        {
+            $tweak = $this->pack('0af79b2b747548d59a4a765fb73a72bc4208d00b43d0606c13d332d5c284b0ef');
+            $privateKey = array();
+            \secp256k1_ec_privkey_tweak_add($privateKey, $tweak);
+        }
 }

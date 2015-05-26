@@ -48,15 +48,14 @@ class Secp256k1PubkeyVerifyTest extends TestCase
             [$resource],
             [$class]
         ];
-     }
+        }
 
     /**
      * @dataProvider getErroneousTypeVectors
      * @expectedException PHPUnit_Framework_Error_Warning
      */
-    public function testErroneousTypes($seckey)
-    {
-        $r = \secp256k1_ec_pubkey_verify($seckey);
-    }
+        public function testErroneousTypes($seckey)
+        {
+            $r = \secp256k1_ec_pubkey_verify($seckey);
+        }
 }
-

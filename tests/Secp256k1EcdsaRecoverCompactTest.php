@@ -2,7 +2,6 @@
 
 namespace BitWasp\Secp256k1Tests;
 
-
 class Secp256k1EcdsaRecoverCompactTest extends TestCase
 {
     public function testVerifyCompact()
@@ -59,6 +58,4 @@ class Secp256k1EcdsaRecoverCompactTest extends TestCase
         $publicKey = '';
         \secp256k1_ecdsa_recover_compact($msg32, $sig, $recid, $compressed, $publicKey);
     }
-
-
 }

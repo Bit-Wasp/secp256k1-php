@@ -64,7 +64,7 @@ class Secp256k1PubkeyDecompressTest extends TestCase
             [$resource],
             [$class]
         ];
-     }
+        }
 
     /**
      * @dataProvider getErroneousTypeVectors
