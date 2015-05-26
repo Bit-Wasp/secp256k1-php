@@ -147,31 +147,6 @@ int pubkeyLengthFromCompressed(int compressed)
 
 // Begin zval <--> context functions
 
-// Takes a context, registers it as a resource, into the provided zval*
-void create_context(secp256k1_context_t* ctx, zval *zv)
-{
-    #if PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION == 4
-    php_printf("ECHOED IT!\n\n");
-    ZEND_REGISTER_RESOURCE(zv, ctx, le_ctx_struct);
-    #else
-    ZEND_REGISTER_RESOURCE(zv, ctx, le_ctx_struct);
-    #endif
-
-}
-
-// Takes a zval, and fetches the associated resource.
-secp256k1_context_t* fetch_context(zval *zv)
-{
-    secp256k1_context_t *context = (secp256k1_context_t*) zend_fetch_resource(&zv TSRMLS_CC, -1, PHP_CTX_STRUCT_RES_NAME, NULL, 1, le_ctx_struct);
-    return context;
-}
-
-// Destroy a resource by calling zend_list_delete on it's pointer - triggers dtor
-void destroy_context(zval *zv)
-{
-    zend_list_delete(Z_LVAL_P(zv));
-}
-
 /** Create a secp256k1 context object.
  *  Returns: a newly created context object.
  *  In:      flags: which parts of the context to initialize.
@@ -187,7 +162,7 @@ PHP_FUNCTION(secp256k1_context_create)
     MAKE_STD_ZVAL(zval_p);
 
     secp256k1_context_t *context = secp256k1_context_create(flags);
-    create_context(context, zval_p);
+    ZEND_REGISTER_RESOURCE(zval_p, context, le_ctx_struct);
     RETVAL_ZVAL(zval_p, 1, php_ctx_struct_dtor);
 }
 
@@ -201,13 +176,13 @@ PHP_FUNCTION(secp256k1_context_destroy)
         RETURN_FALSE;
     }
 
-    secp256k1_context_t *context = fetch_context(zContext);
+    secp256k1_context_t *context = (secp256k1_context_t*) zend_fetch_resource(&zContext TSRMLS_CC, -1, PHP_CTX_STRUCT_RES_NAME, NULL, 1, le_ctx_struct);
     if (!context) {
         zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_context_destroy(): Invalid secp256k1 context");
         return;
     }
 
-    destroy_context(zContext);
+    zend_list_delete(Z_LVAL_P(zContext));
     RETURN_TRUE;
 }
 
@@ -222,7 +197,7 @@ PHP_FUNCTION(secp256k1_context_clone)
         RETURN_FALSE;
     }
 
-    secp256k1_context_t *context = fetch_context(zContext);
+    secp256k1_context_t *context = (secp256k1_context_t*) zend_fetch_resource(&zContext TSRMLS_CC, -1, PHP_CTX_STRUCT_RES_NAME, NULL, 1, le_ctx_struct);
     if (!context) {
         zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_context_destroy(): Invalid secp256k1 context");
         return;
@@ -232,7 +207,7 @@ PHP_FUNCTION(secp256k1_context_clone)
     MAKE_STD_ZVAL(zval_p);
 
     secp256k1_context_t *clone = secp256k1_context_clone(context);
-    create_context(clone, zval_p);
+    ZEND_REGISTER_RESOURCE(zval_p, clone, le_ctx_struct);
     RETVAL_ZVAL(zval_p, 1, php_ctx_struct_dtor);
 }
 
@@ -243,7 +218,7 @@ PHP_FUNCTION(secp256k1_context_randomize)
         RETURN_FALSE;
     }
 
-    secp256k1_context_t *context = fetch_context(zContext);
+    secp256k1_context_t *context = (secp256k1_context_t*) zend_fetch_resource(&zContext TSRMLS_CC, -1, PHP_CTX_STRUCT_RES_NAME, NULL, 1, le_ctx_struct);
     if (!context) {
         zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_context_destroy(): Invalid secp256k1 context");
         return;
@@ -275,7 +250,7 @@ PHP_FUNCTION(secp256k1_ecdsa_verify) {
         return;
     }
 
-    secp256k1_context_t *context = fetch_context(zContext);
+    secp256k1_context_t *context = (secp256k1_context_t*) zend_fetch_resource(&zContext TSRMLS_CC, -1, PHP_CTX_STRUCT_RES_NAME, NULL, 1, le_ctx_struct);
     if (!context) {
         zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_ecdsa_verify(): Invalid secp256k1 context");
         return;
@@ -337,7 +312,7 @@ PHP_FUNCTION(secp256k1_ecdsa_sign) {
        return;
     }
 
-    secp256k1_context_t *context = fetch_context(zContext);
+    secp256k1_context_t *context = (secp256k1_context_t*) zend_fetch_resource(&zContext TSRMLS_CC, -1, PHP_CTX_STRUCT_RES_NAME, NULL, 1, le_ctx_struct);
     if (!context) {
         zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_ecdsa_sign(): Invalid secp256k1 context");
         return;
@@ -388,7 +363,7 @@ PHP_FUNCTION(secp256k1_ecdsa_sign_compact) {
        return;
     }
 
-    secp256k1_context_t *context = fetch_context(zContext);
+    secp256k1_context_t *context = (secp256k1_context_t*) zend_fetch_resource(&zContext TSRMLS_CC, -1, PHP_CTX_STRUCT_RES_NAME, NULL, 1, le_ctx_struct);
     if (!context) {
         zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_ecdsa_sign_compact(): Invalid secp256k1 context");
         return;
@@ -438,7 +413,8 @@ PHP_FUNCTION(secp256k1_ecdsa_recover_compact) {
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rssllz", &zContext, &msg32, &msg32len, &signature, &signatureLen, &recid, &compressed, &publicKey) == FAILURE) {
        return;
     }
-    secp256k1_context_t *context = fetch_context(zContext);
+
+    secp256k1_context_t *context = (secp256k1_context_t*) zend_fetch_resource(&zContext TSRMLS_CC, -1, PHP_CTX_STRUCT_RES_NAME, NULL, 1, le_ctx_struct);
     if (!context) {
         zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_ecdsa_recover_compact(): Invalid secp256k1 context");
         return;
@@ -472,7 +448,7 @@ PHP_FUNCTION(secp256k1_ec_seckey_verify) {
         return;
     }
 
-    secp256k1_context_t *context = fetch_context(zContext);
+    secp256k1_context_t *context = (secp256k1_context_t*) zend_fetch_resource(&zContext TSRMLS_CC, -1, PHP_CTX_STRUCT_RES_NAME, NULL, 1, le_ctx_struct);
     if (!context) {
         zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_ec_seckey_verify(): Invalid secp256k1 context");
         return;
@@ -506,7 +482,7 @@ PHP_FUNCTION(secp256k1_ec_pubkey_verify) {
         return;
     }
 
-    secp256k1_context_t *context = fetch_context(zContext);
+    secp256k1_context_t *context = (secp256k1_context_t*) zend_fetch_resource(&zContext TSRMLS_CC, -1, PHP_CTX_STRUCT_RES_NAME, NULL, 1, le_ctx_struct);
     if (!context) {
         zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_ec_pubkey_verify(): Invalid secp256k1 context");
         return;
@@ -541,7 +517,7 @@ PHP_FUNCTION(secp256k1_ec_pubkey_create) {
         return;
     }
 
-    secp256k1_context_t *context = fetch_context(zContext);
+    secp256k1_context_t *context = (secp256k1_context_t*) zend_fetch_resource(&zContext TSRMLS_CC, -1, PHP_CTX_STRUCT_RES_NAME, NULL, 1, le_ctx_struct);
     if (!context) {
         zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_ec_pubkey_create(): Invalid secp256k1 context");
         return;
@@ -582,7 +558,7 @@ PHP_FUNCTION(secp256k1_ec_pubkey_decompress) {
         return;
     }
 
-    secp256k1_context_t *context = fetch_context(zContext);
+    secp256k1_context_t *context = (secp256k1_context_t*) zend_fetch_resource(&zContext TSRMLS_CC, -1, PHP_CTX_STRUCT_RES_NAME, NULL, 1, le_ctx_struct);
     if (!context) {
         zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_ec_pubkey_decompress(): Invalid secp256k1 context");
         return;
@@ -617,7 +593,7 @@ PHP_FUNCTION (secp256k1_ec_privkey_import) {
         return;
     }
 
-    secp256k1_context_t *context = fetch_context(zContext);
+    secp256k1_context_t *context = (secp256k1_context_t*) zend_fetch_resource(&zContext TSRMLS_CC, -1, PHP_CTX_STRUCT_RES_NAME, NULL, 1, le_ctx_struct);
     if (!context) {
         zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_ec_privkey_import(): Invalid secp256k1 context");
         return;
@@ -644,7 +620,7 @@ PHP_FUNCTION (secp256k1_ec_privkey_export) {
         return;
     }
 
-    secp256k1_context_t *context = fetch_context(zContext);
+    secp256k1_context_t *context = (secp256k1_context_t*) zend_fetch_resource(&zContext TSRMLS_CC, -1, PHP_CTX_STRUCT_RES_NAME, NULL, 1, le_ctx_struct);
     if (!context) {
         zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_ec_privkey_export(): Invalid secp256k1 context");
         return;
@@ -677,7 +653,7 @@ PHP_FUNCTION (secp256k1_ec_privkey_tweak_add) {
         return;
     }
 
-    secp256k1_context_t *context = fetch_context(zContext);
+    secp256k1_context_t *context = (secp256k1_context_t*) zend_fetch_resource(&zContext TSRMLS_CC, -1, PHP_CTX_STRUCT_RES_NAME, NULL, 1, le_ctx_struct);
     if (!context) {
         zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_ec_privkey_tweak_add(): Invalid secp256k1 context");
         return;
@@ -716,7 +692,7 @@ PHP_FUNCTION (secp256k1_ec_pubkey_tweak_add) {
         return;
     }
 
-    secp256k1_context_t *context = fetch_context(zContext);
+    secp256k1_context_t *context = (secp256k1_context_t*) zend_fetch_resource(&zContext TSRMLS_CC, -1, PHP_CTX_STRUCT_RES_NAME, NULL, 1, le_ctx_struct);
     if (!context) {
         zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_ec_pubkey_tweak_add(): Invalid secp256k1 context");
         return;
@@ -756,7 +732,7 @@ PHP_FUNCTION (secp256k1_ec_privkey_tweak_mul) {
         return;
     }
 
-    secp256k1_context_t *context = fetch_context(zContext);
+    secp256k1_context_t *context = (secp256k1_context_t*) zend_fetch_resource(&zContext TSRMLS_CC, -1, PHP_CTX_STRUCT_RES_NAME, NULL, 1, le_ctx_struct);
     if (!context) {
         zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_ec_privkey_tweak_mul(): Invalid secp256k1 context");
         return;
@@ -801,7 +777,7 @@ PHP_FUNCTION (secp256k1_ec_pubkey_tweak_mul) {
         return;
     }
 
-    secp256k1_context_t *context = fetch_context(zContext);
+    secp256k1_context_t *context = (secp256k1_context_t*) zend_fetch_resource(&zContext TSRMLS_CC, -1, PHP_CTX_STRUCT_RES_NAME, NULL, 1, le_ctx_struct);
     if (!context) {
         zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_ec_pubkey_tweak_mul(): Invalid secp256k1 context");
         return;
@@ -831,9 +807,7 @@ PHP_FUNCTION (secp256k1_ec_pubkey_tweak_mul) {
 PHP_MINIT_FUNCTION(secp256k1) {
     REGISTER_LONG_CONSTANT("SECP256K1_CONTEXT_VERIFY", SECP256K1_CONTEXT_VERIFY, CONST_CS | CONST_PERSISTENT);
     REGISTER_LONG_CONSTANT("SECP256K1_CONTEXT_SIGN", SECP256K1_CONTEXT_SIGN, CONST_CS | CONST_PERSISTENT);
-    //ZEND_INIT_MODULE_GLOBALS(secp256k1, php_secp256k1_init_globals, NULL);
     le_ctx_struct = zend_register_list_destructors_ex(php_ctx_struct_dtor, NULL, PHP_CTX_STRUCT_RES_NAME, module_number);
-    //le_ctx_struct = zend_register_list_destructors_ex(NULL, NULL, PHP_CTX_STRUCT_RES_NAME, module_number);
     return SUCCESS;
 }
 
