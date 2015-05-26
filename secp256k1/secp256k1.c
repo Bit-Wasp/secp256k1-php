@@ -116,18 +116,15 @@ static void php_secp256k1_init_globals(zend_secp256k1_globals *secp256k1_globals
 static void php_ctx_struct_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
     secp256k1_context_t *context = (secp256k1_context_t*)rsrc->ptr;
-    secp256k1_context_destroy(context);
+    if (context) {
+        secp256k1_context_destroy(context);
+    }
 }
 
 int pubkeyLengthFromCompressed(int compressed)
 {
     return compressed ? PUBKEY_COMPRESSED_LENGTH : PUBKEY_UNCOMPRESSED_LENGTH;
 }
-
-// () -> registered zval
-// registered zval -> struct
-// struct to context
-
 
 PHP_FUNCTION(secp256k1_context_create)
 {
@@ -136,16 +133,12 @@ PHP_FUNCTION(secp256k1_context_create)
         return;
     }
 
-    secp256k1_context_t *context = secp256k1_context_create(flags);
-    //php_ctx_struct *wrapper = (php_ctx_struct*) malloc(sizeof(php_ctx_struct));
-    //wrapper->ctx = context;
-
     zval *zval_p;
     MAKE_STD_ZVAL(zval_p);
 
+    secp256k1_context_t *context = secp256k1_context_create(flags);
     ZEND_REGISTER_RESOURCE(zval_p, context, le_ctx_struct);
-    RETVAL_ZVAL(zval_p, 0, php_ctx_struct_dtor);
-    return;
+    RETVAL_ZVAL(zval_p, 1, php_ctx_struct_dtor);
 }
 
 PHP_FUNCTION(secp256k1_context_destroy)
@@ -158,13 +151,14 @@ PHP_FUNCTION(secp256k1_context_destroy)
     }
 
     ZEND_FETCH_RESOURCE(context, secp256k1_context_t*, &zResource, -1, PHP_CTX_STRUCT_RES_NAME, le_ctx_struct);
+
     if (!context) {
         zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_context_destroy(): Invalid secp256k1 context");
         return;
     }
 
-    secp256k1_context_destroy(context);
-    return;
+    zend_list_delete(Z_LVAL_P(zResource));
+    RETURN_TRUE;
 }
 /**
  * Verify an ECDSA secret key.
@@ -188,8 +182,6 @@ PHP_FUNCTION(secp256k1_ec_seckey_verify2) {
     }
 
     ZEND_FETCH_RESOURCE(context, secp256k1_context_t*, &zResource, -1, PHP_CTX_STRUCT_RES_NAME, le_ctx_struct);
-    //(php_ctx_struct *) zend_fetch_resource(&zv TSRMLS_CC, -1, PHP_CTX_STRUCT_RES_NAME, NULL, 1, le_ctx_struct);
-    //php_ctx_struct *wrapper = lookup_ctx(zResource);
     if (!context) {
         zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_ec_seckey_verify(): Invalid secp256k1 context");
         return;
