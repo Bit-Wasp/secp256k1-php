@@ -156,7 +156,7 @@ void create_context(secp256k1_context_t* ctx, zval *zv)
     zend_register_resource(zv, ctx, le_ctx_struct);
     #endif
 
-}t 
+}
 
 // Takes a zval, and fetches the associated resource.
 secp256k1_context_t* fetch_context(zval *zv)
