@@ -150,7 +150,12 @@ int pubkeyLengthFromCompressed(int compressed)
 // Takes a context, registers it as a resource, into the provided zval*
 void create_context(secp256k1_context_t* ctx, zval *zv)
 {
+    #if PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION == 4
+    zend_register_resource(zv, ctx, le_ctx_struct TSRLMS_DR);
+    #else
     zend_register_resource(zv, ctx, le_ctx_struct);
+    #endif
+
 }
 
 // Takes a zval, and fetches the associated resource.
@@ -215,6 +220,7 @@ PHP_FUNCTION(secp256k1_context_clone)
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &zContext)) {
         RETURN_FALSE;
     }
+
     secp256k1_context_t *context = fetch_context(zContext);
     if (!context) {
         zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_context_destroy(): Invalid secp256k1 context");
@@ -227,6 +233,22 @@ PHP_FUNCTION(secp256k1_context_clone)
     secp256k1_context_t *clone = secp256k1_context_clone(context);
     create_context(clone, zval_p);
     RETVAL_ZVAL(zval_p, 1, php_ctx_struct_dtor);
+}
+
+PHP_FUNCTION(secp256k1_context_randomize)
+{
+    zval *zContext;
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &zContext)) {
+        RETURN_FALSE;
+    }
+
+    secp256k1_context_t *context = fetch_context(zContext);
+    if (!context) {
+        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_context_destroy(): Invalid secp256k1 context");
+        return;
+    }
+
+
 }
 
 /**
