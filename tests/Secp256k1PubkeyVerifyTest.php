@@ -49,7 +49,7 @@ class Secp256k1PubkeyVerifyTest extends TestCase
             array($resource),
             array($class)
         );
-        }
+     }
 
     /**
      * @dataProvider getErroneousTypeVectors
