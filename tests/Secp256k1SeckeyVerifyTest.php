@@ -32,8 +32,31 @@ class Secp256k1SeckeyVerifyTest extends TestCase
      */
     public function genericTest($privkey, $eVerify)
     {
+        $ctx = $this->context();
         $sec = $this->toBinary32($privkey);
-        $this->assertEquals($eVerify, \secp256k1_ec_seckey_verify($sec));
+        $this->assertEquals($eVerify, \secp256k1_ec_seckey_verify($ctx, $sec));
     }
 
+    public function getErroneousTypeVectors()
+    {
+        $array = array();
+        $class = new self;
+        $resource = openssl_pkey_new();
+
+        return array(
+            array($array),
+            array($resource),
+            array($class)
+        );
+    }
+
+    /**
+     * @dataProvider getErroneousTypeVectors
+     * @expectedException PHPUnit_Framework_Error_Warning
+     */
+    public function testErroneousTypes($seckey)
+    {
+        $ctx = $this->context();
+        $r = \secp256k1_ec_seckey_verify($ctx, $seckey);
+    }
 }

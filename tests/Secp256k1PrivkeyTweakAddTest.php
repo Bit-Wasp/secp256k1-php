@@ -31,9 +31,46 @@ class Secp256k1PrivkeyTweakAddTest extends TestCase
         $tweak = $this->toBinary32($tweak);
         $expectedTweaked = $this->toBinary32($expectedTweaked);
 
-        $result = secp256k1_ec_privkey_tweak_add($privkey, $tweak);
+        $ctx = $this->context();
+        $result = secp256k1_ec_privkey_tweak_add($ctx, $privkey, $tweak);
         $this->assertEquals(1, $result);
         $this->assertEquals($privkey, $expectedTweaked);
 
     }
+    public function getErroneousTypeVectors()
+    {
+            $tweak = $this->pack('0af79b2b747548d59a4a765fb73a72bc4208d00b43d0606c13d332d5c284b0ef');
+            $privateKey = $this->pack('0af79b2b747548d59a4a765fb73a72bc4208d00b43d0606c13d332d5c284b0ef');
+    
+            $array = array();
+            $class = new self;
+            $resource = openssl_pkey_new();
+    
+            return array(
+                array($privateKey, $array),
+                array($privateKey, $resource),
+                array($privateKey, $class)
+            );
+    }
+    
+        /**
+         * @dataProvider getErroneousTypeVectors
+         * @expectedException PHPUnit_Framework_Error_Warning
+         */
+        public function testErroneousTypes($seckey, $tweak)
+        {
+        $ctx = $this->context();
+            $r = \secp256k1_ec_privkey_tweak_add($ctx, $seckey, $tweak);
+        }/**/
+
+    /**
+     * @expectedException \Exception
+     */
+        public function testEnforceZvalString()
+        {
+            $tweak = $this->pack('0af79b2b747548d59a4a765fb73a72bc4208d00b43d0606c13d332d5c284b0ef');
+            $privateKey = array();
+            $ctx = $this->context();
+            \secp256k1_ec_privkey_tweak_add($ctx, $privateKey, $tweak);
+        }
 }

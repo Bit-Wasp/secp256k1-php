@@ -8,10 +8,14 @@ extern zend_module_entry secp256k1_module_entry;
 #define phpext_secp256k1_ptr &secp256k1_module_entry
 
 #define PHP_SECP256K1_VERSION "0.1.0"
+#define PHP_CTX_STRUCT_RES_NAME "secp256k1_context_t"
+typedef struct _php_ctx_struct {
+    secp256k1_context_t *ctx;
+} php_ctx_struct;
 
-ZEND_BEGIN_MODULE_GLOBALS(secp256k1)
-    secp256k1_context_t* context;
-ZEND_END_MODULE_GLOBALS(secp256k1)
+//ZEND_BEGIN_MODULE_GLOBALS(secp256k1)
+//    secp256k1_context_t* context;
+//ZEND_END_MODULE_GLOBALS(secp256k1)
 
 #ifdef ZTS
 # define SECP256K1_G(v) TSRMG(secp256k1_globals_id, zend_secp256k1_globals *, v)

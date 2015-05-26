@@ -2,7 +2,6 @@
 
 namespace BitWasp\Secp256k1Tests;
 
-
 use Symfony\Component\Yaml\Yaml;
 
 class Secp256k1PrivkeyImportExportTest extends TestCase
@@ -33,17 +32,17 @@ class Secp256k1PrivkeyImportExportTest extends TestCase
     public function testImportExport($seckey, $compressed)
     {
         $seckey = $this->toBinary32($seckey);
-
+        $ctx = $this->context();
         $der = '';
-        $r = secp256k1_ec_privkey_export($seckey, $compressed, $der);
+
+        $r = secp256k1_ec_privkey_export($ctx, $seckey, $compressed, $der);
         $this->assertEquals(1, $r);
 
         $recovered = '';
-        $r = secp256k1_ec_privkey_import($der, $recovered);
+        $r = secp256k1_ec_privkey_import($ctx, $der, $recovered);
         $this->assertEquals(1, $r);
 
 
         $this->assertEquals($seckey, $recovered);
-
     }
 }

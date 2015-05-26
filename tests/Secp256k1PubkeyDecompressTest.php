@@ -31,7 +31,8 @@ class Secp256k1PubkeyDecompressTest extends TestCase
     {
         $publickey = $this->toBinary32($expectedCompressed);
 
-        $result = secp256k1_ec_pubkey_decompress($publickey);
+        $ctx = $this->context();
+        $result = secp256k1_ec_pubkey_decompress($ctx, $publickey);
         $this->assertEquals(1, $result, 'check for success');
         $this->assertEquals($expectedUncompressed, bin2hex($publickey));
     }
@@ -44,12 +45,36 @@ class Secp256k1PubkeyDecompressTest extends TestCase
         $o = $this->toBinary32("03ca473d3c0cccbf600d1c89fa33b7f6b1f2b4c66f1f11986701f4b6cc4f54c360");
         $a = $this->toBinary32("03ca473d3c0cccbf600d1c89fa33b7f6b1f2b4c66f1f11986701f4b6cc4f54c360");
         $b = $a;
-        
-        $r = secp256k1_ec_pubkey_decompress($b);
+
+        $ctx = $this->context();
+        $r = secp256k1_ec_pubkey_decompress($ctx, $b);
         
         $this->assertEquals(1, $r);
         $this->assertTrue($b != $o, '$b is decompressed');
         $this->assertTrue($a == $o, '$a is not decompressed');
         
     }
+
+     public function getErroneousTypeVectors()
+     {
+        $array = array();
+        $class = new self;
+        $resource = openssl_pkey_new();
+
+        return array(
+            array($array),
+            array($resource),
+            array($class)
+        );
+     }
+
+    /**
+     * @dataProvider getErroneousTypeVectors
+     * @expectedException \Exception
+     *
+    public function testErroneousTypes($key)
+    {
+        $ctx = $this->context();
+        $r = \secp256k1_ec_pubkey_decompress($ctx, $key);
+    }/**/
 }
