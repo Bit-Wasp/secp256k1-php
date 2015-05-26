@@ -151,7 +151,7 @@ int pubkeyLengthFromCompressed(int compressed)
 void create_context(secp256k1_context_t* ctx, zval *zv)
 {
     #if PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION == 4
-    zend_register_resource(zv, ctx, le_ctx_struct TSRLMS_DR);
+    zend_register_resource(zv, ctx, le_ctx_struct TSRLMS_DC);
     #else
     zend_register_resource(zv, ctx, le_ctx_struct);
     #endif
