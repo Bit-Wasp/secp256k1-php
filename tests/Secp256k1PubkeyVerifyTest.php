@@ -34,7 +34,8 @@ class Secp256k1PubkeyVerifyTest extends TestCase
     private function genericTest($pubkey, $eVerify)
     {
         $pubkey = $this->toBinary32($pubkey);
-        $this->assertEquals($eVerify, secp256k1_ec_pubkey_verify($pubkey));
+        $context = $this->context();
+        $this->assertEquals($eVerify, secp256k1_ec_pubkey_verify($context, $pubkey));
     }
 
      public function getErroneousTypeVectors()
@@ -56,6 +57,7 @@ class Secp256k1PubkeyVerifyTest extends TestCase
      */
         public function testErroneousTypes($seckey)
         {
+            $context = $this->context();
             $r = \secp256k1_ec_pubkey_verify($seckey);
         }
 }

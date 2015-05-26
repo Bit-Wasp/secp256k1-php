@@ -45,7 +45,8 @@ class Secp256k1PubkeyCreateTest extends TestCase
         $secretKey = $this->toBinary32($hexPrivkey);
 
         $pubkey = '';
-        $this->assertEquals($eResult, secp256k1_ec_pubkey_create($secretKey, $fcompressed, $pubkey));
+        $ctx = \secp256k1_context_create(SECP256K1_CONTEXT_VERIFY | SECP256K1_CONTEXT_SIGN);
+        $this->assertEquals($eResult, secp256k1_ec_pubkey_create($ctx, $secretKey, $fcompressed, $pubkey));
         $this->assertEquals(bin2hex($pubkey), $expectedKey);
         $this->assertEquals(($fcompressed ? 33 : 65), strlen($pubkey));
     }
@@ -85,6 +86,10 @@ class Secp256k1PubkeyCreateTest extends TestCase
     public function testCompressedAsAString()
     {
         $privateKey = $this->pack('0af79b2b747548d59a4a765fb73a72bc4208d00b43d0606c13d332d5c284b0ef');
-        \secp256k1_ec_pubkey_create($privateKey, 'string', $pubkey);
+        $ctx = $this->context();
+        $r = 'string';
+        $pubkey = '';
+
+        \secp256k1_ec_pubkey_create($ctx, $privateKey, $r, $pubkey);
     }
 }

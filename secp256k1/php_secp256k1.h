@@ -13,9 +13,9 @@ typedef struct _php_ctx_struct {
     secp256k1_context_t *ctx;
 } php_ctx_struct;
 
-ZEND_BEGIN_MODULE_GLOBALS(secp256k1)
-    secp256k1_context_t* context;
-ZEND_END_MODULE_GLOBALS(secp256k1)
+//ZEND_BEGIN_MODULE_GLOBALS(secp256k1)
+//    secp256k1_context_t* context;
+//ZEND_END_MODULE_GLOBALS(secp256k1)
 
 #ifdef ZTS
 # define SECP256K1_G(v) TSRMG(secp256k1_globals_id, zend_secp256k1_globals *, v)

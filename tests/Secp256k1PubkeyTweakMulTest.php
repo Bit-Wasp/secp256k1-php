@@ -53,7 +53,8 @@ class Secp256k1PubkeyTweakMulTest extends TestCase
     {
         $publicKey = $this->toBinary32($publicKey);
         $tweak = $this->toBinary32($tweak);
-        $result = secp256k1_ec_pubkey_tweak_mul($publicKey, $tweak);
+        $ctx = $this->context();
+        $result = secp256k1_ec_pubkey_tweak_mul($ctx, $publicKey, $tweak);
         $this->assertEquals($eMul, $result);
         $this->assertEquals($expectedPublicKey, bin2hex($publicKey));
     }
@@ -81,7 +82,8 @@ class Secp256k1PubkeyTweakMulTest extends TestCase
      */
     public function testErroneousTypes($pubkey, $tweak)
     {
-        $r = \secp256k1_ec_pubkey_tweak_add($pubkey, $tweak);
+        $ctx = $this->context();
+        $r = \secp256k1_ec_pubkey_tweak_add($ctx, $pubkey, $tweak);
     }/**/
 
     /**
@@ -90,7 +92,8 @@ class Secp256k1PubkeyTweakMulTest extends TestCase
     public function testEnforceZvalString()
     {
         $tweak = $this->pack('0af79b2b747548d59a4a765fb73a72bc4208d00b43d0606c13d332d5c284b0ef');
+        $ctx = $this->context();
         $publicKey = array();
-        \secp256k1_ec_pubkey_tweak_mul($publicKey, $tweak);
+        \secp256k1_ec_pubkey_tweak_mul($ctx, $publicKey, $tweak);
     }
 }

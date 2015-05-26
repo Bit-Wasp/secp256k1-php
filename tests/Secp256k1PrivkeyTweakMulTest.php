@@ -29,11 +29,11 @@ class Secp256k1PrivkeyTweakMulTest extends TestCase
         $privkey = $this->toBinary32($privkey);
         $tweak = $this->toBinary32($tweak);
         $expectedTweaked = $this->toBinary32($expectedTweaked);
+        $ctx = $this->context();
 
-        $result = secp256k1_ec_privkey_tweak_mul($privkey, $tweak);
+        $result = secp256k1_ec_privkey_tweak_mul($ctx, $privkey, $tweak);
         $this->assertEquals(1, $result);
         $this->assertEquals($privkey, $expectedTweaked);
-
     }
 
     public function getErroneousTypeVectors()
@@ -59,7 +59,8 @@ class Secp256k1PrivkeyTweakMulTest extends TestCase
      */
     public function testErroneousTypes($seckey, $tweak)
     {
-        $r = \secp256k1_ec_privkey_tweak_mul($seckey, $tweak);
+        $ctx = $this->context();
+        $r = \secp256k1_ec_privkey_tweak_mul($ctx, $seckey, $tweak);
     }/**/
 
     /**
@@ -69,6 +70,7 @@ class Secp256k1PrivkeyTweakMulTest extends TestCase
     {
         $tweak = $this->pack('0af79b2b747548d59a4a765fb73a72bc4208d00b43d0606c13d332d5c284b0ef');
         $privateKey = array();
-        \secp256k1_ec_privkey_tweak_mul($privateKey, $tweak);
+        $ctx = $this->context();
+        \secp256k1_ec_privkey_tweak_mul($ctx, $privateKey, $tweak);
     }
 }

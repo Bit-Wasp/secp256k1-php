@@ -4,6 +4,12 @@ namespace BitWasp\Secp256k1Tests;
 
 class TestCase extends \PHPUnit_Framework_TestCase
 {
+
+    public function context()
+    {
+        return \secp256k1_context_create(SECP256K1_CONTEXT_VERIFY | SECP256K1_CONTEXT_SIGN);
+    }
+
     public function pack($string)
     {
         if (strlen($string) % 2 !== 0) {
