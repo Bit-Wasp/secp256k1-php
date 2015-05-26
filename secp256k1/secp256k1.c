@@ -108,7 +108,6 @@ int pubkeyLengthFromCompressed(int compressed)
     return compressed ? PUBKEY_COMPRESSED_LENGTH : PUBKEY_UNCOMPRESSED_LENGTH;
 }
 
-
 /**
  * Verify an ECDSA signature.
  *
@@ -188,6 +187,11 @@ PHP_FUNCTION(secp256k1_ecdsa_sign) {
        return;
     }
 
+    if (seckeylen != SECRETKEY_LENGTH) {
+        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_ecdsa_sign(): Parameter 2 should be 32 bytes");
+        return;
+    }
+
     int newsiglen = MAX_SIGNATURE_LENGTH;
     unsigned char newsig[newsiglen];
     int result = secp256k1_ecdsa_sign(context, msg32, newsig, &newsiglen, seckey, NULL, NULL);
@@ -222,6 +226,11 @@ PHP_FUNCTION(secp256k1_ecdsa_sign_compact) {
     zval *signature, *recid;
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sszz", &msg32, &msg32len, &seckey, &seckeylen, &signature, &recid) == FAILURE) {
        return;
+    }
+
+    if (seckeylen != SECRETKEY_LENGTH) {
+        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_ecdsa_sign_compact(): Parameter 2 should be 32 bytes");
+        return;
     }
 
     unsigned char newsig[COMPACT_SIGNATURE_LENGTH];
@@ -293,6 +302,10 @@ PHP_FUNCTION(secp256k1_ec_seckey_verify) {
         return;
     }
 
+    if (seckeylen != SECRETKEY_LENGTH) {
+        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_ec_seckey_verify(): Parameter 1 should be 32 bytes");
+        return;
+    }
     int result = secp256k1_ec_seckey_verify(context, seckey);
 
     RETURN_LONG(result);
@@ -345,6 +358,11 @@ PHP_FUNCTION(secp256k1_ec_pubkey_create) {
     unsigned char *seckey;
     int seckeylen, compressed;
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "slz", &seckey, &seckeylen, &compressed, &pubkey) == FAILURE) {
+        return;
+    }
+
+    if (seckeylen != SECRETKEY_LENGTH) {
+        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_ec_pubkey_create(): Parameter 1 should be 32 bytes");
         return;
     }
 
@@ -431,6 +449,11 @@ PHP_FUNCTION (secp256k1_ec_privkey_export) {
         return;
     }
 
+    if (seckeylen != SECRETKEY_LENGTH) {
+        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_ec_privkey_export(): Parameter 1 should be 32 bytes");
+        return;
+    }
+
     int newkeylen = DERKEY_LENGTH;
     unsigned char newkey[newkeylen];
     int result = secp256k1_ec_privkey_export(context, seckey, newkey, &newkeylen, compressed);
@@ -456,6 +479,11 @@ PHP_FUNCTION (secp256k1_ec_privkey_tweak_add) {
 
     if (Z_TYPE_P(zSecKey) != IS_STRING) {
         zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_ec_privkey_tweak_add(): Parameter 1 should be string");
+        return;
+    }
+
+    if (tweaklen != SECRETKEY_LENGTH) {
+        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_ec_privkey_tweak_add(): Parameter 2 should be 32 bytes");
         return;
     }
 
@@ -488,6 +516,11 @@ PHP_FUNCTION (secp256k1_ec_pubkey_tweak_add) {
         return;
     }
 
+    if (tweaklen != SECRETKEY_LENGTH) {
+        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_ec_pubkey_tweak_add(): Parameter 2 should be 32 bytes");
+        return;
+    }
+
     unsigned char *newpubkey = Z_STRVAL_P(zPubKey);
     int newpubkeylen = Z_STRLEN_P(zPubKey);
     int result = secp256k1_ec_pubkey_tweak_add(context, newpubkey, newpubkeylen, tweak);
@@ -513,8 +546,18 @@ PHP_FUNCTION (secp256k1_ec_privkey_tweak_mul) {
         return;
     }
 
-    if(Z_TYPE_P(zSecKey) != IS_STRING) {
+    if (Z_TYPE_P(zSecKey) != IS_STRING) {
         zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_ec_privkey_tweak_mul(): Parameter 1 should be string");
+        return;
+    }
+
+    if (Z_STRLEN_P(zSecKey) != SECRETKEY_LENGTH) {
+        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_ec_privkey_tweak_mul(): Parameter 1 should be 32 bytes");
+        return;
+    }
+
+    if (tweaklen != SECRETKEY_LENGTH) {
+        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_ec_privkey_tweak_mul(): Parameter 2 should be 32 bytes");
         return;
     }
 
@@ -544,6 +587,11 @@ PHP_FUNCTION (secp256k1_ec_pubkey_tweak_mul) {
 
     if (Z_TYPE_P(zPubKey) != IS_STRING) {
         zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_ec_pubkey_tweak_mul(): Parameter 1 should be string");
+        return;
+    }
+
+    if (tweaklen != SECRETKEY_LENGTH) {
+        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_ec_pubkey_tweak_mul(): Parameter 2 should be 32 bytes");
         return;
     }
 
