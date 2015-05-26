@@ -48,7 +48,7 @@ class Secp256k1EcdsaRecoverCompactTest extends TestCase
             array($msg32, $class, $recid, $compressed),
             array($msg32, $sig, $class, $compressed),
             array($msg32, $sig, $recid, $class)
-        ];
+        );
     }
 
     /**
