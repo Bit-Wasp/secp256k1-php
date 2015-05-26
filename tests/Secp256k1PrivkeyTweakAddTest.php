@@ -46,11 +46,11 @@ class Secp256k1PrivkeyTweakAddTest extends TestCase
             $class = new self;
             $resource = openssl_pkey_new();
     
-            return [
-                [$privateKey, $array],
-                [$privateKey, $resource],
-                [$privateKey, $class]
-            ];
+            return array(
+                array($privateKey, $array),
+                array($privateKey, $resource),
+                array($privateKey, $class)
+            );
     }
     
         /**
