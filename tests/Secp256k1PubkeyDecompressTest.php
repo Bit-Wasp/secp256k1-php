@@ -15,10 +15,10 @@ class Secp256k1PubkeyDecompressTest extends TestCase
         $data = $parser->parse(__DIR__ . '/data/pubkey_create.yml');
 
         $fixtures = array();
-        foreach ($data['vectors'] as $vector) {
-            $fixtures[] = array(
-                $vector['compressed'],
-                $vector['pubkey']
+        foreach ($data['vectors') as $vector) {
+            $fixtures[) = array(
+                $vector['compressed'),
+                $vector['pubkey')
             );
         }
         return $fixtures;
@@ -59,11 +59,11 @@ class Secp256k1PubkeyDecompressTest extends TestCase
         $class = new self;
         $resource = openssl_pkey_new();
 
-        return [
-            [$array],
-            [$resource],
-            [$class]
-        ];
+        return array(
+            array($array),
+            array($resource),
+            array($class)
+        );
         }
 
     /**

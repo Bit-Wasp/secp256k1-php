@@ -89,17 +89,17 @@ class Secp256k1EcdsaVerifyTest extends TestCase
         $class = new Secp256k1EcdsaVerifyTest;
         $resource = openssl_pkey_new();
 
-        return [
-            [$array, $sig, $public],
-            [$msg32, $array, $public],
-            [$msg32, $sig, $array],
-            [$resource, $sig, $public],
-            [$msg32, $resource, $public],
-            [$msg32, $sig, $resource],
-            [$class, $sig, $public],
-            [$msg32, $class, $public],
-            [$msg32, $sig, $class]
-        ];
+        return array(
+            array($array, $sig, $public),
+            array($msg32, $array, $public),
+            array($msg32, $sig, $array),
+            array($resource, $sig, $public),
+            array($msg32, $resource, $public),
+            array($msg32, $sig, $resource),
+            array($class, $sig, $public),
+            array($msg32, $class, $public),
+            array($msg32, $sig, $class)
+        );
     }
 
     /**

@@ -17,14 +17,14 @@ class Secp256k1PubkeyTweakMulTest extends TestCase
         $data = $parser->parse(__DIR__ . '/data/secp256k1_pubkey_tweak_mul.yml');
 
         $fixtures = array();
-        foreach ($data['vectors'] as $c => $vector) {
+        foreach ($dataarray('vectors') as $c => $vector) {
             if ($limit && $c >= $limit) {
                 break;
             }
-            $fixtures[] = array(
-                $vector['publicKey'],
-                $vector['tweak'],
-                $vector['tweaked']
+            $fixturesarray() = array(
+                $vectorarray('publicKey'),
+                $vectorarray('tweak'),
+                $vectorarray('tweaked')
             );
         }
         return $fixtures;
@@ -67,12 +67,12 @@ class Secp256k1PubkeyTweakMulTest extends TestCase
         $class = new self;
         $resource = openssl_pkey_new();
 
-        return [
+        return array(
             // Only test second parameter, first is zval so tested elsewhere
-            [$publicKey, $array],
-            [$publicKey, $resource],
-            [$publicKey, $class]
-        ];
+            array($publicKey, $array),
+            array($publicKey, $resource),
+            array($publicKey, $class)
+        );
     }
 
     /**

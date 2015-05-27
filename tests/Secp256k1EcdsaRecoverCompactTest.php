@@ -31,22 +31,22 @@ class Secp256k1EcdsaRecoverCompactTest extends TestCase
         $class = new Secp256k1EcdsaRecoverCompactTest;
         $resource = openssl_pkey_new();
 
-        return [
-            [$array, $sig, $recid, $compressed],
-            [$msg32, $array, $recid, $compressed],
-            [$msg32, $sig, $array, $compressed],
-            [$msg32, $sig, $recid, $array],
+        return array(
+            array($array, $sig, $recid, $compressed),
+            array($msg32, $array, $recid, $compressed),
+            array($msg32, $sig, $array, $compressed),
+            array($msg32, $sig, $recid, $array),
 
-            [$resource, $sig, $recid, $array],
-            [$msg32, $resource, $recid, $compressed],
-            [$msg32, $sig, $resource, $compressed],
-            [$msg32, $sig, $recid, $resource],
+            array($resource, $sig, $recid, $array),
+            array($msg32, $resource, $recid, $compressed),
+            array($msg32, $sig, $resource, $compressed),
+            array($msg32, $sig, $recid, $resource),
 
-            [$class, $sig, $recid, $compressed],
-            [$msg32, $class, $recid, $compressed],
-            [$msg32, $sig, $class, $compressed],
-            [$msg32, $sig, $recid, $class]
-        ];
+            array($class, $sig, $recid, $compressed),
+            array($msg32, $class, $recid, $compressed),
+            array($msg32, $sig, $class, $compressed),
+            array($msg32, $sig, $recid, $class)
+        );
     }
 
     /**

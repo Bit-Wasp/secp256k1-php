@@ -42,11 +42,11 @@ class Secp256k1SeckeyVerifyTest extends TestCase
         $class = new self;
         $resource = openssl_pkey_new();
 
-        return [
-            [$array],
-            [$resource],
-            [$class]
-        ];
+        return array(
+            array($array),
+            array($resource),
+            array($class)
+        );
     }
 
     /**
