@@ -15,7 +15,7 @@ class Secp256k1PubkeyDecompressTest extends TestCase
         $data = $parser->parse(__DIR__ . '/data/pubkey_create.yml');
 
         $fixtures = array();
-        foreach ($data['vectors') as $vector) {
+        foreach ($data['vectors'] as $vector) {
             $fixtures[] = array(
                 $vector['compressed'],
                 $vector['pubkey']
