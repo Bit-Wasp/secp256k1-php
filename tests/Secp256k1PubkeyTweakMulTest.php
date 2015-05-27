@@ -69,12 +69,12 @@ class Secp256k1PubkeyTweakMulTest extends TestCase
         $class = new self;
         $resource = openssl_pkey_new();
 
-        return [
+        return array(
             // Only test second parameter, first is zval so tested elsewhere
-            [$publicKey, $array],
-            [$publicKey, $resource],
-            [$publicKey, $class]
-        ];
+            array($publicKey, $array),
+            array($publicKey, $resource),
+            array($publicKey, $class)
+        );
     }
 
     /**

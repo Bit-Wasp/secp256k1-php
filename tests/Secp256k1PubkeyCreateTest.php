@@ -59,14 +59,14 @@ class Secp256k1PubkeyCreateTest extends TestCase
         $class = new self;
         $resource = openssl_pkey_new();
 
-        return [
-            [$array, $compressed],
-            [$privateKey, $array],
-            [$resource, $compressed],
-            [$privateKey, $resource],
-            [$class, $compressed],
-            [$privateKey, $class]
-        ];
+        return array(
+            array($array, $compressed),
+            array($privateKey, $array),
+            array($resource, $compressed),
+            array($privateKey, $resource),
+            array($class, $compressed),
+            array($privateKey, $class)
+        );
     }
 
     /**
