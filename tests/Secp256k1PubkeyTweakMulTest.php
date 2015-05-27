@@ -17,14 +17,14 @@ class Secp256k1PubkeyTweakMulTest extends TestCase
         $data = $parser->parse(__DIR__ . '/data/secp256k1_pubkey_tweak_mul.yml');
 
         $fixtures = array();
-        foreach ($dataarray('vectors') as $c => $vector) {
+        foreach ($data['vectors'] as $c => $vector) {
             if ($limit && $c >= $limit) {
                 break;
             }
-            $fixturesarray() = array(
-                $vectorarray('publicKey'),
-                $vectorarray('tweak'),
-                $vectorarray('tweaked')
+            $fixtures[] = array(
+                $vector['publicKey'],
+                $vector['tweak'],
+                $vector['tweaked']
             );
         }
         return $fixtures;
