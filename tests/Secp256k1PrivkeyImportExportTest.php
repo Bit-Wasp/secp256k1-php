@@ -44,6 +44,5 @@ class Secp256k1PrivkeyImportExportTest extends TestCase
 
 
         $this->assertEquals($seckey, $recovered);
-
     }
 }

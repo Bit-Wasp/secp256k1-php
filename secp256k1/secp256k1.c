@@ -9,6 +9,16 @@
 #include "ext/standard/info.h"
 #include "php_secp256k1.h"
 
+static zend_class_entry *spl_ce_InvalidArgumentException;
+
+#define MAX_SIGNATURE_LENGTH 72
+#define COMPACT_SIGNATURE_LENGTH 64
+#define PUBKEY_COMPRESSED_LENGTH 33
+#define PUBKEY_UNCOMPRESSED_LENGTH 65
+#define HASH_LENGTH 32
+#define SECRETKEY_LENGTH 32
+#define DERKEY_LENGTH 300
+
 ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ecdsa_verify, 0)
     ZEND_ARG_INFO(0, msg32)
     ZEND_ARG_INFO(0, signature)
@@ -93,6 +103,12 @@ static void php_secp256k1_init_globals(zend_secp256k1_globals *secp256k1_globals
     secp256k1_globals->context = secp256k1_context_create(SECP256K1_CONTEXT_VERIFY | SECP256K1_CONTEXT_SIGN);
 }
 
+int pubkeyLengthFromCompressed(int compressed)
+{
+    return compressed ? PUBKEY_COMPRESSED_LENGTH : PUBKEY_UNCOMPRESSED_LENGTH;
+}
+
+
 /**
  * Verify an ECDSA signature.
  *
@@ -116,8 +132,7 @@ PHP_FUNCTION(secp256k1_ecdsa_verify) {
         return;
     }
 
-    int result;
-    result = secp256k1_ecdsa_verify(context, msg32, sig, siglen, pubkey, pubkeylen);
+    int result = secp256k1_ecdsa_verify(context, msg32, sig, siglen, pubkey, pubkeylen);
 
     RETURN_LONG(result);
 }
@@ -173,12 +188,9 @@ PHP_FUNCTION(secp256k1_ecdsa_sign) {
        return;
     }
 
-    unsigned char newsig[72];
-    int newsiglen = 72;
-    int result;
-
-    result = secp256k1_ecdsa_sign(context, msg32, newsig, &newsiglen, seckey, NULL, NULL);
-
+    int newsiglen = MAX_SIGNATURE_LENGTH;
+    unsigned char newsig[newsiglen];
+    int result = secp256k1_ecdsa_sign(context, msg32, newsig, &newsiglen, seckey, NULL, NULL);
     if (result) {
         ZVAL_STRINGL(signature, newsig, newsiglen, 1);
     }
@@ -212,10 +224,9 @@ PHP_FUNCTION(secp256k1_ecdsa_sign_compact) {
        return;
     }
 
-    unsigned char newsig[64];
-    int newsiglen, newrecid, result;
-    result = secp256k1_ecdsa_sign_compact(context, msg32, newsig, seckey, NULL, NULL, &newrecid);
-
+    unsigned char newsig[COMPACT_SIGNATURE_LENGTH];
+    int newsiglen, newrecid;
+    int result = secp256k1_ecdsa_sign_compact(context, msg32, newsig, seckey, NULL, NULL, &newrecid);
     if (result) {
         ZVAL_STRINGL(signature, newsig, 64, 1);
         ZVAL_LONG(recid, newrecid);
@@ -253,10 +264,9 @@ PHP_FUNCTION(secp256k1_ecdsa_recover_compact) {
        return;
     }
 
-    unsigned char newpubkey[(compressed ? 33 : 65)];
-    int newpubkeylen, result;
-    result = secp256k1_ecdsa_recover_compact(context, msg32, signature, newpubkey, &newpubkeylen, compressed, recid);
-
+    int newpubkeylen = pubkeyLengthFromCompressed(compressed);
+    unsigned char newpubkey[newpubkeylen];
+    int result = secp256k1_ecdsa_recover_compact(context, msg32, signature, newpubkey, &newpubkeylen, compressed, recid);
     if (result) {
         ZVAL_STRINGL(publicKey, newpubkey, newpubkeylen, 1);
     }
@@ -283,8 +293,7 @@ PHP_FUNCTION(secp256k1_ec_seckey_verify) {
         return;
     }
 
-    int result;
-    result = secp256k1_ec_seckey_verify(context, seckey);
+    int result = secp256k1_ec_seckey_verify(context, seckey);
 
     RETURN_LONG(result);
 }
@@ -309,8 +318,7 @@ PHP_FUNCTION(secp256k1_ec_pubkey_verify) {
         return;
     }
 
-    int result;
-    result = secp256k1_ec_pubkey_verify(context, pubkey, pubkeylen);
+    int result = secp256k1_ec_pubkey_verify(context, pubkey, pubkeylen);
 
     RETURN_LONG(result);
 }
@@ -336,16 +344,13 @@ PHP_FUNCTION(secp256k1_ec_pubkey_create) {
     zval *pubkey;
     unsigned char *seckey;
     int seckeylen, compressed;
-    int newpubkeylen = 65;
-
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "slz", &seckey, &seckeylen, &compressed, &pubkey) == FAILURE) {
         return;
     }
 
-    unsigned char newpubkey[compressed ? 33 : 65];
-    int result;
-    result = secp256k1_ec_pubkey_create(context, newpubkey, &newpubkeylen, seckey, compressed);
-
+    int newpubkeylen = pubkeyLengthFromCompressed(compressed);
+    unsigned char newpubkey[newpubkeylen];
+    int result = secp256k1_ec_pubkey_create(context, newpubkey, &newpubkeylen, seckey, compressed);
     if (result) {
         ZVAL_STRINGL(pubkey, newpubkey, newpubkeylen, 1);
     }
@@ -354,7 +359,7 @@ PHP_FUNCTION(secp256k1_ec_pubkey_create) {
 }
 
 /**
- * Decompress a public key. (Tested, but hidden SEG FAULT somewhere..)
+ * Decompress a public key.
  *
  * In/Out:
  *  pubkey:    pointer to a 65-byte array to put the decompressed public key.
@@ -368,19 +373,23 @@ PHP_FUNCTION(secp256k1_ec_pubkey_decompress) {
     secp256k1_context_t * context = SECP256K1_G(context);
 
     zval *zPubKey;
-    unsigned char *pubkey, newpubkey[65];
+    unsigned char *pubkey, newpubkey[PUBKEY_UNCOMPRESSED_LENGTH];
     int pubkeylen;
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &zPubKey) == FAILURE) {
         return;
     }
 
+    if(Z_TYPE_P(zPubKey) != IS_STRING) {
+        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_ec_pubkey_decompress(): Parameter 1 should be string");
+        return;
+    }
+
+    // Explicitly make a copy of this memory, as not to interfere with the original input variable.
     pubkey = Z_STRVAL_P(zPubKey);
     pubkeylen = Z_STRLEN_P(zPubKey);
     memcpy(newpubkey, pubkey, pubkeylen);
-    int result;
-    result = secp256k1_ec_pubkey_decompress(context, newpubkey, &pubkeylen);
-
-    if (result == 1) {
+    int result = secp256k1_ec_pubkey_decompress(context, newpubkey, &pubkeylen);
+    if (result) {
         ZVAL_STRINGL(zPubKey, newpubkey, pubkeylen, 1);
     }
 
@@ -400,10 +409,10 @@ PHP_FUNCTION (secp256k1_ec_privkey_import) {
         return;
     }
 
-    unsigned char newseckey[32];
+    unsigned char newseckey[SECRETKEY_LENGTH];
     int result = secp256k1_ec_privkey_import(context, newseckey, derkey, derkeylen);
     if (result) {
-        ZVAL_STRINGL(zSecKey, newseckey, 32, 1);
+        ZVAL_STRINGL(zSecKey, newseckey, SECRETKEY_LENGTH, 1);
     }
 
     RETURN_LONG(result);
@@ -422,9 +431,9 @@ PHP_FUNCTION (secp256k1_ec_privkey_export) {
         return;
     }
 
-    unsigned char newkey[300];
-    int newkeylen;
-    int result = secp256k1_ec_privkey_export(context, seckey, newkey, &newkeylen, compressed ? 1 : 0);
+    int newkeylen = DERKEY_LENGTH;
+    unsigned char newkey[newkeylen];
+    int result = secp256k1_ec_privkey_export(context, seckey, newkey, &newkeylen, compressed);
     if (result) {
         ZVAL_STRINGL(zDerKey, newkey, newkeylen, 1);
     }
@@ -434,25 +443,27 @@ PHP_FUNCTION (secp256k1_ec_privkey_export) {
 
 /**
  * Tweak a private key by adding tweak to it.
- *
- * @TODO: this can't be right
  */
 PHP_FUNCTION (secp256k1_ec_privkey_tweak_add) {
     secp256k1_context_t * context = SECP256K1_G(context);
-    zval *seckey;
-    unsigned char *newseckey, *tweak;
+
+    zval *zSecKey;
+    unsigned char *tweak;
     int tweaklen;
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zs", &seckey, &tweak, &tweaklen) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zs", &zSecKey, &tweak, &tweaklen) == FAILURE) {
         return;
     }
 
-    newseckey = Z_STRVAL_P(seckey);
-    int result;
-    result = secp256k1_ec_privkey_tweak_add(context, newseckey, tweak);
+    if (Z_TYPE_P(zSecKey) != IS_STRING) {
+        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_ec_privkey_tweak_add(): Parameter 1 should be string");
+        return;
+    }
 
+    unsigned char *newseckey = Z_STRVAL_P(zSecKey);
+    int result = secp256k1_ec_privkey_tweak_add(context, newseckey, tweak);
     if (result) {
-        Z_STRVAL_P(seckey) = newseckey;
-        Z_STRLEN_P(seckey) = 32;
+        // Final arg is zero, don't destroy newseckey memory
+        ZVAL_STRINGL(zSecKey, newseckey, SECRETKEY_LENGTH, 0);
     }
 
     RETURN_LONG(result);
@@ -464,21 +475,25 @@ PHP_FUNCTION (secp256k1_ec_privkey_tweak_add) {
 PHP_FUNCTION (secp256k1_ec_pubkey_tweak_add) {
     secp256k1_context_t * context = SECP256K1_G(context);
 
-    zval *pubkey;
-    unsigned char  *tweak, *newpubkey;
-    int tweaklen, newpubkeylen;
+    zval *zPubKey;
+    unsigned char *tweak;
+    int tweaklen;
 
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zs", &pubkey, &tweak, &tweaklen) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zs", &zPubKey, &tweak, &tweaklen) == FAILURE) {
         return;
     }
 
-    newpubkey = Z_STRVAL_P(pubkey);
-    newpubkeylen = Z_STRLEN_P(pubkey);
-    int result;
-    result = secp256k1_ec_pubkey_tweak_add(context, newpubkey, newpubkeylen, tweak);
+    if (Z_TYPE_P(zPubKey) != IS_STRING) {
+        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_ec_pubkey_tweak_add(): Parameter 1 should be string");
+        return;
+    }
 
+    unsigned char *newpubkey = Z_STRVAL_P(zPubKey);
+    int newpubkeylen = Z_STRLEN_P(zPubKey);
+    int result = secp256k1_ec_pubkey_tweak_add(context, newpubkey, newpubkeylen, tweak);
     if (result) {
-        ZVAL_STRINGL(pubkey, newpubkey, newpubkeylen, 0);
+        // Final arg is zero, don't destroy newpubkey memory
+        ZVAL_STRINGL(zPubKey, newpubkey, newpubkeylen, 0);
     }
 
     RETURN_LONG(result);
@@ -489,21 +504,25 @@ PHP_FUNCTION (secp256k1_ec_pubkey_tweak_add) {
  */
 PHP_FUNCTION (secp256k1_ec_privkey_tweak_mul) {
     secp256k1_context_t * context = SECP256K1_G(context);
-    zval *seckey;
-    unsigned char *newseckey, *tweak;
+
+    zval *zSecKey;
+    unsigned char *tweak;
     int tweaklen;
 
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zs", &seckey, &tweak, &tweaklen) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zs", &zSecKey, &tweak, &tweaklen) == FAILURE) {
         return;
     }
 
-    newseckey = Z_STRVAL_P(seckey);
-    int result;
-    result = secp256k1_ec_privkey_tweak_mul(context, newseckey, tweak);
+    if(Z_TYPE_P(zSecKey) != IS_STRING) {
+        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_ec_privkey_tweak_mul(): Parameter 1 should be string");
+        return;
+    }
 
+    unsigned char *newseckey = Z_STRVAL_P(zSecKey);
+    int result = secp256k1_ec_privkey_tweak_mul(context, newseckey, tweak);
     if (result) {
-        Z_STRVAL_P(seckey) = newseckey;
-        Z_STRLEN_P(seckey) = 32;
+        // Final arg is zero, don't destroy newseckey memory
+        ZVAL_STRINGL(zSecKey, newseckey, SECRETKEY_LENGTH, 0);
     }
 
     RETURN_LONG(result);
@@ -515,21 +534,25 @@ PHP_FUNCTION (secp256k1_ec_privkey_tweak_mul) {
 PHP_FUNCTION (secp256k1_ec_pubkey_tweak_mul) {
     secp256k1_context_t * context = SECP256K1_G(context);
 
-    zval *pubkey;
-    unsigned char *tweak, *newpubkey;
-    int tweaklen, newpubkeylen;
+    zval *zPubKey;
+    unsigned char *tweak;
+    int tweaklen;
 
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zs", &pubkey, &tweak, &tweaklen) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zs", &zPubKey, &tweak, &tweaklen) == FAILURE) {
         return;
     }
 
-    newpubkey = Z_STRVAL_P(pubkey);
-    newpubkeylen = Z_STRLEN_P(pubkey);
-    int result;
-    result = secp256k1_ec_pubkey_tweak_mul(context, newpubkey, newpubkeylen, tweak);
+    if (Z_TYPE_P(zPubKey) != IS_STRING) {
+        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_ec_pubkey_tweak_mul(): Parameter 1 should be string");
+        return;
+    }
 
+    unsigned char *newpubkey = Z_STRVAL_P(zPubKey);
+    int newpubkeylen = Z_STRLEN_P(zPubKey);
+    int result = secp256k1_ec_pubkey_tweak_mul(context, newpubkey, newpubkeylen, tweak);
     if (result) {
-        ZVAL_STRINGL(pubkey, newpubkey, newpubkeylen, 0);
+        // Final arg is zero, don't destroy newpubkey memory
+        ZVAL_STRINGL(zPubKey, newpubkey, newpubkeylen, 0);
     }
 
     RETURN_LONG(result);

@@ -52,4 +52,26 @@ class Secp256k1PubkeyDecompressTest extends TestCase
         $this->assertTrue($a == $o, '$a is not decompressed');
         
     }
+
+     public function getErroneousTypeVectors()
+     {
+        $array = array();
+        $class = new self;
+        $resource = openssl_pkey_new();
+
+        return array(
+            array($array),
+            array($resource),
+            array($class)
+        );
+     }
+
+    /**
+     * @dataProvider getErroneousTypeVectors
+     * @expectedException \Exception
+     *
+    public function testErroneousTypes($key)
+    {
+        $r = \secp256k1_ec_pubkey_decompress($key);
+    }/**/
 }
