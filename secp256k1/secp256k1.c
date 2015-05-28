@@ -27,6 +27,10 @@ ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_context_destroy, 0)
     ZEND_ARG_INFO(0, context)
 ZEND_END_ARG_INFO();
 
+ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_context_clone, 0)
+    ZEND_ARG_INFO(0, context)
+ZEND_END_ARG_INFO();
+
 ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ecdsa_verify, 0)
     ZEND_ARG_INFO(0, msg32)
     ZEND_ARG_INFO(0, signature)
@@ -160,6 +164,34 @@ PHP_FUNCTION(secp256k1_context_destroy)
     zend_list_delete(Z_LVAL_P(zResource));
     RETURN_TRUE;
 }
+
+/** Copies a secp256k1 context object.
+ *  Returns: a newly created context object.
+ *  In:      ctx: an existing context to copy
+ */
+PHP_FUNCTION(secp256k1_context_clone)
+{
+    zval *zContext;
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &zContext)) {
+        RETURN_FALSE;
+    }
+
+    secp256k1_context_t *context;
+    ZEND_FETCH_RESOURCE(context, secp256k1_context_t*, &zContext, -1, PHP_CTX_STRUCT_RES_NAME, le_ctx_struct);
+
+    if (!context) {
+        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_context_clone(): Invalid secp256k1 context");
+        return;
+    }
+
+    zval *zval_p;
+    MAKE_STD_ZVAL(zval_p);
+
+    secp256k1_context_t *clone = secp256k1_context_clone(context);
+    ZEND_REGISTER_RESOURCE(zval_p, clone, le_ctx_struct);
+    RETVAL_ZVAL(zval_p, 1, php_ctx_struct_dtor);
+}
+
 /**
  * Verify an ECDSA secret key.
 
@@ -730,6 +762,7 @@ PHP_MINFO_FUNCTION(secp256k1) {
 const zend_function_entry secp256k1_functions[] = {
     PHP_FE(secp256k1_context_create, arginfo_secp256k1_context_create)
     PHP_FE(secp256k1_context_destroy, arginfo_secp256k1_context_destroy)
+    PHP_FE(secp256k1_context_clone, arginfo_secp256k1_context_clone)
     PHP_FE(secp256k1_ecdsa_sign, arginfo_secp256k1_ecdsa_sign)
     PHP_FE(secp256k1_ecdsa_verify, arginfo_secp256k1_ecdsa_verify)
     PHP_FE(secp256k1_ecdsa_sign_compact, arginfo_secp256k1_ecdsa_sign_compact)
