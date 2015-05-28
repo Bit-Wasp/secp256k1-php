@@ -129,10 +129,10 @@ class Secp256k1EcdsaVerifyTest extends TestCase
         $this->assertEquals(-2, \secp256k1_ecdsa_verify($msg32, 1, $public), 'sig as 1');
         $this->assertEquals(-1, \secp256k1_ecdsa_verify($msg32, $sig, 1), 'public as 1');
 
-        $resource = gmp_init(10, 10);
-        $this->assertEquals(0, \secp256k1_ecdsa_verify($resource, $sig, $public), 'msg32 as resource');
-        $this->assertEquals(-2, \secp256k1_ecdsa_verify($msg32, $resource, $public), 'sig as resource');
-        $this->assertEquals(-1, \secp256k1_ecdsa_verify($msg32, $sig, $resource), 'pubkey as resource');
+        //$resource = gmp_init(10, 10);
+        //$this->assertEquals(0, \secp256k1_ecdsa_verify($resource, $sig, $public), 'msg32 as resource');
+        //$this->assertEquals(-2, \secp256k1_ecdsa_verify($msg32, $resource, $public), 'sig as resource');
+        //$this->assertEquals(-1, \secp256k1_ecdsa_verify($msg32, $sig, $resource), 'pubkey as resource');
 
 /*
         -
