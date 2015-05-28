@@ -147,21 +147,21 @@ PHP_FUNCTION(secp256k1_context_create)
 
 PHP_FUNCTION(secp256k1_context_destroy)
 {
-    zval *zResource;
+    zval *zContext;
     secp256k1_context_t *context;
 
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &zResource)) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &zContext)) {
         RETURN_FALSE;
     }
 
-    ZEND_FETCH_RESOURCE(context, secp256k1_context_t*, &zResource, -1, PHP_CTX_STRUCT_RES_NAME, le_ctx_struct);
+    ZEND_FETCH_RESOURCE(context, secp256k1_context_t*, &zContext, -1, PHP_CTX_STRUCT_RES_NAME, le_ctx_struct);
 
     if (!context) {
         zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_context_destroy(): Invalid secp256k1 context");
         return;
     }
 
-    zend_list_delete(Z_LVAL_P(zResource));
+    zend_list_delete(Z_LVAL_P(zContext));
     RETURN_TRUE;
 }
 
