@@ -136,7 +136,7 @@ PHP_FUNCTION(secp256k1_context_create)
     MAKE_STD_ZVAL(ret);
     secp256k1_context_t *context = secp256k1_context_create(flags);
     ZEND_REGISTER_RESOURCE(ret, context, le_context);
-    RETVAL_ZVAL(ret, 1, php_ctx_struct_dtor);
+    RETVAL_ZVAL(ret, 0, php_ctx_struct_dtor);
 
 }
 
@@ -183,7 +183,7 @@ PHP_FUNCTION(secp256k1_context_clone)
 
     secp256k1_context_t *clone = secp256k1_context_clone(context);
     ZEND_REGISTER_RESOURCE(zval_p, clone, le_context);
-    RETVAL_ZVAL(zval_p, 1, php_ctx_struct_dtor);
+    RETVAL_ZVAL(zval_p, 0, php_ctx_struct_dtor);
 }
 
 /**
