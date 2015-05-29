@@ -9,6 +9,28 @@
 #include "ext/standard/info.h"
 #include "php_secp256k1.h"
 
+static zend_class_entry *spl_ce_InvalidArgumentException;
+
+#define MAX_SIGNATURE_LENGTH 72
+#define COMPACT_SIGNATURE_LENGTH 64
+#define PUBKEY_COMPRESSED_LENGTH 33
+#define PUBKEY_UNCOMPRESSED_LENGTH 65
+#define HASH_LENGTH 32
+#define SECRETKEY_LENGTH 32
+#define DERKEY_LENGTH 300
+
+ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_context_create, 0)
+    ZEND_ARG_INFO(0, flags)
+ZEND_END_ARG_INFO();
+
+ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_context_destroy, 0)
+    ZEND_ARG_INFO(0, context)
+ZEND_END_ARG_INFO();
+
+ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_context_clone, 0)
+    ZEND_ARG_INFO(0, context)
+ZEND_END_ARG_INFO();
+
 ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ecdsa_verify, 0)
     ZEND_ARG_INFO(0, msg32)
     ZEND_ARG_INFO(0, signature)
@@ -87,10 +109,117 @@ ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ec_pubkey_tweak_mul, 0)
     ZEND_ARG_INFO(0, tweak)
 ZEND_END_ARG_INFO();
 
-ZEND_DECLARE_MODULE_GLOBALS(secp256k1)
-static void php_secp256k1_init_globals(zend_secp256k1_globals *secp256k1_globals)
+static int le_context;
+#define PHP_CONTEXT_RES_NAME "secp256k1_context_t"
+
+static void php_ctx_struct_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
-    secp256k1_globals->context = secp256k1_context_create(SECP256K1_CONTEXT_VERIFY | SECP256K1_CONTEXT_SIGN);
+    secp256k1_context_t *context = (secp256k1_context_t*)rsrc->ptr;
+    if (context) {
+        secp256k1_context_destroy(context);
+    }
+}
+
+int pubkeyLengthFromCompressed(int compressed)
+{
+    return compressed ? PUBKEY_COMPRESSED_LENGTH : PUBKEY_UNCOMPRESSED_LENGTH;
+}
+
+PHP_FUNCTION(secp256k1_context_create)
+{
+    int flags;
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &flags) == FAILURE) {
+        return;
+    }
+
+    zval *ret;
+    MAKE_STD_ZVAL(ret);
+    secp256k1_context_t *context = secp256k1_context_create(flags);
+    ZEND_REGISTER_RESOURCE(ret, context, le_context);
+    RETVAL_ZVAL(ret, 0, php_ctx_struct_dtor);
+
+}
+
+PHP_FUNCTION(secp256k1_context_destroy)
+{
+    zval *zContext;
+    secp256k1_context_t *context;
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &zContext)) {
+        RETURN_FALSE;
+    }
+
+    ZEND_FETCH_RESOURCE(context, secp256k1_context_t*, &zContext, -1, PHP_CONTEXT_RES_NAME, le_context);
+
+    if (!context) {
+        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_context_destroy(): Invalid secp256k1 context");
+        return;
+    }
+
+    RETURN_BOOL(zend_list_delete(Z_LVAL_P(zContext)) == SUCCESS);
+}
+
+/** Copies a secp256k1 context object.
+ *  Returns: a newly created context object.
+ *  In:      ctx: an existing context to copy
+ */
+PHP_FUNCTION(secp256k1_context_clone)
+{
+    zval *zContext;
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &zContext)) {
+        RETURN_FALSE;
+    }
+
+    secp256k1_context_t *context;
+    ZEND_FETCH_RESOURCE(context, secp256k1_context_t*, &zContext, -1, PHP_CONTEXT_RES_NAME, le_context);
+
+    if (!context) {
+        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_context_clone(): Invalid secp256k1 context");
+        return;
+    }
+
+    zval *zval_p;
+    MAKE_STD_ZVAL(zval_p);
+
+    secp256k1_context_t *clone = secp256k1_context_clone(context);
+    ZEND_REGISTER_RESOURCE(zval_p, clone, le_context);
+    RETVAL_ZVAL(zval_p, 0, php_ctx_struct_dtor);
+}
+
+/**
+ * Verify an ECDSA secret key.
+
+ * In:
+ *  seckey: pointer to a 32-byte secret key (cannot be NULL)
+ *
+ * Returns:
+ *  1: secret key is valid
+ *  0: secret key is invalid
+ */
+PHP_FUNCTION(secp256k1_ec_seckey_verify2) {
+
+    zval *zResource;
+    secp256k1_context_t *context;
+    unsigned char *seckey;
+    int seckeylen;
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &zResource, &seckey, &seckeylen) == FAILURE) {
+        return;
+    }
+
+    ZEND_FETCH_RESOURCE(context, secp256k1_context_t*, &zResource, -1, PHP_CONTEXT_RES_NAME, le_context);
+    if (!context) {
+        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_ec_seckey_verify(): Invalid secp256k1 context");
+        return;
+    }
+
+    if (seckeylen != SECRETKEY_LENGTH) {
+        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_ec_seckey_verify(): Parameter 2 should be 32 bytes");
+        return;
+    }
+
+    int result = secp256k1_ec_seckey_verify(context, seckey);
+    RETURN_LONG(result);
 }
 
 /**
@@ -108,7 +237,7 @@ static void php_secp256k1_init_globals(zend_secp256k1_globals *secp256k1_globals
  * -2: invalid signature
  */
 PHP_FUNCTION(secp256k1_ecdsa_verify) {
-    secp256k1_context_t * context = SECP256K1_G(context);
+    secp256k1_context_t * context = secp256k1_context_create(SECP256K1_CONTEXT_VERIFY | SECP256K1_CONTEXT_SIGN);
 
     unsigned char *msg32, *sig, *pubkey;
     int msg32len, siglen, pubkeylen;
@@ -116,8 +245,7 @@ PHP_FUNCTION(secp256k1_ecdsa_verify) {
         return;
     }
 
-    int result;
-    result = secp256k1_ecdsa_verify(context, msg32, sig, siglen, pubkey, pubkeylen);
+    int result = secp256k1_ecdsa_verify(context, msg32, sig, siglen, pubkey, pubkeylen);
 
     RETURN_LONG(result);
 }
@@ -164,7 +292,7 @@ PHP_FUNCTION(secp256k1_ecdsa_verify) {
  * be taken when this property is required for an application.
  */
 PHP_FUNCTION(secp256k1_ecdsa_sign) {
-    secp256k1_context_t * context = SECP256K1_G(context);
+    secp256k1_context_t * context = secp256k1_context_create(SECP256K1_CONTEXT_VERIFY | SECP256K1_CONTEXT_SIGN);
 
     zval *signature;
     unsigned char *seckey, *msg32;
@@ -173,12 +301,14 @@ PHP_FUNCTION(secp256k1_ecdsa_sign) {
        return;
     }
 
-    unsigned char newsig[72];
-    int newsiglen = 72;
-    int result;
+    if (seckeylen != SECRETKEY_LENGTH) {
+        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_ecdsa_sign(): Parameter 2 should be 32 bytes");
+        return;
+    }
 
-    result = secp256k1_ecdsa_sign(context, msg32, newsig, &newsiglen, seckey, NULL, NULL);
-
+    int newsiglen = MAX_SIGNATURE_LENGTH;
+    unsigned char newsig[newsiglen];
+    int result = secp256k1_ecdsa_sign(context, msg32, newsig, &newsiglen, seckey, NULL, NULL);
     if (result) {
         ZVAL_STRINGL(signature, newsig, newsiglen, 1);
     }
@@ -203,7 +333,7 @@ PHP_FUNCTION(secp256k1_ecdsa_sign) {
  *  0: the nonce generation function failed, or the secret key was invalid.
  */
 PHP_FUNCTION(secp256k1_ecdsa_sign_compact) {
-    secp256k1_context_t * context = SECP256K1_G(context);
+    secp256k1_context_t * context = secp256k1_context_create(SECP256K1_CONTEXT_VERIFY | SECP256K1_CONTEXT_SIGN);
 
     unsigned char *seckey, *msg32;
     int seckeylen, msg32len;
@@ -212,10 +342,14 @@ PHP_FUNCTION(secp256k1_ecdsa_sign_compact) {
        return;
     }
 
-    unsigned char newsig[64];
-    int newsiglen, newrecid, result;
-    result = secp256k1_ecdsa_sign_compact(context, msg32, newsig, seckey, NULL, NULL, &newrecid);
+    if (seckeylen != SECRETKEY_LENGTH) {
+        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_ecdsa_sign_compact(): Parameter 2 should be 32 bytes");
+        return;
+    }
 
+    unsigned char newsig[COMPACT_SIGNATURE_LENGTH];
+    int newsiglen, newrecid;
+    int result = secp256k1_ecdsa_sign_compact(context, msg32, newsig, seckey, NULL, NULL, &newrecid);
     if (result) {
         ZVAL_STRINGL(signature, newsig, 64, 1);
         ZVAL_LONG(recid, newrecid);
@@ -243,7 +377,7 @@ PHP_FUNCTION(secp256k1_ecdsa_sign_compact) {
  *  0: otherwise.
  */
 PHP_FUNCTION(secp256k1_ecdsa_recover_compact) {
-    secp256k1_context_t * context = SECP256K1_G(context);
+    secp256k1_context_t * context = secp256k1_context_create(SECP256K1_CONTEXT_VERIFY | SECP256K1_CONTEXT_SIGN);
 
     unsigned char *msg32, *signature;
     long recid;
@@ -253,10 +387,9 @@ PHP_FUNCTION(secp256k1_ecdsa_recover_compact) {
        return;
     }
 
-    unsigned char newpubkey[(compressed ? 33 : 65)];
-    int newpubkeylen, result;
-    result = secp256k1_ecdsa_recover_compact(context, msg32, signature, newpubkey, &newpubkeylen, compressed, recid);
-
+    int newpubkeylen = pubkeyLengthFromCompressed(compressed);
+    unsigned char newpubkey[newpubkeylen];
+    int result = secp256k1_ecdsa_recover_compact(context, msg32, signature, newpubkey, &newpubkeylen, compressed, recid);
     if (result) {
         ZVAL_STRINGL(publicKey, newpubkey, newpubkeylen, 1);
     }
@@ -275,7 +408,7 @@ PHP_FUNCTION(secp256k1_ecdsa_recover_compact) {
  *  0: secret key is invalid
  */
 PHP_FUNCTION(secp256k1_ec_seckey_verify) {
-    secp256k1_context_t * context = SECP256K1_G(context);
+    secp256k1_context_t * context = secp256k1_context_create(SECP256K1_CONTEXT_VERIFY | SECP256K1_CONTEXT_SIGN);
     unsigned char *seckey;
     int seckeylen;
 
@@ -283,8 +416,11 @@ PHP_FUNCTION(secp256k1_ec_seckey_verify) {
         return;
     }
 
-    int result;
-    result = secp256k1_ec_seckey_verify(context, seckey);
+    if (seckeylen != SECRETKEY_LENGTH) {
+        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_ec_seckey_verify(): Parameter 1 should be 32 bytes");
+        return;
+    }
+    int result = secp256k1_ec_seckey_verify(context, seckey);
 
     RETURN_LONG(result);
 }
@@ -301,7 +437,7 @@ PHP_FUNCTION(secp256k1_ec_seckey_verify) {
  *  0: invalid public key
  */
 PHP_FUNCTION(secp256k1_ec_pubkey_verify) {
-    secp256k1_context_t * context = SECP256K1_G(context);
+    secp256k1_context_t * context = secp256k1_context_create(SECP256K1_CONTEXT_VERIFY | SECP256K1_CONTEXT_SIGN);
 
     unsigned char *pubkey;
     int pubkeylen;
@@ -309,8 +445,7 @@ PHP_FUNCTION(secp256k1_ec_pubkey_verify) {
         return;
     }
 
-    int result;
-    result = secp256k1_ec_pubkey_verify(context, pubkey, pubkeylen);
+    int result = secp256k1_ec_pubkey_verify(context, pubkey, pubkeylen);
 
     RETURN_LONG(result);
 }
@@ -331,21 +466,23 @@ PHP_FUNCTION(secp256k1_ec_pubkey_verify) {
  *  0: secret was invalid, try again.
  */
 PHP_FUNCTION(secp256k1_ec_pubkey_create) {
-    secp256k1_context_t * context = SECP256K1_G(context);
+    secp256k1_context_t * context = secp256k1_context_create(SECP256K1_CONTEXT_VERIFY | SECP256K1_CONTEXT_SIGN);
 
     zval *pubkey;
     unsigned char *seckey;
     int seckeylen, compressed;
-    int newpubkeylen = 65;
-
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "slz", &seckey, &seckeylen, &compressed, &pubkey) == FAILURE) {
         return;
     }
 
-    unsigned char newpubkey[compressed ? 33 : 65];
-    int result;
-    result = secp256k1_ec_pubkey_create(context, newpubkey, &newpubkeylen, seckey, compressed);
+    if (seckeylen != SECRETKEY_LENGTH) {
+        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_ec_pubkey_create(): Parameter 1 should be 32 bytes");
+        return;
+    }
 
+    int newpubkeylen = pubkeyLengthFromCompressed(compressed);
+    unsigned char newpubkey[newpubkeylen];
+    int result = secp256k1_ec_pubkey_create(context, newpubkey, &newpubkeylen, seckey, compressed);
     if (result) {
         ZVAL_STRINGL(pubkey, newpubkey, newpubkeylen, 1);
     }
@@ -354,7 +491,7 @@ PHP_FUNCTION(secp256k1_ec_pubkey_create) {
 }
 
 /**
- * Decompress a public key. (Tested, but hidden SEG FAULT somewhere..)
+ * Decompress a public key.
  *
  * In/Out:
  *  pubkey:    pointer to a 65-byte array to put the decompressed public key.
@@ -365,22 +502,26 @@ PHP_FUNCTION(secp256k1_ec_pubkey_create) {
  *  If 1 is returned, the pubkey is replaced with its decompressed version.
  */
 PHP_FUNCTION(secp256k1_ec_pubkey_decompress) {
-    secp256k1_context_t * context = SECP256K1_G(context);
+    secp256k1_context_t * context = secp256k1_context_create(SECP256K1_CONTEXT_VERIFY | SECP256K1_CONTEXT_SIGN);
 
     zval *zPubKey;
-    unsigned char *pubkey, newpubkey[65];
+    unsigned char *pubkey, newpubkey[PUBKEY_UNCOMPRESSED_LENGTH];
     int pubkeylen;
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &zPubKey) == FAILURE) {
         return;
     }
 
+    if(Z_TYPE_P(zPubKey) != IS_STRING) {
+        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_ec_pubkey_decompress(): Parameter 1 should be string");
+        return;
+    }
+
+    // Explicitly make a copy of this memory, as not to interfere with the original input variable.
     pubkey = Z_STRVAL_P(zPubKey);
     pubkeylen = Z_STRLEN_P(zPubKey);
     memcpy(newpubkey, pubkey, pubkeylen);
-    int result;
-    result = secp256k1_ec_pubkey_decompress(context, newpubkey, &pubkeylen);
-
-    if (result == 1) {
+    int result = secp256k1_ec_pubkey_decompress(context, newpubkey, &pubkeylen);
+    if (result) {
         ZVAL_STRINGL(zPubKey, newpubkey, pubkeylen, 1);
     }
 
@@ -391,7 +532,7 @@ PHP_FUNCTION(secp256k1_ec_pubkey_decompress) {
  * Import a private key in DER format.
  */
 PHP_FUNCTION (secp256k1_ec_privkey_import) {
-    secp256k1_context_t * context = SECP256K1_G(context);
+    secp256k1_context_t * context = secp256k1_context_create(SECP256K1_CONTEXT_VERIFY | SECP256K1_CONTEXT_SIGN);
 
     zval *zSecKey;
     unsigned char *derkey;
@@ -400,10 +541,10 @@ PHP_FUNCTION (secp256k1_ec_privkey_import) {
         return;
     }
 
-    unsigned char newseckey[32];
+    unsigned char newseckey[SECRETKEY_LENGTH];
     int result = secp256k1_ec_privkey_import(context, newseckey, derkey, derkeylen);
     if (result) {
-        ZVAL_STRINGL(zSecKey, newseckey, 32, 1);
+        ZVAL_STRINGL(zSecKey, newseckey, SECRETKEY_LENGTH, 1);
     }
 
     RETURN_LONG(result);
@@ -413,7 +554,7 @@ PHP_FUNCTION (secp256k1_ec_privkey_import) {
  * Export a private key in DER format.
  */
 PHP_FUNCTION (secp256k1_ec_privkey_export) {
-    secp256k1_context_t * context = SECP256K1_G(context);
+    secp256k1_context_t * context = secp256k1_context_create(SECP256K1_CONTEXT_VERIFY | SECP256K1_CONTEXT_SIGN);
 
     zval *zDerKey;
     unsigned char *seckey;
@@ -422,9 +563,14 @@ PHP_FUNCTION (secp256k1_ec_privkey_export) {
         return;
     }
 
-    unsigned char newkey[300];
-    int newkeylen;
-    int result = secp256k1_ec_privkey_export(context, seckey, newkey, &newkeylen, compressed ? 1 : 0);
+    if (seckeylen != SECRETKEY_LENGTH) {
+        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_ec_privkey_export(): Parameter 1 should be 32 bytes");
+        return;
+    }
+
+    int newkeylen = DERKEY_LENGTH;
+    unsigned char newkey[newkeylen];
+    int result = secp256k1_ec_privkey_export(context, seckey, newkey, &newkeylen, compressed);
     if (result) {
         ZVAL_STRINGL(zDerKey, newkey, newkeylen, 1);
     }
@@ -434,25 +580,32 @@ PHP_FUNCTION (secp256k1_ec_privkey_export) {
 
 /**
  * Tweak a private key by adding tweak to it.
- *
- * @TODO: this can't be right
  */
 PHP_FUNCTION (secp256k1_ec_privkey_tweak_add) {
-    secp256k1_context_t * context = SECP256K1_G(context);
-    zval *seckey;
-    unsigned char *newseckey, *tweak;
+    secp256k1_context_t * context = secp256k1_context_create(SECP256K1_CONTEXT_VERIFY | SECP256K1_CONTEXT_SIGN);
+
+    zval *zSecKey;
+    unsigned char *tweak;
     int tweaklen;
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zs", &seckey, &tweak, &tweaklen) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zs", &zSecKey, &tweak, &tweaklen) == FAILURE) {
         return;
     }
 
-    newseckey = Z_STRVAL_P(seckey);
-    int result;
-    result = secp256k1_ec_privkey_tweak_add(context, newseckey, tweak);
+    if (Z_TYPE_P(zSecKey) != IS_STRING) {
+        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_ec_privkey_tweak_add(): Parameter 1 should be string");
+        return;
+    }
 
+    if (tweaklen != SECRETKEY_LENGTH) {
+        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_ec_privkey_tweak_add(): Parameter 2 should be 32 bytes");
+        return;
+    }
+
+    unsigned char *newseckey = Z_STRVAL_P(zSecKey);
+    int result = secp256k1_ec_privkey_tweak_add(context, newseckey, tweak);
     if (result) {
-        Z_STRVAL_P(seckey) = newseckey;
-        Z_STRLEN_P(seckey) = 32;
+        // Final arg is zero, don't destroy newseckey memory
+        ZVAL_STRINGL(zSecKey, newseckey, SECRETKEY_LENGTH, 0);
     }
 
     RETURN_LONG(result);
@@ -462,23 +615,32 @@ PHP_FUNCTION (secp256k1_ec_privkey_tweak_add) {
  * Tweak a public key by adding tweak times the generator to it
  */
 PHP_FUNCTION (secp256k1_ec_pubkey_tweak_add) {
-    secp256k1_context_t * context = SECP256K1_G(context);
+    secp256k1_context_t * context = secp256k1_context_create(SECP256K1_CONTEXT_VERIFY | SECP256K1_CONTEXT_SIGN);
 
-    zval *pubkey;
-    unsigned char  *tweak, *newpubkey;
-    int tweaklen, newpubkeylen;
+    zval *zPubKey;
+    unsigned char *tweak;
+    int tweaklen;
 
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zs", &pubkey, &tweak, &tweaklen) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zs", &zPubKey, &tweak, &tweaklen) == FAILURE) {
         return;
     }
 
-    newpubkey = Z_STRVAL_P(pubkey);
-    newpubkeylen = Z_STRLEN_P(pubkey);
-    int result;
-    result = secp256k1_ec_pubkey_tweak_add(context, newpubkey, newpubkeylen, tweak);
+    if (Z_TYPE_P(zPubKey) != IS_STRING) {
+        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_ec_pubkey_tweak_add(): Parameter 1 should be string");
+        return;
+    }
 
+    if (tweaklen != SECRETKEY_LENGTH) {
+        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_ec_pubkey_tweak_add(): Parameter 2 should be 32 bytes");
+        return;
+    }
+
+    unsigned char *newpubkey = Z_STRVAL_P(zPubKey);
+    int newpubkeylen = Z_STRLEN_P(zPubKey);
+    int result = secp256k1_ec_pubkey_tweak_add(context, newpubkey, newpubkeylen, tweak);
     if (result) {
-        ZVAL_STRINGL(pubkey, newpubkey, newpubkeylen, 0);
+        // Final arg is zero, don't destroy newpubkey memory
+        ZVAL_STRINGL(zPubKey, newpubkey, newpubkeylen, 0);
     }
 
     RETURN_LONG(result);
@@ -488,22 +650,36 @@ PHP_FUNCTION (secp256k1_ec_pubkey_tweak_add) {
  * Tweak a private key by multiplying it with tweak.
  */
 PHP_FUNCTION (secp256k1_ec_privkey_tweak_mul) {
-    secp256k1_context_t * context = SECP256K1_G(context);
-    zval *seckey;
-    unsigned char *newseckey, *tweak;
+    secp256k1_context_t * context = secp256k1_context_create(SECP256K1_CONTEXT_VERIFY | SECP256K1_CONTEXT_SIGN);
+
+    zval *zSecKey;
+    unsigned char *tweak;
     int tweaklen;
 
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zs", &seckey, &tweak, &tweaklen) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zs", &zSecKey, &tweak, &tweaklen) == FAILURE) {
         return;
     }
 
-    newseckey = Z_STRVAL_P(seckey);
-    int result;
-    result = secp256k1_ec_privkey_tweak_mul(context, newseckey, tweak);
+    if (Z_TYPE_P(zSecKey) != IS_STRING) {
+        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_ec_privkey_tweak_mul(): Parameter 1 should be string");
+        return;
+    }
 
+    if (Z_STRLEN_P(zSecKey) != SECRETKEY_LENGTH) {
+        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_ec_privkey_tweak_mul(): Parameter 1 should be 32 bytes");
+        return;
+    }
+
+    if (tweaklen != SECRETKEY_LENGTH) {
+        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_ec_privkey_tweak_mul(): Parameter 2 should be 32 bytes");
+        return;
+    }
+
+    unsigned char *newseckey = Z_STRVAL_P(zSecKey);
+    int result = secp256k1_ec_privkey_tweak_mul(context, newseckey, tweak);
     if (result) {
-        Z_STRVAL_P(seckey) = newseckey;
-        Z_STRLEN_P(seckey) = 32;
+        // Final arg is zero, don't destroy newseckey memory
+        ZVAL_STRINGL(zSecKey, newseckey, SECRETKEY_LENGTH, 0);
     }
 
     RETURN_LONG(result);
@@ -513,32 +689,41 @@ PHP_FUNCTION (secp256k1_ec_privkey_tweak_mul) {
  * Tweak a public key by multiplying it with tweak
  */
 PHP_FUNCTION (secp256k1_ec_pubkey_tweak_mul) {
-    secp256k1_context_t * context = SECP256K1_G(context);
+    secp256k1_context_t * context = secp256k1_context_create(SECP256K1_CONTEXT_VERIFY | SECP256K1_CONTEXT_SIGN);
 
-    zval *pubkey;
-    unsigned char *tweak, *newpubkey;
-    int tweaklen, newpubkeylen;
+    zval *zPubKey;
+    unsigned char *tweak;
+    int tweaklen;
 
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zs", &pubkey, &tweak, &tweaklen) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zs", &zPubKey, &tweak, &tweaklen) == FAILURE) {
         return;
     }
 
-    newpubkey = Z_STRVAL_P(pubkey);
-    newpubkeylen = Z_STRLEN_P(pubkey);
-    int result;
-    result = secp256k1_ec_pubkey_tweak_mul(context, newpubkey, newpubkeylen, tweak);
+    if (Z_TYPE_P(zPubKey) != IS_STRING) {
+        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_ec_pubkey_tweak_mul(): Parameter 1 should be string");
+        return;
+    }
 
+    if (tweaklen != SECRETKEY_LENGTH) {
+        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_ec_pubkey_tweak_mul(): Parameter 2 should be 32 bytes");
+        return;
+    }
+
+    unsigned char *newpubkey = Z_STRVAL_P(zPubKey);
+    int newpubkeylen = Z_STRLEN_P(zPubKey);
+    int result = secp256k1_ec_pubkey_tweak_mul(context, newpubkey, newpubkeylen, tweak);
     if (result) {
-        ZVAL_STRINGL(pubkey, newpubkey, newpubkeylen, 0);
+        // Final arg is zero, don't destroy newpubkey memory
+        ZVAL_STRINGL(zPubKey, newpubkey, newpubkeylen, 0);
     }
 
     RETURN_LONG(result);
 }
 
 PHP_MINIT_FUNCTION(secp256k1) {
+        le_context = zend_register_list_destructors_ex(php_ctx_struct_dtor, NULL, PHP_CONTEXT_RES_NAME, module_number);
     REGISTER_LONG_CONSTANT("SECP256K1_CONTEXT_VERIFY", SECP256K1_CONTEXT_VERIFY, CONST_CS | CONST_PERSISTENT);
     REGISTER_LONG_CONSTANT("SECP256K1_CONTEXT_SIGN", SECP256K1_CONTEXT_SIGN, CONST_CS | CONST_PERSISTENT);
-    ZEND_INIT_MODULE_GLOBALS(secp256k1, php_secp256k1_init_globals, NULL);
     return SUCCESS;
 }
 
@@ -567,11 +752,15 @@ PHP_MINFO_FUNCTION(secp256k1) {
  * Every user visible function must have an entry in secp256k1_functions[].
  */
 const zend_function_entry secp256k1_functions[] = {
+    PHP_FE(secp256k1_context_create, arginfo_secp256k1_context_create)
+    PHP_FE(secp256k1_context_destroy, arginfo_secp256k1_context_destroy)
+    PHP_FE(secp256k1_context_clone, arginfo_secp256k1_context_clone)
     PHP_FE(secp256k1_ecdsa_sign, arginfo_secp256k1_ecdsa_sign)
     PHP_FE(secp256k1_ecdsa_verify, arginfo_secp256k1_ecdsa_verify)
     PHP_FE(secp256k1_ecdsa_sign_compact, arginfo_secp256k1_ecdsa_sign_compact)
     PHP_FE(secp256k1_ecdsa_recover_compact, arginfo_secp256k1_ecdsa_recover_compact)
     PHP_FE(secp256k1_ec_seckey_verify, arginfo_secp256k1_ec_seckey_verify)
+    PHP_FE(secp256k1_ec_seckey_verify2, NULL)
     PHP_FE(secp256k1_ec_pubkey_verify, arginfo_secp256k1_ec_pubkey_verify)
     PHP_FE(secp256k1_ec_pubkey_create, arginfo_secp256k1_ec_pubkey_create)
     PHP_FE(secp256k1_ec_pubkey_decompress, arginfo_secp256k1_ec_pubkey_decompress)

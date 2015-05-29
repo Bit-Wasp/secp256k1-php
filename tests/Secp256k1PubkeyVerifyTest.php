@@ -36,4 +36,26 @@ class Secp256k1PubkeyVerifyTest extends TestCase
         $pubkey = $this->toBinary32($pubkey);
         $this->assertEquals($eVerify, secp256k1_ec_pubkey_verify($pubkey));
     }
+
+     public function getErroneousTypeVectors()
+     {
+        $array = array();
+        $class = new self;
+        $resource = openssl_pkey_new();
+
+        return array(
+            array($array),
+            array($resource),
+            array($class)
+        );
+        }
+
+    /**
+     * @dataProvider getErroneousTypeVectors
+     * @expectedException PHPUnit_Framework_Error_Warning
+     */
+        public function testErroneousTypes($seckey)
+        {
+            $r = \secp256k1_ec_pubkey_verify($seckey);
+        }
 }
