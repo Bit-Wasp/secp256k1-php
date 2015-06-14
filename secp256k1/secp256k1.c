@@ -51,7 +51,8 @@ ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ec_pubkey_create, 0)
 ZEND_END_ARG_INFO();
 
 ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ec_pubkey_decompress, 0)
-    ZEND_ARG_INFO(1, publicKey)
+    ZEND_ARG_INFO(0, publicKeyIn)
+    ZEND_ARG_INFO(1, publicKeyOut)
 ZEND_END_ARG_INFO();
 
 ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ec_privkey_import, 0)
@@ -370,15 +371,11 @@ PHP_FUNCTION(secp256k1_ec_pubkey_decompress) {
     zval *zPubKey;
     unsigned char *pubkey, newpubkey[65];
     int pubkeylen;
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &zPubKey) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz", &pubkey, &pubkeylen, &zPubKey) == FAILURE) {
         return;
     }
 
-    pubkey = Z_STRVAL_P(zPubKey);
-    pubkeylen = Z_STRLEN_P(zPubKey);
-    memcpy(newpubkey, pubkey, pubkeylen);
-    int result;
-    result = secp256k1_ec_pubkey_decompress(context, newpubkey, &pubkeylen);
+    int result = secp256k1_ec_pubkey_decompress(context, pubkey, newpubkey, &pubkeylen);
 
     if (result == 1) {
         ZVAL_STRINGL(zPubKey, newpubkey, pubkeylen, 1);
