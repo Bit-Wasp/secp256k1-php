@@ -62,4 +62,44 @@ class Secp256k1EcdsaSignTest extends TestCase
             $this->assertEquals(1, secp256k1_ecdsa_verify($context, $msg, $signature, $pubkey));
         }
     }
+
+    public function getErroneousTypeVectors()
+    {
+        $private = $this->pack('17a2209250b59f07a25b560aa09cb395a183eb260797c0396b82904f918518d5');
+        $msg32 = $this->pack('0af79b2b747548d59a4a765fb73a72bc4208d00b43d0606c13d332d5c284b0ef');
+        $context = TestCase::getContext();
+
+        $array = array();
+        $class = new Secp256k1EcdsaSignCompactTest;
+        $resource = openssl_pkey_new();
+
+        return array(
+            array($context, $array, $private),
+            array($context, $msg32, $array),
+            array($context, $resource, $private),
+            array($context, $msg32, $resource),
+            array($context, $class, $private),
+            array($context, $msg32, $class)
+        );
+    }
+
+    /**
+     * @dataProvider getErroneousTypeVectors
+     * @expectedException \PHPUnit_Framework_Error_Warning
+     */
+    public function testErroneousTypes($context, $msg32, $private)
+    {
+        $sig = '';
+        $recid = '';
+        \secp256k1_ecdsa_sign_compact($context, $msg32, $private, $sig, $recid);
+    }
+
+    public function testReferenceTypes()
+    {
+        $private = $this->pack('17a2209250b59f07a25b560aa09cb395a183eb260797c0396b82904f918518d5');
+        $msg32 = $this->pack('0af79b2b747548d59a4a765fb73a72bc4208d00b43d0606c13d332d5c284b0ef');
+        $sig = array();
+        $recid = array();
+        $this->assertEquals(1, \secp256k1_ecdsa_sign_compact(TestCase::getContext(), $msg32, $private, $sig, $recid));
+    }
 }

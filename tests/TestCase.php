@@ -15,6 +15,14 @@ class TestCase extends \PHPUnit_Framework_TestCase
         return self::$context;
     }
 
+    public function pack($string)
+    {
+        if (strlen($string) % 2 !== 0)
+            $string = '0' . $string;
+
+        return pack("H*", $string);
+    }
+
     public function toBinary32($str)
     {
         return str_pad(pack("H*", (string)$str), 32, chr(0), STR_PAD_LEFT);

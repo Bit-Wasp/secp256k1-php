@@ -9,6 +9,7 @@
 #include "ext/standard/info.h"
 #include "php_secp256k1.h"
 
+static zend_class_entry *spl_ce_InvalidArgumentException;
 static int le_secp256k1_ctx;
 
 ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_context_create, 0)
@@ -207,6 +208,11 @@ zend_module_entry secp256k1_module_entry = {
 #ifdef COMPILE_DL_SECP256K1
 ZEND_GET_MODULE(secp256k1)
 #endif
+
+int pubkeyLengthFromCompressed(int compressed)
+{
+    return compressed ? PUBKEY_COMPRESSED_LENGTH : PUBKEY_UNCOMPRESSED_LENGTH;
+}
 
 /* Create a secp256k1 context */
 /* {{{ proto resource secp256k1_context_create(int flags)
@@ -407,7 +413,7 @@ PHP_FUNCTION(secp256k1_ecdsa_recover_compact)
 
     ZEND_FETCH_RESOURCE(ctx, secp256k1_context_t*, &zCtx, -1, SECP256K1_CTX_RES_NAME, le_secp256k1_ctx);
 
-    unsigned char newpubkey[(compressed ? 33 : 65)];
+    unsigned char newpubkey[pubkeyLengthFromCompressed(compressed)];
     result = secp256k1_ecdsa_recover_compact(ctx, msg32, signature, newpubkey, &newpubkeylen, compressed, recid);
     if (result) {
         ZVAL_STRINGL(zPubKey, newpubkey, newpubkeylen, 1);
@@ -495,6 +501,11 @@ PHP_FUNCTION(secp256k1_ec_pubkey_decompress)
 
     ZEND_FETCH_RESOURCE(ctx, secp256k1_context_t*, &zCtx, -1, SECP256K1_CTX_RES_NAME, le_secp256k1_ctx);
 
+    if (Z_TYPE_P(zPubKey) != IS_STRING) {
+        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_ec_pubkey_decompress(): Parameter 2 should be string");
+        return;
+    }
+
     result = secp256k1_ec_pubkey_decompress(ctx, pubkey, newpubkey, &pubkeylen);
     if (result) {
         ZVAL_STRINGL(zPubKey, newpubkey, pubkeylen, 1);
@@ -506,7 +517,7 @@ PHP_FUNCTION(secp256k1_ec_privkey_import)
 {
     zval *zCtx, *zSecKey;
     secp256k1_context_t *ctx;
-    unsigned char *derkey, newseckey[32];
+    unsigned char *derkey, newseckey[SECRETKEY_LENGTH];
     int result, derkeylen;
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rsz", &zCtx, &derkey, &derkeylen, &zSecKey) == FAILURE) {
         return;
@@ -516,7 +527,7 @@ PHP_FUNCTION(secp256k1_ec_privkey_import)
 
     result = secp256k1_ec_privkey_import(ctx, newseckey, derkey, derkeylen);
     if (result) {
-        ZVAL_STRINGL(zSecKey, newseckey, 32, 1);
+        ZVAL_STRINGL(zSecKey, newseckey, SECRETKEY_LENGTH, 1);
     }
 
     RETURN_LONG(result);
@@ -527,15 +538,14 @@ PHP_FUNCTION(secp256k1_ec_privkey_export)
     zval *zCtx, *zDerKey;
     secp256k1_context_t *ctx;
     int result, seckeylen, compressed, newkeylen;
-    unsigned char *seckey, newkey[300];
-
+    unsigned char *seckey, newkey[DERKEY_LENGTH];
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rslz", &zCtx, &seckey, &seckeylen, &compressed, &zDerKey) == FAILURE) {
         return;
     }
 
     ZEND_FETCH_RESOURCE(ctx, secp256k1_context_t*, &zCtx, -1, SECP256K1_CTX_RES_NAME, le_secp256k1_ctx);
 
-    result = secp256k1_ec_privkey_export(ctx, seckey, newkey, &newkeylen, compressed ? 1 : 0);
+    result = secp256k1_ec_privkey_export(ctx, seckey, newkey, &newkeylen, compressed);
     if (result) {
         ZVAL_STRINGL(zDerKey, newkey, newkeylen, 1);
     }
@@ -552,6 +562,11 @@ PHP_FUNCTION(secp256k1_ec_privkey_tweak_add)
         return;
     }
 
+    if (Z_TYPE_P(zSecKey) != IS_STRING) {
+        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_ec_privkey_tweak_add(): Parameter 2 should be string");
+        return;
+    }
+
     ZEND_FETCH_RESOURCE(ctx, secp256k1_context_t*, &zCtx, -1, SECP256K1_CTX_RES_NAME, le_secp256k1_ctx);
     newseckey = Z_STRVAL_P(zSecKey);
     result = secp256k1_ec_privkey_tweak_add(ctx, newseckey, tweak);
@@ -565,6 +580,11 @@ PHP_FUNCTION(secp256k1_ec_pubkey_tweak_add)
     unsigned char *tweak, *newpubkey;
     int result, tweaklen, newpubkeylen;
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rzs", &zCtx, &zPubKey, &tweak, &tweaklen) == FAILURE) {
+        return;
+    }
+
+    if (Z_TYPE_P(zPubKey) != IS_STRING) {
+        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_ec_pubkey_tweak_add(): Parameter 2 should be string");
         return;
     }
 
@@ -587,7 +607,10 @@ PHP_FUNCTION(secp256k1_ec_privkey_tweak_mul)
     }
 
     ZEND_FETCH_RESOURCE(ctx, secp256k1_context_t*, &zCtx, -1, SECP256K1_CTX_RES_NAME, le_secp256k1_ctx);
-
+    if (Z_TYPE_P(zSecKey) != IS_STRING) {
+        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_ec_privkey_tweak_mul(): Parameter 2 should be string");
+        return;
+    }
     newseckey = Z_STRVAL_P(zSecKey);
     result = secp256k1_ec_privkey_tweak_mul(ctx, newseckey, tweak);
     RETURN_LONG(result);
@@ -604,7 +627,10 @@ PHP_FUNCTION(secp256k1_ec_pubkey_tweak_mul)
     }
 
     ZEND_FETCH_RESOURCE(ctx, secp256k1_context_t*, &zCtx, -1, SECP256K1_CTX_RES_NAME, le_secp256k1_ctx);
-
+    if (Z_TYPE_P(zPubKey) != IS_STRING) {
+        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_ec_pubkey_tweak_mul(): Parameter 2 should be string");
+        return;
+    }
     newpubkey = Z_STRVAL_P(zPubKey);
     newpubkeylen = Z_STRLEN_P(zPubKey);
     result = secp256k1_ec_pubkey_tweak_mul(ctx, newpubkey, newpubkeylen, tweak);
