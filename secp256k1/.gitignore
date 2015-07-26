@@ -1,4 +1,5 @@
 .deps
+CMakeLists.txt
 *.lo
 *.la
 .libs
