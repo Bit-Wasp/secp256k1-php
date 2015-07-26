@@ -34,7 +34,7 @@ class Secp256k1EcdsaSignCompactTest extends TestCase
 
             $byte = 27 + $recid + ($compressed ? 4 : 0);
             $byteHex = str_pad(dechex($byte), 2, '0', STR_PAD_LEFT);
-            $bin = hex2bin($byteHex) . $sig;
+            $bin = \hex2bin($byteHex) . $sig;
             $base64 = base64_encode($bin);
 
             $this->decodeTest($context, $base64, $msg, $recid, $compressed, $publicKey);
