@@ -2,7 +2,6 @@
 
 namespace BitWasp\Secp256k1Tests;
 
-
 class Secp256k1EcdsaSignCompactTest extends TestCase
 {
     public function testSignCompact()
@@ -22,7 +21,7 @@ class Secp256k1EcdsaSignCompactTest extends TestCase
     public function testRandomSign()
     {
         $context = TestCase::getContext();
-        for($i = 0; $i < 5; $i++) {
+        for ($i = 0; $i < 5; $i++) {
             $compressed = ($i%2==0);
             $private = $this->getPrivate();
             $publicKey = '';

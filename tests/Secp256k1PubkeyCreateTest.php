@@ -88,5 +88,4 @@ class Secp256k1PubkeyCreateTest extends TestCase
         $pubkey = '';
         \secp256k1_ec_pubkey_create(TestCase::getContext(), $privateKey, 'string', $pubkey);
     }
-
 }

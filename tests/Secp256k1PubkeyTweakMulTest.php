@@ -2,9 +2,7 @@
 
 namespace BitWasp\Secp256k1Tests;
 
-
 use Symfony\Component\Yaml\Yaml;
-
 
 class Secp256k1PubkeyTweakMulTest extends TestCase
 {
