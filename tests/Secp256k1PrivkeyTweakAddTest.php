@@ -12,8 +12,10 @@ class Secp256k1PrivkeyTweakAddTest extends TestCase
         $parser = new Yaml();
         $data = $parser->parse(__DIR__ . '/data/secp256k1_privkey_tweak_add.yml');
         $fixtures = array();
+        $context = TestCase::getContext();
         foreach ($data['vectors'] as $vector) {
             $fixtures[] = array(
+                $context,
                 $vector['privkey'],
                 $vector['tweak'],
                 $vector['tweaked']
@@ -25,13 +27,13 @@ class Secp256k1PrivkeyTweakAddTest extends TestCase
     /**
      * @dataProvider getVectors
      */
-    public function testTweaksPrivateKeyAdd($privkey, $tweak, $expectedTweaked)
+    public function testTweaksPrivateKeyAdd($context, $privkey, $tweak, $expectedTweaked)
     {
         $privkey = $this->toBinary32($privkey);
         $tweak = $this->toBinary32($tweak);
         $expectedTweaked = $this->toBinary32($expectedTweaked);
 
-        $result = secp256k1_ec_privkey_tweak_add($privkey, $tweak);
+        $result = secp256k1_ec_privkey_tweak_add($context, $privkey, $tweak);
         $this->assertEquals(1, $result);
         $this->assertEquals($privkey, $expectedTweaked);
 

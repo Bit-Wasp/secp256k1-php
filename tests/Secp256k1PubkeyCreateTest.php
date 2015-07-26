@@ -14,9 +14,11 @@ class Secp256k1PubkeyCreateTest extends TestCase
         $parser = new Yaml();
         $data = $parser->parse(__DIR__ . '/data/pubkey_create.yml');
 
+        $context = TestCase::getContext();
         $fixtures = array();
         foreach ($data['vectors'] as $vector) {
             $fixtures[] = array(
+                $context,
                 $vector['seckey'],
                 $vector['compressed'],
                 $vector['pubkey']
@@ -28,10 +30,10 @@ class Secp256k1PubkeyCreateTest extends TestCase
     /**
      * @dataProvider getVectors
      */
-    public function testCreatesPubkey($hexPrivKey, $expectedCompressed, $expectedPubKey)
+    public function testCreatesPubkey($context, $hexPrivKey, $expectedCompressed, $expectedPubKey)
     {
-        $this->genericTest($hexPrivKey, 1, $expectedCompressed, 1);
-        $this->genericTest($hexPrivKey, 0, $expectedPubKey, 1);
+        $this->genericTest($context, $hexPrivKey, 1, $expectedCompressed, 1);
+        $this->genericTest($context, $hexPrivKey, 0, $expectedPubKey, 1);
     }
 
     /**
@@ -40,12 +42,12 @@ class Secp256k1PubkeyCreateTest extends TestCase
      * @param $expectedKey
      * @param $eResult
      */
-    public function genericTest($hexPrivkey, $fcompressed, $expectedKey, $eResult)
+    public function genericTest($context, $hexPrivkey, $fcompressed, $expectedKey, $eResult)
     {
         $secretKey = $this->toBinary32($hexPrivkey);
 
         $pubkey = '';
-        $this->assertEquals($eResult, secp256k1_ec_pubkey_create($secretKey, $fcompressed, $pubkey));
+        $this->assertEquals($eResult, secp256k1_ec_pubkey_create($context, $secretKey, $fcompressed, $pubkey));
         $this->assertEquals(bin2hex($pubkey), $expectedKey);
         $this->assertEquals(($fcompressed ? 33 : 65), strlen($pubkey));
     }

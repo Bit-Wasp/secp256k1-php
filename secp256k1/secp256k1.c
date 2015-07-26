@@ -166,7 +166,9 @@ PHP_MINIT_FUNCTION(secp256k1) {
     le_secp256k1_ctx = zend_register_list_destructors_ex(secp256k1_ctx_dtor, NULL, SECP256K1_CTX_RES_NAME, module_number);
     REGISTER_LONG_CONSTANT("SECP256K1_CONTEXT_VERIFY", SECP256K1_CONTEXT_VERIFY, CONST_CS | CONST_PERSISTENT);
     REGISTER_LONG_CONSTANT("SECP256K1_CONTEXT_SIGN", SECP256K1_CONTEXT_SIGN, CONST_CS | CONST_PERSISTENT);
+    /*
     ZEND_INIT_MODULE_GLOBALS(secp256k1, php_secp256k1_init_globals, NULL);
+     */
     return SUCCESS;
 }
 
@@ -497,7 +499,7 @@ PHP_FUNCTION(secp256k1_ec_privkey_import)
 {
     zval *zCtx, *zSecKey;
     secp256k1_context_t *ctx;
-    unsigned char *derkey, *newseckey = emalloc(32);
+    unsigned char *derkey, newseckey[32];
     int result, derkeylen;
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rsz", &zCtx, &derkey, &derkeylen, &zSecKey) == FAILURE) {
         return;
@@ -517,8 +519,8 @@ PHP_FUNCTION(secp256k1_ec_privkey_export)
 {
     zval *zCtx, *zDerKey;
     secp256k1_context_t *ctx;
-    int result, seckeylen, compressed, newkeylen = 300;
-    unsigned char *seckey, *newkey;
+    int result, seckeylen, compressed, newkeylen;
+    unsigned char *seckey, newkey[300];
 
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rslz", &zCtx, &seckey, &seckeylen, &compressed, &zDerKey) == FAILURE) {
         return;
@@ -526,7 +528,6 @@ PHP_FUNCTION(secp256k1_ec_privkey_export)
 
     ZEND_FETCH_RESOURCE(ctx, secp256k1_context_t*, &zCtx, -1, SECP256K1_CTX_RES_NAME, le_secp256k1_ctx);
 
-    newkey = emalloc(newkeylen);
     result = secp256k1_ec_privkey_export(ctx, seckey, newkey, &newkeylen, compressed ? 1 : 0);
     if (result) {
         ZVAL_STRINGL(zDerKey, newkey, newkeylen, 1);
@@ -586,6 +587,7 @@ PHP_FUNCTION(secp256k1_ec_privkey_tweak_mul)
 
     ZEND_FETCH_RESOURCE(ctx, secp256k1_context_t*, &zCtx, -1, SECP256K1_CTX_RES_NAME, le_secp256k1_ctx);
 
+    newseckey = Z_STRVAL_P(zSecKey);
     result = secp256k1_ec_privkey_tweak_mul(ctx, newseckey, tweak);
     if (result) {
         Z_STRVAL_P(zSecKey) = newseckey;

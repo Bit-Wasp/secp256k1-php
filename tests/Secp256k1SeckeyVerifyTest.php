@@ -11,9 +11,10 @@ class Secp256k1SeckeyVerifyTest extends TestCase
         $parser = new Yaml();
         $data = $parser->parse(__DIR__ . '/data/pubkey_create.yml');
 
+        $context = TestCase::getContext();
         $fixtures = array();
         foreach ($data['vectors'] as $vector) {
-            $fixtures[] = array($vector['seckey']);
+            $fixtures[] = array($context, $vector['seckey']);
         }
         return $fixtures;
     }
@@ -21,19 +22,19 @@ class Secp256k1SeckeyVerifyTest extends TestCase
     /**
      * @dataProvider getVectors
      */
-    public function testVerfiesSeckey($hexPrivKey)
+    public function testVerfiesSeckey($context, $hexPrivKey)
     {
-        $this->genericTest($hexPrivKey, 1);
+        $this->genericTest($context, $hexPrivKey, 1);
     }
 
     /**
      * @param string $privkey
      * @param bool $eVerify
      */
-    public function genericTest($privkey, $eVerify)
+    public function genericTest($context, $privkey, $eVerify)
     {
         $sec = $this->toBinary32($privkey);
-        $this->assertEquals($eVerify, \secp256k1_ec_seckey_verify($sec));
+        $this->assertEquals($eVerify, \secp256k1_ec_seckey_verify($context, $sec));
     }
 
 }

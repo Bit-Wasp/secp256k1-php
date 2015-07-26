@@ -16,8 +16,9 @@ class Secp256k1EcdsaSignTest extends TestCase
         $data = $parser->parse(__DIR__ . '/data/deterministicSignatures.yml');
 
         $fixtures = array();
+        $context = TestCase::getContext();
         foreach ($data['vectors'] as $vector) {
-            $fixtures[] = array($vector['privkey'], $vector['msg'], substr($vector['sig'], 0, strlen($vector['sig'])-2));
+            $fixtures[] = array($context, $vector['privkey'], $vector['msg'], substr($vector['sig'], 0, strlen($vector['sig'])-2));
         }
         return $fixtures;
     }
@@ -26,9 +27,10 @@ class Secp256k1EcdsaSignTest extends TestCase
      * Testing return value 1
      * @dataProvider getVectors
      */
-    public function testEcdsaSign($hexPrivKey, $msg, $sig)
+    public function testEcdsaSign($context, $hexPrivKey, $msg, $sig)
     {
         $this->genericTest(
+            $context,
             $hexPrivKey,
             $msg,
             $sig,
@@ -42,13 +44,13 @@ class Secp256k1EcdsaSignTest extends TestCase
      * @param $expectedSig
      * @param $eSigCreate
      */
-    private function genericTest($privkeyhex, $msg, $expectedSig, $eSigCreate)
+    private function genericTest($context, $privkeyhex, $msg, $expectedSig, $eSigCreate)
     {
         $privkey = $this->toBinary32($privkeyhex);
         $msg = $this->toBinary32($msg);
 
         $signature = '';
-        $sign = secp256k1_ecdsa_sign($msg, $privkey, $signature);
+        $sign = secp256k1_ecdsa_sign($context, $msg, $privkey, $signature);
         $this->assertEquals($eSigCreate, $sign);
         $this->assertEquals($expectedSig, bin2hex($signature));
         
@@ -56,8 +58,8 @@ class Secp256k1EcdsaSignTest extends TestCase
 
         if ($eSigCreate == 1) {
             $pubkey = '';
-            $this->assertEquals(1, secp256k1_ec_pubkey_create($privkey, 0, $pubkey));
-            $this->assertEquals(1, secp256k1_ecdsa_verify($msg, $signature, $pubkey));
+            $this->assertEquals(1, secp256k1_ec_pubkey_create($context, $privkey, 0, $pubkey));
+            $this->assertEquals(1, secp256k1_ecdsa_verify($context, $msg, $signature, $pubkey));
         }
     }
 }
