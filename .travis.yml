@@ -14,7 +14,7 @@ install:
     - |
         wget https://github.com/bitcoin/secp256k1/archive/4c63780710351ffcc52341497e3ca0e518fbad79.zip \
         && unzip 4c63780710351ffcc52341497e3ca0e518fbad79.zip \
-        && cd libsecp256k1 \
+        && cd secp256k1-4c63780710351ffcc52341497e3ca0e518fbad79 \
         && ./autogen.sh && ./configure && make && sudo make install \
         && cd ..
     - |
