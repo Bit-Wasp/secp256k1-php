@@ -30,7 +30,7 @@ before_script:
 
 script:
     - |
-        cd libsecp256k1 \
+        cd secp256k1-4c63780710351ffcc52341497e3ca0e518fbad79 \
         && ./tests \
         && cd ..
     - php -dextension=secp256k1.so vendor/phpunit/phpunit/phpunit tests/
