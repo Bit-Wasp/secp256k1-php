@@ -81,6 +81,62 @@ class Secp256k1EcdsaVerifyTest extends TestCase
         );
     }
 
+    public function getErroneousTypeVectors()
+    {
+        $private = $this->pack('17a2209250b59f07a25b560aa09cb395a183eb260797c0396b82904f918518d5');
+        $public = '';
+        $context = TestCase::getContext();
+        $this->assertEquals(1, \secp256k1_ec_pubkey_create($context, $private, 0, $public), 'public');
+        $msg32 = $this->pack('0af79b2b747548d59a4a765fb73a72bc4208d00b43d0606c13d332d5c284b0ef');
+        $sig = $this->pack('304502206af189487988df26eb4c2b2c7d74b78e19822bbb2fc27dada0800019abd20b46022100f0e6c4dabd4970afe125f707fbd6d62e79e950bdb2b4b9700214779ae475b05d01');
+
+        $array = array();
+        $class = new Secp256k1EcdsaVerifyTest;
+        $resource = openssl_pkey_new();
+
+        return array(
+            array($context, $array, $sig, $public),
+            array($context, $msg32, $array, $public),
+            array($context, $msg32, $sig, $array),
+            array($context, $resource, $sig, $public),
+            array($context, $msg32, $resource, $public),
+            array($context, $msg32, $sig, $resource),
+            array($context, $class, $sig, $public),
+            array($context, $msg32, $class, $public),
+            array($context, $msg32, $sig, $class)
+        );
+    }
+
+    /**
+     * @dataProvider getErroneousTypeVectors
+     * @expectedException \PHPUnit_Framework_Error_Warning
+     */
+    public function testErroneousTypes($context, $msg32, $sig, $public)
+    {
+        \secp256k1_ecdsa_verify($context, $msg32, $sig, $public);
+    }
+
+    public function testVerifyWithInvalidInput()
+    {
+        $context = TestCase::getContext();
+        $private = $this->pack('17a2209250b59f07a25b560aa09cb395a183eb260797c0396b82904f918518d5');
+        $msg32 = $this->pack('0af79b2b747548d59a4a765fb73a72bc4208d00b43d0606c13d332d5c284b0ef');
+        $sig = $this->pack('304502206af189487988df26eb4c2b2c7d74b78e19822bbb2fc27dada0800019abd20b46022100f0e6c4dabd4970afe125f707fbd6d62e79e950bdb2b4b9700214779ae475b05d01');
+
+        $public = '';
+        $this->assertEquals(1, \secp256k1_ec_pubkey_create($context, $private, 0, $public), 'public');
+        $this->assertEquals(1, \secp256k1_ecdsa_verify($context, $msg32, $sig, $public), 'initial check');
+
+        $this->assertEquals(0, \secp256k1_ecdsa_verify($context, '', $sig, $public), 'msg32 as empty string');
+        $this->assertEquals(-2, \secp256k1_ecdsa_verify($context, $msg32, '', $public), 'sig as empty string');
+        $this->assertEquals(-1, \secp256k1_ecdsa_verify($context, $msg32, $sig, ''), 'pubkey as empty string');
+
+        $this->assertEquals(0, \secp256k1_ecdsa_verify($context, 1, $sig, $public), 'msg32 as 1');
+        $this->assertEquals(-2, \secp256k1_ecdsa_verify($context, $msg32, 1, $public), 'sig as 1');
+        $this->assertEquals(-1, \secp256k1_ecdsa_verify($context, $msg32, $sig, 1), 'public as 1');
+
+    }
+
     /**
      * @param $privkey
      * @param $msg

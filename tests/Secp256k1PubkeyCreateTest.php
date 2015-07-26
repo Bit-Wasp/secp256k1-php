@@ -51,4 +51,42 @@ class Secp256k1PubkeyCreateTest extends TestCase
         $this->assertEquals(bin2hex($pubkey), $expectedKey);
         $this->assertEquals(($fcompressed ? 33 : 65), strlen($pubkey));
     }
+
+
+    public function getErroneousTypeVectors()
+    {
+        $context = TestCase::getContext();
+        $compressed = 1;
+        $privateKey = $this->pack('0af79b2b747548d59a4a765fb73a72bc4208d00b43d0606c13d332d5c284b0ef');
+        $array = array();
+        $class = new self;
+        $resource = openssl_pkey_new();
+        return array(
+            array($context, $array, $compressed),
+            array($context, $privateKey, $array),
+            array($context, $resource, $compressed),
+            array($context, $privateKey, $resource),
+            array($context, $class, $compressed),
+            array($context, $privateKey, $class)
+        );
+    }
+    /**
+     * @dataProvider getErroneousTypeVectors
+     * @expectedException \PHPUnit_Framework_Error_Warning
+     */
+    public function testErroneousTypes($context, $seckey, $compressed)
+    {
+        $pubkey = '';
+        $r = \secp256k1_ec_pubkey_create($context, $seckey, $compressed, $pubkey);
+    }
+    /**
+     * @expectedException \PHPUnit_Framework_Error_Warning
+     */
+    public function testCompressedAsAString()
+    {
+        $privateKey = $this->pack('0af79b2b747548d59a4a765fb73a72bc4208d00b43d0606c13d332d5c284b0ef');
+        $pubkey = '';
+        \secp256k1_ec_pubkey_create(TestCase::getContext(), $privateKey, 'string', $pubkey);
+    }
+
 }
