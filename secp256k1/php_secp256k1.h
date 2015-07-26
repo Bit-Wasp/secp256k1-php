@@ -16,6 +16,14 @@ extern zend_module_entry secp256k1_module_entry;
 # define SECP256K1_G(v) (secp256k1_globals.v)
 #endif
 
+#define MAX_SIGNATURE_LENGTH 72
+#define COMPACT_SIGNATURE_LENGTH 64
+#define PUBKEY_COMPRESSED_LENGTH 33
+#define PUBKEY_UNCOMPRESSED_LENGTH 65
+#define HASH_LENGTH 32
+#define SECRETKEY_LENGTH 32
+#define DERKEY_LENGTH 300
+
 PHP_FUNCTION(secp256k1_context_create);
 PHP_FUNCTION(secp256k1_context_destroy);
 PHP_FUNCTION(secp256k1_context_clone);

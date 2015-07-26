@@ -3,7 +3,7 @@
 namespace BitWasp\Secp256k1Tests;
 
 
-class Secp256k1EcdsaSignCompact extends TestCase
+class Secp256k1EcdsaSignCompactTest extends TestCase
 {
     public function testSignCompact()
     {
