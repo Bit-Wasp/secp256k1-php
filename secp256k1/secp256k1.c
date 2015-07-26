@@ -366,7 +366,7 @@ PHP_FUNCTION(secp256k1_ecdsa_sign)
         return;
     }
 
-    result = secp256k1_ecdsa_sign(ctx, msg32, newsig, &newsiglen, seckey, 0, 0);
+    result = secp256k1_ecdsa_sign(ctx, msg32, newsig, &newsiglen, seckey, NULL, NULL);
     if (result) {
         ZVAL_STRINGL(zSig, newsig, newsiglen, 1);
     }
