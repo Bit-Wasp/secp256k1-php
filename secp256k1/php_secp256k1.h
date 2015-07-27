@@ -4,6 +4,7 @@
 #ifndef PHP_SECP256K1_H
 #define PHP_SECP256K1_H
 
+
 extern zend_module_entry secp256k1_module_entry;
 #define phpext_secp256k1_ptr &secp256k1_module_entry
 

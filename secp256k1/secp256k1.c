@@ -348,7 +348,7 @@ PHP_FUNCTION(secp256k1_ecdsa_sign)
 {
     zval *zCtx, *zSig;
     secp256k1_context_t *ctx;
-    int seckeylen, msg32len, result, newsiglen;
+    int seckeylen, msg32len, result, newsiglen = 72;
     unsigned char *seckey, *msg32, newsig[MAX_SIGNATURE_LENGTH];
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rssz", &zCtx, &msg32, &msg32len, &seckey, &seckeylen, &zSig) == FAILURE) {
         return;
