@@ -12,8 +12,9 @@ before_install:
 
 install:
     - |
-        git clone git://github.com/bitcoin/secp256k1.git libsecp256k1 \
-        && cd libsecp256k1 \
+        wget https://github.com/bitcoin/secp256k1/archive/4c63780710351ffcc52341497e3ca0e518fbad79.zip \
+        && unzip 4c63780710351ffcc52341497e3ca0e518fbad79.zip \
+        && cd secp256k1-4c63780710351ffcc52341497e3ca0e518fbad79 \
         && ./autogen.sh && ./configure && make && sudo make install \
         && cd ..
     - |
@@ -29,10 +30,10 @@ before_script:
 
 script:
     - |
-        cd libsecp256k1 \
+        cd secp256k1-4c63780710351ffcc52341497e3ca0e518fbad79 \
         && ./tests \
         && cd ..
-    - php -dextension=secp256k1.so vendor/phpunit/phpunit/phpunit --debug tests/
+    - php -dextension=secp256k1.so vendor/phpunit/phpunit/phpunit tests/
 
 notifications:
   webhooks:
