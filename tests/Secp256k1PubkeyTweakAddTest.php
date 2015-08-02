@@ -16,6 +16,7 @@ class Secp256k1PubkeyTweakAddTest extends TestCase
         $parser = new Yaml();
         $data = $parser->parse(__DIR__ . '/data/secp256k1_pubkey_tweak_add.yml');
 
+        $compressed = 0;
         $context = TestCase::getContext();
         $fixtures = array();
         foreach ($data['vectors'] as $c => $vector) {
@@ -26,7 +27,8 @@ class Secp256k1PubkeyTweakAddTest extends TestCase
                 $context,
                 $vector['publicKey'],
                 $vector['tweak'],
-                $vector['tweaked']
+                $vector['tweaked'],
+                $compressed
             );
         }
         return $fixtures;
@@ -35,14 +37,15 @@ class Secp256k1PubkeyTweakAddTest extends TestCase
     /**
      * @dataProvider getVectors
      */
-    public function testAddsToPubkey($context, $publicKey, $tweak, $expectedPublicKey)
+    public function testAddsToPubkey($context, $publicKey, $tweak, $expectedPublicKey, $compressed)
     {
         $this->genericTest(
             $context,
             $publicKey,
             $tweak,
             $expectedPublicKey,
-            1
+            1,
+            $compressed
         );
     }
 
@@ -52,13 +55,18 @@ class Secp256k1PubkeyTweakAddTest extends TestCase
      * @param $expectedPublicKey
      * @param $eAdd
      */
-    private function genericTest($context, $publicKey, $tweak, $expectedPublicKey, $eAdd)
+    private function genericTest($context, $publicKey, $tweak, $expectedPublicKey, $eAdd, $compressed)
     {
         $publicKey = $this->toBinary32($publicKey);
+        $p = '';
+        secp256k1_ec_pubkey_parse($context, $publicKey, $p);
         $tweak = $this->toBinary32($tweak);
-        $result = secp256k1_ec_pubkey_tweak_add($context, $publicKey, $tweak);
+        $result = secp256k1_ec_pubkey_tweak_add($context, $p, $tweak);
         $this->assertEquals($eAdd, $result);
-        $this->assertEquals(bin2hex($publicKey), $expectedPublicKey);
+
+        $pSer = '';
+        secp256k1_ec_pubkey_serialize($context, $p, $compressed, $pSer);
+        $this->assertEquals(bin2hex($pSer), $expectedPublicKey);
     }
 
 
@@ -89,7 +97,7 @@ class Secp256k1PubkeyTweakAddTest extends TestCase
     }
 
     /**
-     * @expectedException \Exception
+     * @expectedException \PHPUnit_Framework_Error_Warning
      */
     public function testEnforceZvalString()
     {
