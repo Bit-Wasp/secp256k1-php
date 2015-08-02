@@ -52,15 +52,10 @@ class Secp256k1EcdsaSignTest extends TestCase
         $signature = '';
         $sign = secp256k1_ecdsa_sign($context, $msg, $privkey, $signature);
         $this->assertEquals($eSigCreate, $sign);
-        $this->assertEquals($expectedSig, bin2hex($signature));
+        $this->assertEquals('secp256k1_ecdsa_signature_t', get_resource_type($signature));
         
         return;
 
-        if ($eSigCreate == 1) {
-            $pubkey = '';
-            $this->assertEquals(1, secp256k1_ec_pubkey_create($context, $privkey, 0, $pubkey));
-            $this->assertEquals(1, secp256k1_ecdsa_verify($context, $msg, $signature, $pubkey));
-        }
     }
 
     public function getErroneousTypeVectors()
@@ -70,7 +65,7 @@ class Secp256k1EcdsaSignTest extends TestCase
         $context = TestCase::getContext();
 
         $array = array();
-        $class = new Secp256k1EcdsaSignCompactTest;
+        $class = new Secp256k1EcdsaSignTest;
         $resource = openssl_pkey_new();
 
         return array(
@@ -90,16 +85,7 @@ class Secp256k1EcdsaSignTest extends TestCase
     public function testErroneousTypes($context, $msg32, $private)
     {
         $sig = '';
-        $recid = '';
-        \secp256k1_ecdsa_sign_compact($context, $msg32, $private, $sig, $recid);
+        \secp256k1_ecdsa_sign($context, $msg32, $private, $sig);
     }
 
-    public function testReferenceTypes()
-    {
-        $private = $this->pack('17a2209250b59f07a25b560aa09cb395a183eb260797c0396b82904f918518d5');
-        $msg32 = $this->pack('0af79b2b747548d59a4a765fb73a72bc4208d00b43d0606c13d332d5c284b0ef');
-        $sig = array();
-        $recid = array();
-        $this->assertEquals(1, \secp256k1_ecdsa_sign_compact(TestCase::getContext(), $msg32, $private, $sig, $recid));
-    }
 }

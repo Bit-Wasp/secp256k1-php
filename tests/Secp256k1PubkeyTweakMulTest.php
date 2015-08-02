@@ -16,6 +16,7 @@ class Secp256k1PubkeyTweakMulTest extends TestCase
         $parser = new Yaml();
         $data = $parser->parse(__DIR__ . '/data/secp256k1_pubkey_tweak_mul.yml');
 
+        $compressed = 0;
         $context = TestCase::getContext();
         $fixtures = array();
         foreach ($data['vectors'] as $c => $vector) {
@@ -26,7 +27,8 @@ class Secp256k1PubkeyTweakMulTest extends TestCase
                 $context,
                 $vector['publicKey'],
                 $vector['tweak'],
-                $vector['tweaked']
+                $vector['tweaked'],
+                $compressed
             );
         }
         return $fixtures;
@@ -35,14 +37,15 @@ class Secp256k1PubkeyTweakMulTest extends TestCase
     /**
      * @dataProvider getVectors
      */
-    public function testMultipliesByPubkey($context, $publicKey, $tweak, $expectedPublicKey)
+    public function testMultipliesByPubkey($context, $publicKey, $tweak, $expectedPublicKey, $compressed)
     {
         $this->genericTest(
             $context,
             $publicKey,
             $tweak,
             $expectedPublicKey,
-            1
+            1,
+            $compressed
         );
     }
 
@@ -52,13 +55,17 @@ class Secp256k1PubkeyTweakMulTest extends TestCase
      * @param $expectedPublicKey
      * @param $eMul
      */
-    private function genericTest($context, $publicKey, $tweak, $expectedPublicKey, $eMul)
+    private function genericTest($context, $publicKey, $tweak, $expectedPublicKey, $eMul, $compressed)
     {
         $publicKey = $this->toBinary32($publicKey);
         $tweak = $this->toBinary32($tweak);
-        $result = secp256k1_ec_pubkey_tweak_mul($context, $publicKey, $tweak);
+        $p = '';
+        secp256k1_ec_pubkey_parse($context, $publicKey, $p);
+        $result = secp256k1_ec_pubkey_tweak_mul($context, $p, $tweak);
         $this->assertEquals($eMul, $result);
-        $this->assertEquals($expectedPublicKey, bin2hex($publicKey));
+        $ser = '';
+        secp256k1_ec_pubkey_serialize($context, $p, $compressed, $ser);
+        $this->assertEquals($expectedPublicKey, bin2hex($ser));
     }
 
     public function getErroneousTypeVectors()
@@ -85,7 +92,7 @@ class Secp256k1PubkeyTweakMulTest extends TestCase
     }
 
     /**
-     * @expectedException \Exception
+     * @expectedException \PHPUnit_Framework_Error_Warning
      */
     public function testEnforceZvalString()
     {

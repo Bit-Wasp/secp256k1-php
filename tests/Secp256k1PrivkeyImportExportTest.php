@@ -36,12 +36,10 @@ class Secp256k1PrivkeyImportExportTest extends TestCase
         $seckey = $this->toBinary32($seckey);
 
         $der = '';
-        $r = secp256k1_ec_privkey_export($context, $seckey, $compressed, $der);
-        $this->assertEquals(1, $r);
+        $this->assertEquals(1, secp256k1_ec_privkey_export($context, $seckey, $compressed, $der));
 
         $recovered = '';
-        $r = secp256k1_ec_privkey_import($context, $der, $recovered);
-        $this->assertEquals(1, $r);
+        $this->assertEquals(1, secp256k1_ec_privkey_import($context, $der, $recovered));
 
         $this->assertEquals($seckey, $recovered);
 
