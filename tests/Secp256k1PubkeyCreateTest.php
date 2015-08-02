@@ -55,7 +55,7 @@ class Secp256k1PubkeyCreateTest extends TestCase
         $this->assertEquals($expectedKey, bin2hex($serialized));
         $this->assertEquals(($fcompressed ? 33 : 65), strlen($serialized));
     }
-    
+
     public function getErroneousTypeVectors()
     {
         $context = TestCase::getContext();
