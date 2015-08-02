@@ -47,45 +47,36 @@ class Secp256k1PubkeyCreateTest extends TestCase
         $secretKey = $this->toBinary32($hexPrivkey);
 
         $pubkey = '';
-        $this->assertEquals($eResult, secp256k1_ec_pubkey_create($context, $secretKey, $fcompressed, $pubkey));
-        $this->assertEquals(bin2hex($pubkey), $expectedKey);
-        $this->assertEquals(($fcompressed ? 33 : 65), strlen($pubkey));
+        $this->assertEquals($eResult, secp256k1_ec_pubkey_create($context, $secretKey, $pubkey));
+        $this->assertEquals('secp256k1_pubkey_t', get_resource_type($pubkey));
+
+        $serialized = '';
+        secp256k1_ec_pubkey_serialize($context, $pubkey, $fcompressed, $serialized);
+        $this->assertEquals($expectedKey, bin2hex($serialized));
+        $this->assertEquals(($fcompressed ? 33 : 65), strlen($serialized));
     }
-
-
+    
     public function getErroneousTypeVectors()
     {
         $context = TestCase::getContext();
-        $compressed = 1;
-        $privateKey = $this->pack('0af79b2b747548d59a4a765fb73a72bc4208d00b43d0606c13d332d5c284b0ef');
+
         $array = array();
         $class = new self;
         $resource = openssl_pkey_new();
         return array(
-            array($context, $array, $compressed),
-            array($context, $privateKey, $array),
-            array($context, $resource, $compressed),
-            array($context, $privateKey, $resource),
-            array($context, $class, $compressed),
-            array($context, $privateKey, $class)
+            array($context, $array),
+            array($context, $resource),
+            array($context, $class),
         );
     }
     /**
      * @dataProvider getErroneousTypeVectors
      * @expectedException \PHPUnit_Framework_Error_Warning
      */
-    public function testErroneousTypes($context, $seckey, $compressed)
+    public function testErroneousTypes($context, $seckey)
     {
         $pubkey = '';
-        $r = \secp256k1_ec_pubkey_create($context, $seckey, $compressed, $pubkey);
+        \secp256k1_ec_pubkey_create($context, $seckey, $pubkey);
     }
-    /**
-     * @expectedException \PHPUnit_Framework_Error_Warning
-     */
-    public function testCompressedAsAString()
-    {
-        $privateKey = $this->pack('0af79b2b747548d59a4a765fb73a72bc4208d00b43d0606c13d332d5c284b0ef');
-        $pubkey = '';
-        \secp256k1_ec_pubkey_create(TestCase::getContext(), $privateKey, 'string', $pubkey);
-    }
+
 }
