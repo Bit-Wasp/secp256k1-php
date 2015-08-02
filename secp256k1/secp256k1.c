@@ -557,6 +557,7 @@ PHP_FUNCTION(secp256k1_ecdsa_sign)
  *           sig64:      pointer to initialized signature that supports pubkey recovery (cannot be NULL)
  *  Out:     pubkey:     pointer to the recoved public key (cannot be NULL)
  */
+
 PHP_FUNCTION(secp256k1_ecdsa_recover)
 {
     zval *zCtx, *zSig, *zPubKey;
@@ -564,14 +565,15 @@ PHP_FUNCTION(secp256k1_ecdsa_recover)
     secp256k1_pubkey_t *pubkey;
     secp256k1_ecdsa_signature_t *sig;
     unsigned char *msg32;
-    int result, recid, msg32len, compressed;
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rsrllz", &zCtx, &msg32, &msg32len, &zSig, &recid, &compressed, &zPubKey) == FAILURE) {
+    int result, msg32len;
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rsrz", &zCtx, &msg32, &msg32len, &zSig, &zPubKey) == FAILURE) {
         return;
     }
 
     ZEND_FETCH_RESOURCE(ctx, secp256k1_context_t*, &zCtx, -1, SECP256K1_CTX_RES_NAME, le_secp256k1_ctx);
     ZEND_FETCH_RESOURCE(sig, secp256k1_ecdsa_signature_t*, &zSig, -1, SECP256K1_SIG_RES_NAME, le_secp256k1_sig);
 
+    pubkey = emalloc(sizeof(secp256k1_pubkey_t));
     result = secp256k1_ecdsa_recover(ctx, msg32, sig, pubkey);
     if (result) {
         ZEND_REGISTER_RESOURCE(zPubKey, pubkey, le_secp256k1_pubkey);
