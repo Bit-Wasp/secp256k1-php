@@ -12,9 +12,10 @@ class Secp256k1PubkeyVerifyTest extends TestCase
         $parser = new Yaml();
         $data = $parser->parse(__DIR__ . '/data/pubkey_create.yml');
 
+        $context = TestCase::getContext();
         $fixtures = array();
         foreach ($data['vectors'] as $vector) {
-            $fixtures[] = array($vector['pubkey']);
+            $fixtures[] = array($context, $vector['pubkey']);
         }
         return $fixtures;
     }
@@ -22,18 +23,39 @@ class Secp256k1PubkeyVerifyTest extends TestCase
     /**
      * @dataProvider getVectors
      */
-    public function testVerifiesPublicKey($pubkey)
+    public function testVerifiesPublicKey($context, $pubkey)
     {
-        $this->genericTest($pubkey, 1);
+        $this->genericTest($context, $pubkey, 1);
     }
 
     /**
      * @param $pubkey
      * @param $eVerify
      */
-    private function genericTest($pubkey, $eVerify)
+    private function genericTest($context, $pubkey, $eVerify)
     {
         $pubkey = $this->toBinary32($pubkey);
-        $this->assertEquals($eVerify, secp256k1_ec_pubkey_verify($pubkey));
+        $this->assertEquals($eVerify, secp256k1_ec_pubkey_verify($context, $pubkey));
+    }
+
+    public function getErroneousTypeVectors()
+    {
+        $context = TestCase::getContext();
+        $array = array();
+        $class = new self;
+        $resource = openssl_pkey_new();
+        return array(
+            array($context, $array),
+            array($context, $resource),
+            array($context, $class)
+        );
+    }
+    /**
+     * @dataProvider getErroneousTypeVectors
+     * @expectedException \PHPUnit_Framework_Error_Warning
+     */
+    public function testErroneousTypes($context, $seckey)
+    {
+        \secp256k1_ec_pubkey_verify($context, $seckey);
     }
 }
