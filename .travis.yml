@@ -12,7 +12,7 @@ before_install:
 
 install:
     - |
-        git clone git@github.com:bitcoin/secp256k1.git libsecp256k1 \
+        git clone git://github.com/bitcoin/secp256k1.git libsecp256k1 \
         && cd libsecp256k1 \
         && ./autogen.sh && ./configure && make && sudo make install \
         && cd ..
