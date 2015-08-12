@@ -201,6 +201,9 @@ PHP_MINIT_FUNCTION(secp256k1) {
     le_secp256k1_sig = zend_register_list_destructors_ex(secp256k1_sig_dtor, NULL, SECP256K1_SIG_RES_NAME, module_number);
     REGISTER_LONG_CONSTANT("SECP256K1_CONTEXT_VERIFY", SECP256K1_CONTEXT_VERIFY, CONST_CS | CONST_PERSISTENT);
     REGISTER_LONG_CONSTANT("SECP256K1_CONTEXT_SIGN", SECP256K1_CONTEXT_SIGN, CONST_CS | CONST_PERSISTENT);
+    REGISTER_STRING_CONSTANT("SECP256K1_TYPE_CONTEXT", SECP256K1_CTX_RES_NAME, CONST_CS | CONST_PERSISTENT);
+    REGISTER_STRING_CONSTANT("SECP256K1_TYPE_PUBKEY", SECP256K1_PUBKEY_RES_NAME, CONST_CS | CONST_PERSISTENT);
+    REGISTER_STRING_CONSTANT("SECP256K1_TYPE_SIG", SECP256K1_SIG_RES_NAME, CONST_CS | CONST_PERSISTENT);
     /*
     ZEND_INIT_MODULE_GLOBALS(secp256k1, php_secp256k1_init_globals, NULL);
      */
@@ -360,12 +363,11 @@ PHP_FUNCTION(secp256k1_ecdsa_signature_serialize_compact)
     zval *zCtx, *zSig, *zSigOut, *zRecId;
     secp256k1_context_t *ctx;
     secp256k1_ecdsa_signature_t *sig;
-    int result, recid, sigoutlen = COMPACT_SIGNATURE_LENGTH;
+    int result, recid = 0, sigoutlen = COMPACT_SIGNATURE_LENGTH;
     unsigned char *sigout;
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rrz|z", &zCtx, &zSig, &zSigOut, &zRecId) == FAILURE) {
         RETURN_FALSE;
     }
-
     ZEND_FETCH_RESOURCE(ctx, secp256k1_context_t*, &zCtx, -1, SECP256K1_CTX_RES_NAME, le_secp256k1_ctx);
     ZEND_FETCH_RESOURCE(sig, secp256k1_ecdsa_signature_t*, &zSig, -1, SECP256K1_SIG_RES_NAME, le_secp256k1_sig);
 
