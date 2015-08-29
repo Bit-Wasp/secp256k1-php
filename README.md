@@ -5,6 +5,10 @@
 
 PHP bindings for https://github.com/bitcoin/secp256k1
 
+Please note that the upstream library, [[libsecp256k1](https://github.com/bitcoin/secp256k1)] is considered 
+experimental by it's authors, and has not yet been formally released. For this reason, it's use should be 
+discouraged. For consensus systems this warning is critical.
+
 ### Requirements
 Only PHP 5.x is supported at the moment - PHP7 will come soon.  
 
