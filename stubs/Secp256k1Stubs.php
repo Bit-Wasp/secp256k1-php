@@ -7,6 +7,7 @@ namespace {
     define('SECP256K1_TYPE_CONTEXT', "secp256k1_context_t");
     define('SECP256K1_TYPE_PUBKEY', "secp256k1_pubkey_t");
     define('SECP256K1_TYPE_SIG', "secp256k1_ecdsa_signature_t");
+    define('SECP256K1_TYPE_RECOVERABLE_SIG', "secp256k1_ecdsa_recoverable_signature_t");
 
     /**
      * Create a Secp256k1 context resource
@@ -88,20 +89,6 @@ namespace {
     }
 
     /**
-     * Parses a compact signature into a secp256k1_ecdsa_signature_t resource.
-     * Note: If $recIdIn is provided, the resource will support pubkey recovery
-     *
-     * @param resource $secp256k1_context_t
-     * @param string $signatureIn
-     * @param resource|string $secp256k1_ecdsa_signature_t
-     * @param int $recIdIn [optional]
-     * @return int
-     */
-    function secp256k1_ecdsa_signature_parse_compact($secp256k1_context_t, $signatureIn, $secp256k1_ecdsa_signature_t, $recIdIn)
-    {
-    }
-
-    /**
      * @param resource $secp256k1_context_t
      * @param string $msg32
      * @param resource $secp256k1_ecdsa_signature_t - signature resource
@@ -126,11 +113,53 @@ namespace {
     /**
      * @param resource $secp256k1_context_t
      * @param string $msg32
+     * @param string $privateKey
+     * @param resource|string $secp256k1_ecdsa_recoverable_signature_t
+     * @return int
+     */
+    function secp256k1_ecdsa_sign_recoverable($secp256k1_context_t, $msg32, $privateKey, $secp256k1_ecdsa_recoverable_signature_t)
+    {
+    }
+
+    /**
+     * @param resource $secp256k1_context_t
+     * @param resource $secp256k1_ecdsa_recoverable_signature_t
      * @param resource $secp256k1_ecdsa_signature_t
+     * @return int
+     */
+    function secp256k1_ecdsa_recoverable_signature_serialize_compact($secp256k1_context_t, $secp256k1_ecdsa_recoverable_signature_t, $secp256k1_ecdsa_signature_t)
+    {
+    }
+
+    /**
+     * @param resource $secp256k1_context_t
+     * @param string $output64
+     * @param int $recid
+     * @param resource $secp256k1_ecdsa_recoverable_signature_t
+     * @return int
+     */
+    function secp256k1_ecdsa_recoverable_signature_parse_compact($secp256k1_context_t, $secp256k1_ecdsa_recoverable_signature_t, $output64, $recid)
+    {
+    }
+
+    /**
+     * @param resource $secp256k1_context_t
+     * @param resource $secp256k1_ecdsa_recoverable_signature_t
+     * @param resource|string $secp256k1_ecdsa_signature_t
+     * @return int
+     */
+    function secp256k1_ecdsa_recoverable_signature_convert($secp256k1_context_t, $secp256k1_ecdsa_recoverable_signature_t, $secp256k1_ecdsa_signature_t)
+    {
+    }
+
+    /**
+     * @param resource $secp256k1_context_t
+     * @param string $msg32
+     * @param resource $secp256k1_ecdsa_recoverable_signature_t
      * @param resource|string $secp256k1_pubkey_t
      * @return int
      */
-    function secp256k1_ecdsa_recover($secp256k1_context_t, $msg32, $secp256k1_ecdsa_signature_t, $secp256k1_pubkey_t)
+    function secp256k1_ecdsa_recover($secp256k1_context_t, $msg32, $secp256k1_ecdsa_recoverable_signature_t, $secp256k1_pubkey_t)
     {
     }
 
