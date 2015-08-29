@@ -11,6 +11,7 @@ extern zend_module_entry secp256k1_module_entry;
 #define SECP256K1_CTX_RES_NAME "secp256k1_context_t"
 #define SECP256K1_PUBKEY_RES_NAME "secp256k1_pubkey_t"
 #define SECP256K1_SIG_RES_NAME "secp256k1_ecdsa_signature_t"
+#define SECP256K1_RECOVERABLE_SIG_RES_NAME "secp256k1_ecdsa_recoverable_signature_t"
 
 #ifdef ZTS
 # define SECP256K1_G(v) TSRMG(secp256k1_globals_id, zend_secp256k1_globals *, v)
