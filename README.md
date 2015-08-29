@@ -13,7 +13,7 @@ discouraged. For consensus systems this warning is critical.
 Only PHP 5.x is supported at the moment - PHP7 will come soon.  
 
 ### About the extension
-  - Runs against latest libsecp256k1
+  - Runs against latest libsecp256k1 (until upstream produces versioned releases)
   - Tests are present for all currently added functions. The C library also has it's own tests, with some useful edge case tests, which will be ported soon.
   - This extension only supports deterministic signatures at present. In fact, no RNG is utilized in this extension - private keys must be generated elsewhere. 
   - The extension exposes the same raw API of libsecp256k1. As such, you must ensure you are passing the binary representations of each value.   
@@ -24,7 +24,7 @@ Only PHP 5.x is supported at the moment - PHP7 will come soon.
     git clone git@github.com:bitwasp/secp256k1-php
     git clone git@github.com:bitcoin/secp256k1
     cd secp256k1
-    ./autogen.sh && ./configure && make && sudo make install
+    ./autogen.sh && ./configure --enable-module-recovery && make && sudo make install
     cd ../secp256k1-php/secp256k1
     phpize && ./configure --with-secp256k1 && make && sudo make install
 ```
