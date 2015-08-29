@@ -124,10 +124,11 @@ namespace {
     /**
      * @param resource $secp256k1_context_t
      * @param resource $secp256k1_ecdsa_recoverable_signature_t
-     * @param resource $secp256k1_ecdsa_signature_t
+     * @param string $signatureOut
+     * @param int $recid
      * @return int
      */
-    function secp256k1_ecdsa_recoverable_signature_serialize_compact($secp256k1_context_t, $secp256k1_ecdsa_recoverable_signature_t, $secp256k1_ecdsa_signature_t)
+    function secp256k1_ecdsa_recoverable_signature_serialize_compact($secp256k1_context_t, $secp256k1_ecdsa_recoverable_signature_t, $signatureOut, $recid)
     {
     }
 
@@ -138,7 +139,7 @@ namespace {
      * @param resource $secp256k1_ecdsa_recoverable_signature_t
      * @return int
      */
-    function secp256k1_ecdsa_recoverable_signature_parse_compact($secp256k1_context_t, $secp256k1_ecdsa_recoverable_signature_t, $output64, $recid)
+    function secp256k1_ecdsa_recoverable_signature_parse_compact($secp256k1_context_t, $input64, $recid, $secp256k1_ecdsa_recoverable_signature_t)
     {
     }
 
