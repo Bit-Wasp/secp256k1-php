@@ -830,7 +830,7 @@ PHP_FUNCTION(secp256k1_ecdsa_recoverable_signature_convert)
     secp256k1_ecdsa_recoverable_signature_t * rSig;
     secp256k1_ecdsa_signature_t * nSig;
     int result;
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rr", &zCtx, &zNormalSig, &zRecoverableSig) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rrz", &zCtx, &zRecoverableSig, &zNormalSig) == FAILURE) {
         return;
     }
 
@@ -858,7 +858,7 @@ PHP_FUNCTION(secp256k1_ecdsa_recoverable_signature_serialize_compact)
     }
 
     ZEND_FETCH_RESOURCE(ctx, secp256k1_context_t*, &zCtx, -1, SECP256K1_CTX_RES_NAME, le_secp256k1_ctx);
-    ZEND_FETCH_RESOURCE(recsig, secp256k1_ecdsa_recoverable_signature_t*, &zCtx, -1, SECP256K1_RECOVERABLE_SIG_RES_NAME, le_secp256k1_recoverable_sig);
+    ZEND_FETCH_RESOURCE(recsig, secp256k1_ecdsa_recoverable_signature_t*, &zRecSig, -1, SECP256K1_RECOVERABLE_SIG_RES_NAME, le_secp256k1_recoverable_sig);
     sig = emalloc(COMPACT_SIGNATURE_LENGTH);
     result = secp256k1_ecdsa_recoverable_signature_serialize_compact(ctx, sig, &recid, recsig);
     if (result) {
@@ -895,7 +895,7 @@ PHP_FUNCTION(secp256k1_ecdsa_sign_recoverable)
     newsig = emalloc(sizeof(secp256k1_ecdsa_recoverable_signature_t));
     result = secp256k1_ecdsa_sign_recoverable(ctx, msg32, newsig, seckey, NULL, NULL);
     if (result) {
-        ZEND_REGISTER_RESOURCE(zSig, newsig, le_secp256k1_sig);
+        ZEND_REGISTER_RESOURCE(zSig, newsig, le_secp256k1_recoverable_sig);
     }
     RETURN_LONG(result);
 }
