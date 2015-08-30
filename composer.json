@@ -12,7 +12,7 @@
             "email": "afk11@users.noreply.github.com"
         }
     ],
-    "autoload": {
+    "autoload-dev": {
       "psr-4": {
         "BitWasp\\Secp256k1Tests\\": "tests/"
       }
