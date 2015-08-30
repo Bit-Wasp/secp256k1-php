@@ -62,21 +62,6 @@ namespace {
     }
 
     /**
-     * Serializes a secp256k1_ecdsa_signature_t resource in compact form, into $signatureOut.
-     * If 1 is returned, the signature was saved. When $recIdOut is set, the recovery ID will
-     * be saved to this variable.
-     *
-     * @param resource $secp256k1_context_t
-     * @param resource $secp256k1_ecdsa_signature_t
-     * @param string $signatureOut
-     * @param int $recIdOut [optional] when set, the recid will be saved here.
-     * @return int
-     */
-    function secp256k1_ecdsa_signature_serialize_compact($secp256k1_context_t, $secp256k1_ecdsa_signature_t, &$signatureOut, &$recIdOut)
-    {
-    }
-
-    /**
      * Parses a DER signature into a secp256k1_ecdsa_signature_t resource.
      *
      * @param resource $secp256k1_context_t
