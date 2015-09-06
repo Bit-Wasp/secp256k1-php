@@ -36,6 +36,20 @@ class Secp256k1PubkeyCreateTest extends TestCase
         $this->genericTest($context, $hexPrivKey, 0, $expectedPubKey, 1);
     }
 
+    public function testWontCreateFromInvalidPrivateKey()
+    {
+        // All bits set - winds up greater than curve order
+        $mask = gmp_init(0, 10);
+        for($i = 0; $i < 256; $i++) {
+            $mask = gmp_or(gmp_pow(2, $i), $mask);
+        }
+
+        /** @var resource $pubkey_t */
+        $pubkey_t = '';
+        $privateKey = pack("H*", gmp_strval($mask, 16));
+        $this->assertEquals(0, secp256k1_ec_pubkey_create(TestCase::getContext(), $pubkey_t, $privateKey));
+    }
+
     /**
      * @param $hexPrivkey
      * @param $fcompressed
@@ -46,12 +60,13 @@ class Secp256k1PubkeyCreateTest extends TestCase
     {
         $secretKey = $this->toBinary32($hexPrivkey);
 
+        /** @var resource $pubkey */
         $pubkey = '';
-        $this->assertEquals($eResult, secp256k1_ec_pubkey_create($context, $secretKey, $pubkey));
+        $this->assertEquals($eResult, secp256k1_ec_pubkey_create($context, $pubkey,$secretKey));
         $this->assertEquals('secp256k1_pubkey_t', get_resource_type($pubkey));
 
         $serialized = '';
-        secp256k1_ec_pubkey_serialize($context, $pubkey, $fcompressed, $serialized);
+        $this->assertEquals(1, secp256k1_ec_pubkey_serialize($context, $pubkey, $fcompressed, $serialized));
         $this->assertEquals($expectedKey, bin2hex($serialized));
         $this->assertEquals(($fcompressed ? 33 : 65), strlen($serialized));
     }
@@ -75,8 +90,9 @@ class Secp256k1PubkeyCreateTest extends TestCase
      */
     public function testErroneousTypes($context, $seckey)
     {
+        /** @var resource $pubkey */
         $pubkey = '';
-        \secp256k1_ec_pubkey_create($context, $seckey, $pubkey);
+        \secp256k1_ec_pubkey_create($context, $pubkey, $seckey);
     }
 
 }

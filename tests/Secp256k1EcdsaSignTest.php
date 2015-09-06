@@ -50,7 +50,7 @@ class Secp256k1EcdsaSignTest extends TestCase
         $msg = $this->toBinary32($msg);
 
         $signature = '';
-        $sign = secp256k1_ecdsa_sign($context, $msg, $privkey, $signature);
+        $sign = secp256k1_ecdsa_sign($context, $signature, $msg, $privkey);
         $this->assertEquals($eSigCreate, $sign);
         $this->assertEquals('secp256k1_ecdsa_signature_t', get_resource_type($signature));
         
@@ -85,7 +85,7 @@ class Secp256k1EcdsaSignTest extends TestCase
     public function testErroneousTypes($context, $msg32, $private)
     {
         $sig = '';
-        \secp256k1_ecdsa_sign($context, $msg32, $private, $sig);
+        \secp256k1_ecdsa_sign($context, $sig, $msg32, $private);
     }
 
 }
