@@ -30,8 +30,8 @@ ZEND_END_ARG_INFO();
 
 ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ecdsa_signature_parse_der, 0)
     ZEND_ARG_INFO(0, context)
-    ZEND_ARG_INFO(0, signatureStr)
     ZEND_ARG_INFO(1, secp256k1_ecdsa_signature_t)
+    ZEND_ARG_INFO(0, signatureStr)
 ZEND_END_ARG_INFO();
 
 ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ecdsa_signature_serialize_der, 0)
@@ -42,8 +42,8 @@ ZEND_END_ARG_INFO();
 
 ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ecdsa_verify, 0)
     ZEND_ARG_INFO(0, context)
-    ZEND_ARG_INFO(0, msg32)
     ZEND_ARG_INFO(0, signature)
+    ZEND_ARG_INFO(0, msg32)
     ZEND_ARG_INFO(0, publicKey)
 ZEND_END_ARG_INFO();
 
@@ -56,9 +56,9 @@ ZEND_END_ARG_INFO();
 
 ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ecdsa_sign_recoverable, 0)
     ZEND_ARG_INFO(0, secp256k1_context_t)
+    ZEND_ARG_INFO(1, secp256k1_ecdsa_recoverable_signature_t)
     ZEND_ARG_INFO(0, msg32)
     ZEND_ARG_INFO(0, secretKey)
-    ZEND_ARG_INFO(1, secp256k1_ecdsa_recoverable_signature_t)
 ZEND_END_ARG_INFO();
 
 ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ecdsa_recoverable_signature_serialize_compact, 0)
@@ -83,9 +83,9 @@ ZEND_END_ARG_INFO();
 
 ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ecdsa_recover, 0)
     ZEND_ARG_INFO(0, context)
-    ZEND_ARG_INFO(0, msg32)
-    ZEND_ARG_INFO(0, secp256k1_ecdsa_recoverable_signature_t)
     ZEND_ARG_INFO(1, secp256k1_pubkey_t)
+    ZEND_ARG_INFO(0, secp256k1_ecdsa_recoverable_signature_t)
+    ZEND_ARG_INFO(0, msg32)
 ZEND_END_ARG_INFO();
 
 ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ec_seckey_verify, 0)
@@ -108,8 +108,8 @@ ZEND_END_ARG_INFO();
 
 ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ec_pubkey_create, 0)
     ZEND_ARG_INFO(0, context)
-    ZEND_ARG_INFO(0, secretKey)
     ZEND_ARG_INFO(1, publicKey)
+    ZEND_ARG_INFO(0, secretKey)
 ZEND_END_ARG_INFO();
 
 ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ec_privkey_import, 0)
@@ -392,7 +392,7 @@ PHP_FUNCTION(secp256k1_ecdsa_signature_parse_der)
     secp256k1_ecdsa_signature_t *sig;
     unsigned char *sigin;
     int result, siglen;
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rsz", &zCtx, &sigin, &siglen, &zSig) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rzs", &zCtx, &zSig, &sigin, &siglen) == FAILURE) {
         RETURN_FALSE;
     }
 
@@ -425,7 +425,7 @@ PHP_FUNCTION(secp256k1_ecdsa_verify) {
     secp256k1_pubkey_t *pubkey;
     unsigned char *msg32;
     int result, msg32len;
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rsrr", &zCtx, &msg32, &msg32len, &zSig, &zPubKey) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rrsr", &zCtx, &zSig, &msg32, &msg32len, &zPubKey) == FAILURE) {
         return;
     }
 
@@ -433,7 +433,7 @@ PHP_FUNCTION(secp256k1_ecdsa_verify) {
     ZEND_FETCH_RESOURCE(sig, secp256k1_ecdsa_signature_t*, &zSig, -1, SECP256K1_SIG_RES_NAME, le_secp256k1_sig);
     ZEND_FETCH_RESOURCE(pubkey, secp256k1_pubkey_t*, &zPubKey, -1, SECP256K1_PUBKEY_RES_NAME, le_secp256k1_pubkey);
 
-    result = secp256k1_ecdsa_verify(ctx, msg32, sig, pubkey);
+    result = secp256k1_ecdsa_verify(ctx, sig, msg32, pubkey);
     RETURN_LONG(result);
 }
 /* }}} */
@@ -486,7 +486,7 @@ PHP_FUNCTION(secp256k1_ecdsa_sign)
     secp256k1_ecdsa_signature_t *newsig;
     int seckeylen, msg32len, result;
     unsigned char *seckey, *msg32;
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rssz", &zCtx, &msg32, &msg32len, &seckey, &seckeylen, &zSig) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rzss", &zCtx, &zSig, &msg32, &msg32len, &seckey, &seckeylen) == FAILURE) {
         return;
     }
 
@@ -503,7 +503,7 @@ PHP_FUNCTION(secp256k1_ecdsa_sign)
     }
 
     newsig = emalloc(sizeof(secp256k1_ecdsa_signature_t));
-    result = secp256k1_ecdsa_sign(ctx, msg32, newsig, seckey, NULL, NULL);
+    result = secp256k1_ecdsa_sign(ctx, newsig, msg32, seckey, NULL, NULL);
     if (result) {
         ZEND_REGISTER_RESOURCE(zSig, newsig, le_secp256k1_sig);
     }
@@ -559,7 +559,7 @@ PHP_FUNCTION(secp256k1_ec_pubkey_create)
     secp256k1_pubkey_t *pubkey;
     int result, seckeylen;
     unsigned char *seckey;
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rsz", &zCtx, &seckey, &seckeylen, &zPubKey) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rzs", &zCtx, &zPubKey, &seckey, &seckeylen) == FAILURE) {
         return;
     }
 
@@ -581,8 +581,8 @@ PHP_FUNCTION(secp256k1_ec_pubkey_create)
 /* Parse a variable length public key into a public key resource */
 /** {{{ proto int secp256k1_ec_pubkey_parse(resource secp256k1_context_t, string publicKey)
  *  In:    ctx:          a secp256k1_context_t resource
- *         publicKey:    a serialized public key
  *         pubkey_t:     an empty variable, set the public key resource here.
+ *         publicKey:    a serialized public key
  *  Returns: 1:          a public key was set to pubkey_t.
              anything else: error.
  */
@@ -593,7 +593,7 @@ PHP_FUNCTION(secp256k1_ec_pubkey_parse)
     secp256k1_pubkey_t *pubkey;
     unsigned char *pubkeyin;
     int result, pubkeylen;
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rsz", &zCtx, &pubkeyin, &pubkeylen, &zPubKey) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rzs", &zCtx, &zPubKey, &pubkeyin, &pubkeylen) == FAILURE) {
         RETURN_FALSE;
     }
 
@@ -639,7 +639,6 @@ PHP_FUNCTION(secp256k1_ec_pubkey_serialize)
          compressed:   flag indicating whether the public key is compressed. 
  *  Out: seckey:       a variable reference, somewhere to put the private key.
  */
-
 PHP_FUNCTION(secp256k1_ec_privkey_import)
 {
     zval *zCtx, *zSecKey;
@@ -682,7 +681,7 @@ PHP_FUNCTION(secp256k1_ec_privkey_export)
         zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_ec_privkey_export(): Parameter 2 should be 32 bytes");
         return;
     }
-    result = secp256k1_ec_privkey_export(ctx, seckey, newkey, &newkeylen, compressed);
+    result = secp256k1_ec_privkey_export(ctx, newkey, &newkeylen, seckey, compressed);
     if (result) {
         ZVAL_STRINGL(zDerKey, newkey, newkeylen, 1);
     }
@@ -809,7 +808,7 @@ PHP_FUNCTION(secp256k1_ecdsa_recoverable_signature_parse_compact)
     secp256k1_ecdsa_recoverable_signature_t *sig;
     int result;
     long recid;
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rslz", &zCtx, &input64, &input64len, &recid, &zSig) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rzsl", &zCtx, &zSig, &input64, &input64len, &recid) == FAILURE) {
         return;
     }
 
@@ -876,24 +875,24 @@ PHP_FUNCTION(secp256k1_ecdsa_sign_recoverable)
     secp256k1_ecdsa_recoverable_signature_t *newsig;
     int seckeylen, msg32len, result;
     unsigned char *seckey, *msg32;
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rssz", &zCtx, &msg32, &msg32len, &seckey, &seckeylen, &zSig) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rzss", &zCtx, &zSig, &msg32, &msg32len, &seckey, &seckeylen) == FAILURE) {
         return;
     }
 
     ZEND_FETCH_RESOURCE(ctx, secp256k1_context_t*, &zCtx, -1, SECP256K1_CTX_RES_NAME, le_secp256k1_ctx);
 
     if (msg32len != HASH_LENGTH) {
-        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_ecdsa_sign(): Parameter 2 should be 32 bytes");
-        return;
-    }
-
-    if (seckeylen != SECRETKEY_LENGTH) {
         zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_ecdsa_sign(): Parameter 3 should be 32 bytes");
         return;
     }
 
+    if (seckeylen != SECRETKEY_LENGTH) {
+        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_ecdsa_sign(): Parameter 4 should be 32 bytes");
+        return;
+    }
+
     newsig = emalloc(sizeof(secp256k1_ecdsa_recoverable_signature_t));
-    result = secp256k1_ecdsa_sign_recoverable(ctx, msg32, newsig, seckey, NULL, NULL);
+    result = secp256k1_ecdsa_sign_recoverable(ctx, newsig, msg32, seckey, NULL, NULL);
     if (result) {
         ZEND_REGISTER_RESOURCE(zSig, newsig, le_secp256k1_recoverable_sig);
     }
@@ -918,7 +917,7 @@ PHP_FUNCTION(secp256k1_ecdsa_recover)
     secp256k1_ecdsa_recoverable_signature_t *sig;
     unsigned char *msg32;
     int result, msg32len;
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rsrz", &zCtx, &msg32, &msg32len, &zSig, &zPubKey) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rzrs", &zCtx, &zPubKey, &zSig, &msg32, &msg32len) == FAILURE) {
         return;
     }
 
@@ -926,7 +925,7 @@ PHP_FUNCTION(secp256k1_ecdsa_recover)
     ZEND_FETCH_RESOURCE(sig, secp256k1_ecdsa_recoverable_signature_t*, &zSig, -1, SECP256K1_RECOVERABLE_SIG_RES_NAME, le_secp256k1_recoverable_sig);
 
     pubkey = emalloc(sizeof(secp256k1_pubkey_t));
-    result = secp256k1_ecdsa_recover(ctx, msg32, sig, pubkey);
+    result = secp256k1_ecdsa_recover(ctx, pubkey, sig, msg32);
     if (result) {
         ZEND_REGISTER_RESOURCE(zPubKey, pubkey, le_secp256k1_pubkey);
     }

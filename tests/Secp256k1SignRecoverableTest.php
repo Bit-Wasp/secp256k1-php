@@ -6,25 +6,26 @@ class Secp256k1SignRecoverableTest extends TestCase
 {
     public function test()
     {
+        $context = TestCase::getContext();
         $privKey = hash('sha256', 'private key', true);
         $msg32 = hash('sha256', 'msg', true);
-        $pub_t = '';
         /** @var resource $pub_t */
-        $context = TestCase::getContext();
+        $pub_t = '';
 
         // Create public key of our private key
-        $this->assertEquals(1, secp256k1_ec_pubkey_create($context, $privKey, $pub_t));
+        $this->assertEquals(1, secp256k1_ec_pubkey_create($context, $pub_t, $privKey));
 
         // Create recoverable signature
         $r_sig_t = '';
         /** @var resource $r_sig_t */
-        $this->assertEquals(1, secp256k1_ecdsa_sign_recoverable($context, $msg32, $privKey, $r_sig_t));
+        $this->assertEquals(1, secp256k1_ecdsa_sign_recoverable($context, $r_sig_t, $msg32, $privKey));
         $this->assertEquals(SECP256K1_TYPE_RECOVERABLE_SIG, get_resource_type($r_sig_t));
 
         // Recover public key from the signature
         $r_pubkey_t = '';
+
         /** @var resource $r_pubkey_t */
-        $this->assertEquals(1, secp256k1_ecdsa_recover($context, $msg32, $r_sig_t, $r_pubkey_t));
+        $this->assertEquals(1, secp256k1_ecdsa_recover($context, $r_pubkey_t, $r_sig_t, $msg32));
 
         // Compare the two public keys
         $sPubkey = '';
@@ -39,14 +40,13 @@ class Secp256k1SignRecoverableTest extends TestCase
         $recid = '';
         secp256k1_ecdsa_recoverable_signature_serialize_compact($context, $r_sig_t, $sSig, $recid);
 
-        $parsedSig = '';
         /** @var resource $parsedSig */
-        $this->assertEquals(1, secp256k1_ecdsa_recoverable_signature_parse_compact($context, $sSig, $recid, $parsedSig));
+        $parsedSig = '';
+        $this->assertEquals(1, secp256k1_ecdsa_recoverable_signature_parse_compact($context, $parsedSig, $sSig, $recid));
 
         $sSigAgain = '';
         $recidAgain = '';
-        secp256k1_ecdsa_recoverable_signature_serialize_compact($context, $parsedSig, $sSigAgain, $recidAgain);
-
+        $this->assertEquals(1, secp256k1_ecdsa_recoverable_signature_serialize_compact($context, $parsedSig, $sSigAgain, $recidAgain));
 
         // Prepare expected DER sig
         $rl = 32;
@@ -64,8 +64,8 @@ class Secp256k1SignRecoverableTest extends TestCase
         $t = 4 + $rl + $sl;
         $der = "\x30" . chr($t) . "\x02" . chr($rl) . $r . "\x02" . chr($sl) . $s;
 
-        $plain = '';
         /** @var resource $plain */
+        $plain = '';
 
         // Test that conversion is successful
         $this->assertEquals(1, secp256k1_ecdsa_recoverable_signature_convert($context, $r_sig_t, $plain));
