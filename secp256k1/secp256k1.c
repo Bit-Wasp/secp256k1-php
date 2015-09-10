@@ -433,7 +433,7 @@ PHP_FUNCTION(secp256k1_ecdsa_verify) {
     ZEND_FETCH_RESOURCE(sig, secp256k1_ecdsa_signature_t*, &zSig, -1, SECP256K1_SIG_RES_NAME, le_secp256k1_sig);
     ZEND_FETCH_RESOURCE(pubkey, secp256k1_pubkey_t*, &zPubKey, -1, SECP256K1_PUBKEY_RES_NAME, le_secp256k1_pubkey);
 
-    result = secp256k1_ecdsa_verify(ctx, msg32, sig, pubkey);
+    result = secp256k1_ecdsa_verify(ctx, sig, msg32, pubkey);
     RETURN_LONG(result);
 }
 /* }}} */
@@ -503,7 +503,7 @@ PHP_FUNCTION(secp256k1_ecdsa_sign)
     }
 
     newsig = emalloc(sizeof(secp256k1_ecdsa_signature_t));
-    result = secp256k1_ecdsa_sign(ctx, msg32, newsig, seckey, NULL, NULL);
+    result = secp256k1_ecdsa_sign(ctx, newsig, msg32, seckey, NULL, NULL);
     if (result) {
         ZEND_REGISTER_RESOURCE(zSig, newsig, le_secp256k1_sig);
     }
@@ -682,7 +682,7 @@ PHP_FUNCTION(secp256k1_ec_privkey_export)
         zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_ec_privkey_export(): Parameter 2 should be 32 bytes");
         return;
     }
-    result = secp256k1_ec_privkey_export(ctx, seckey, newkey, &newkeylen, compressed);
+    result = secp256k1_ec_privkey_export(ctx, newkey, &newkeylen, seckey, compressed);
     if (result) {
         ZVAL_STRINGL(zDerKey, newkey, newkeylen, 1);
     }
@@ -893,7 +893,7 @@ PHP_FUNCTION(secp256k1_ecdsa_sign_recoverable)
     }
 
     newsig = emalloc(sizeof(secp256k1_ecdsa_recoverable_signature_t));
-    result = secp256k1_ecdsa_sign_recoverable(ctx, msg32, newsig, seckey, NULL, NULL);
+    result = secp256k1_ecdsa_sign_recoverable(ctx, newsig, msg32, seckey, 0, 0);
     if (result) {
         ZEND_REGISTER_RESOURCE(zSig, newsig, le_secp256k1_recoverable_sig);
     }
@@ -926,7 +926,7 @@ PHP_FUNCTION(secp256k1_ecdsa_recover)
     ZEND_FETCH_RESOURCE(sig, secp256k1_ecdsa_recoverable_signature_t*, &zSig, -1, SECP256K1_RECOVERABLE_SIG_RES_NAME, le_secp256k1_recoverable_sig);
 
     pubkey = emalloc(sizeof(secp256k1_pubkey_t));
-    result = secp256k1_ecdsa_recover(ctx, msg32, sig, pubkey);
+    result = secp256k1_ecdsa_recover(ctx, pubkey, sig, msg32);
     if (result) {
         ZEND_REGISTER_RESOURCE(zPubKey, pubkey, le_secp256k1_pubkey);
     }
