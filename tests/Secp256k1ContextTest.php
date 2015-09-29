@@ -12,13 +12,13 @@ class Secp256k1ContextTest extends TestCase
         // We should have two resources of type secp256k1_context_t
         $this->assertInternalType('resource', $ctx);
         $this->assertInternalType('resource', $ctx);
-        $this->assertEquals('secp256k1_context_t', get_resource_type($ctx));
-        $this->assertEquals('secp256k1_context_t', get_resource_type($clone));
+        $this->assertEquals(SECP256K1_TYPE_CONTEXT, get_resource_type($ctx));
+        $this->assertEquals(SECP256K1_TYPE_CONTEXT, get_resource_type($clone));
 
         // We should be able to destroy it (without affecting the other), and see it's type is now unknown.
         $this->assertTrue(\secp256k1_context_destroy($ctx));
         $this->assertEquals('Unknown', get_resource_type($ctx));
-        $this->assertEquals('secp256k1_context_t', get_resource_type($clone));
+        $this->assertEquals(SECP256K1_TYPE_CONTEXT, get_resource_type($clone));
 
     }
 }

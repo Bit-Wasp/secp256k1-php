@@ -9,10 +9,10 @@ extern zend_module_entry secp256k1_module_entry;
 #define phpext_secp256k1_ptr &secp256k1_module_entry
 
 #define PHP_SECP256K1_VERSION "0.1.0"
-#define SECP256K1_CTX_RES_NAME "secp256k1_context_t"
-#define SECP256K1_PUBKEY_RES_NAME "secp256k1_pubkey_t"
-#define SECP256K1_SIG_RES_NAME "secp256k1_ecdsa_signature_t"
-#define SECP256K1_RECOVERABLE_SIG_RES_NAME "secp256k1_ecdsa_recoverable_signature_t"
+#define SECP256K1_CTX_RES_NAME "secp256k1_context"
+#define SECP256K1_PUBKEY_RES_NAME "secp256k1_pubkey"
+#define SECP256K1_SIG_RES_NAME "secp256k1_ecdsa_signature"
+#define SECP256K1_RECOVERABLE_SIG_RES_NAME "secp256k1_ecdsa_recoverable_signature"
 
 #ifdef ZTS
 # define SECP256K1_G(v) TSRMG(secp256k1_globals_id, zend_secp256k1_globals *, v)
@@ -42,8 +42,6 @@ PHP_FUNCTION(secp256k1_ec_seckey_verify);
 PHP_FUNCTION(secp256k1_ec_pubkey_create);
 PHP_FUNCTION(secp256k1_ec_pubkey_parse);
 PHP_FUNCTION(secp256k1_ec_pubkey_serialize);
-PHP_FUNCTION(secp256k1_ec_privkey_import);
-PHP_FUNCTION(secp256k1_ec_privkey_export);
 
 PHP_FUNCTION(secp256k1_ec_privkey_tweak_add);
 PHP_FUNCTION(secp256k1_ec_privkey_tweak_mul);

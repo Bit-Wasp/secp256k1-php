@@ -33,7 +33,7 @@ if test "$PHP_SECP256K1" != "no"; then
 
   dnl # --with-secp256k1 -> check for lib and symbol presence
   LIBNAME=secp256k1 # you may want to change this
-  LIBSYMBOL=secp256k1_nonce_function_default # you most likely want to change this 
+  LIBSYMBOL=secp256k1_context_create # you most likely want to change this 
 
   PHP_CHECK_LIBRARY($LIBNAME,$LIBSYMBOL,
   [
