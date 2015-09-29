@@ -102,8 +102,10 @@ class Secp256k1EcdsaVerifyTest extends TestCase
         $msg32 = $this->pack('0af79b2b747548d59a4a765fb73a72bc4208d00b43d0606c13d332d5c284b0ef');
         $sig = $this->pack('304502206af189487988df26eb4c2b2c7d74b78e19822bbb2fc27dada0800019abd20b46022100f0e6c4dabd4970afe125f707fbd6d62e79e950bdb2b4b9700214779ae475b05d01');
 
+        /** @var resource $s */
         $s = '';
         secp256k1_ecdsa_signature_parse_der($context, $sig, $s);
+        /** @var resource $public */
         $public = '';
         $this->assertEquals(1, \secp256k1_ec_pubkey_create($context, $private, $public), 'public');
         $this->assertEquals(1, \secp256k1_ecdsa_verify($context, $msg32, $s, $public), 'initial check');
@@ -127,10 +129,12 @@ class Secp256k1EcdsaVerifyTest extends TestCase
         $seckey = $this->toBinary32($privkey);
         $msg = $this->toBinary32($msg);
         $sig = $this->toBinary32($sig);
-        
+
+        /** @var resource $pubkey */
         $pubkey = '';
         $this->assertEquals($ePubCreate, \secp256k1_ec_pubkey_create($context, $seckey, $pubkey));
 
+        /** @var resource $s */
         $s = '';
         secp256k1_ecdsa_signature_parse_der($context, $sig, $s);
         $this->assertEquals($eSigCreate, \secp256k1_ecdsa_verify($context, $msg, $s, $pubkey));

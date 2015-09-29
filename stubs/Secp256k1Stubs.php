@@ -8,6 +8,7 @@ namespace {
     define('SECP256K1_TYPE_PUBKEY', "secp256k1_pubkey_t");
     define('SECP256K1_TYPE_SIG', "secp256k1_ecdsa_signature_t");
     define('SECP256K1_TYPE_RECOVERABLE_SIG', "secp256k1_ecdsa_recoverable_signature_t");
+    define('SECP256K1_EC_COMPRESSED', 0 << 1);
 
     /**
      * Create a Secp256k1 context resource

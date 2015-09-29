@@ -49,10 +49,11 @@ class Secp256k1EcdsaSignTest extends TestCase
         $privkey = $this->toBinary32($privkeyhex);
         $msg = $this->toBinary32($msg);
 
+        /** @var resource $signature */
         $signature = '';
         $sign = secp256k1_ecdsa_sign($context, $msg, $privkey, $signature);
         $this->assertEquals($eSigCreate, $sign);
-        $this->assertEquals('secp256k1_ecdsa_signature_t', get_resource_type($signature));
+        $this->assertEquals(SECP256K1_TYPE_SIG, get_resource_type($signature));
         
         return;
 

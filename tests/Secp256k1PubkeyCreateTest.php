@@ -46,9 +46,10 @@ class Secp256k1PubkeyCreateTest extends TestCase
     {
         $secretKey = $this->toBinary32($hexPrivkey);
 
+        /** @var resource $pubkey */
         $pubkey = '';
         $this->assertEquals($eResult, secp256k1_ec_pubkey_create($context, $secretKey, $pubkey));
-        $this->assertEquals('secp256k1_pubkey_t', get_resource_type($pubkey));
+        $this->assertEquals(SECP256K1_TYPE_PUBKEY, get_resource_type($pubkey));
 
         $serialized = '';
         secp256k1_ec_pubkey_serialize($context, $pubkey, $fcompressed, $serialized);
