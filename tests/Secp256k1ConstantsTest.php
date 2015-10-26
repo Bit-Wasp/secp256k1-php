@@ -11,9 +11,9 @@ class Secp256k1ConstantsTest extends TestCase
         $this->assertEquals('secp256k1_pubkey', SECP256K1_TYPE_PUBKEY);
         $this->assertEquals('secp256k1_context', SECP256K1_TYPE_CONTEXT);
 
-        $this->assertEquals('1', SECP256K1_CONTEXT_VERIFY);
-        $this->assertEquals('2', SECP256K1_CONTEXT_SIGN);
+        $this->assertEquals('257', SECP256K1_CONTEXT_VERIFY);
+        $this->assertEquals('513', SECP256K1_CONTEXT_SIGN);
 
-        $this->assertEquals(1, SECP256K1_EC_COMPRESSED);
+        $this->assertEquals(258, SECP256K1_EC_COMPRESSED);
     }
 }

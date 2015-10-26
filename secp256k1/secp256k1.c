@@ -209,9 +209,11 @@ PHP_MINIT_FUNCTION(secp256k1) {
     le_secp256k1_pubkey = zend_register_list_destructors_ex(secp256k1_pubkey_dtor, NULL, SECP256K1_PUBKEY_RES_NAME, module_number);
     le_secp256k1_sig = zend_register_list_destructors_ex(secp256k1_sig_dtor, NULL, SECP256K1_SIG_RES_NAME, module_number);
     le_secp256k1_recoverable_sig = zend_register_list_destructors_ex(secp256k1_recoverable_sig_dtor, NULL, SECP256K1_RECOVERABLE_SIG_RES_NAME, module_number);
+
     REGISTER_LONG_CONSTANT("SECP256K1_CONTEXT_VERIFY", SECP256K1_CONTEXT_VERIFY, CONST_CS | CONST_PERSISTENT);
     REGISTER_LONG_CONSTANT("SECP256K1_CONTEXT_SIGN", SECP256K1_CONTEXT_SIGN, CONST_CS | CONST_PERSISTENT);
     REGISTER_LONG_CONSTANT("SECP256K1_EC_COMPRESSED", SECP256K1_EC_COMPRESSED, CONST_CS | CONST_PERSISTENT);
+
     REGISTER_STRING_CONSTANT("SECP256K1_TYPE_CONTEXT", SECP256K1_CTX_RES_NAME, CONST_CS | CONST_PERSISTENT);
     REGISTER_STRING_CONSTANT("SECP256K1_TYPE_PUBKEY", SECP256K1_PUBKEY_RES_NAME, CONST_CS | CONST_PERSISTENT);
     REGISTER_STRING_CONSTANT("SECP256K1_TYPE_SIG", SECP256K1_SIG_RES_NAME, CONST_CS | CONST_PERSISTENT);
@@ -419,7 +421,10 @@ PHP_FUNCTION(secp256k1_ecdsa_verify) {
     ZEND_FETCH_RESOURCE(sig, secp256k1_ecdsa_signature*, &zSig, -1, SECP256K1_SIG_RES_NAME, le_secp256k1_sig);
     ZEND_FETCH_RESOURCE(pubkey, secp256k1_pubkey*, &zPubKey, -1, SECP256K1_PUBKEY_RES_NAME, le_secp256k1_pubkey);
 
-    result = secp256k1_ecdsa_verify(ctx, sig, msg32, pubkey);
+    secp256k1_ecdsa_signature *sigcpy = emalloc(sizeof(secp256k1_ecdsa_signature));
+    secp256k1_ecdsa_signature_normalize(ctx, sigcpy, sig);
+    result = secp256k1_ecdsa_verify(ctx, sigcpy, msg32, pubkey);
+
     RETURN_LONG(result);
 }
 /* }}} */
@@ -611,13 +616,11 @@ PHP_FUNCTION(secp256k1_ec_pubkey_serialize)
     ZEND_FETCH_RESOURCE(ctx, secp256k1_context*, &zCtx, -1, SECP256K1_CTX_RES_NAME, le_secp256k1_ctx);
     ZEND_FETCH_RESOURCE(pubkey, secp256k1_pubkey*, &zPubKey, -1, SECP256K1_PUBKEY_RES_NAME, le_secp256k1_pubkey);
 
-    if (compressed) {
-        flags |= SECP256K1_EC_COMPRESSED;
-    }
+    flags |= compressed ? SECP256K1_EC_COMPRESSED : SECP256K1_EC_UNCOMPRESSED;
 
     size_t pubkeylen = pubkeyLengthFromCompressed(compressed);
     unsigned char *pubkeyout = emalloc(pubkeylen);
-    result = secp256k1_ec_pubkey_serialize(ctx, pubkeyout, &pubkeylen, pubkey, compressed);
+    result = secp256k1_ec_pubkey_serialize(ctx, pubkeyout, &pubkeylen, pubkey, flags);
     if (result) {
         ZVAL_STRINGL(zPubOut, pubkeyout, pubkeylen, 1);
     }
