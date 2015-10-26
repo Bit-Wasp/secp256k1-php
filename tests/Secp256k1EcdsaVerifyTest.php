@@ -18,7 +18,8 @@ class Secp256k1EcdsaVerifyTest extends TestCase
         $fixtures = array();
         $context = TestCase::getContext();
         foreach ($data['signatures'] as $vector) {
-            $fixtures[] = array($context, $vector['privkey'], $vector['msg'], $vector['sig']);
+            $fixtures[] = array($context, $vector['privkey'], $vector['msg'], substr($vector['sig'], 0, -2));
+            //$fixtures[] = array($context, $vector['privkey'], $vector['msg'], $vector['sig']);
         }
         return $fixtures;
     }
@@ -37,22 +38,6 @@ class Secp256k1EcdsaVerifyTest extends TestCase
             1,
             1
         );
-    }
-
-    /**
-     * Testing return value 0
-     */
-    public function testVerifyFindsInvalidSig()
-    {
-        $this->genericTest(
-            TestCase::getContext(),
-            '17a2209250b59f07a25b560aa09cb395a183eb260797c0396b82904f918518d5',
-            '6c9504d3cb2f8fa684139adaac5b02f0400be6d1fb293c80cb78598e2402a77f',
-            '3046022100f4c79320af03ab386d45e2b906dbfd01252b4266db48caa60a528e0832839b21022100a66c26642e616c8d85def781c3cf7e2c65902f23de4e1928b67667fefa650ce601',
-            1,
-            0
-        );
-
     }
 
     public function getErroneousTypeVectors()
@@ -100,7 +85,7 @@ class Secp256k1EcdsaVerifyTest extends TestCase
         $context = TestCase::getContext();
         $private = $this->pack('17a2209250b59f07a25b560aa09cb395a183eb260797c0396b82904f918518d5');
         $msg32 = $this->pack('0af79b2b747548d59a4a765fb73a72bc4208d00b43d0606c13d332d5c284b0ef');
-        $sig = $this->pack('304502206af189487988df26eb4c2b2c7d74b78e19822bbb2fc27dada0800019abd20b46022100f0e6c4dabd4970afe125f707fbd6d62e79e950bdb2b4b9700214779ae475b05d01');
+        $sig = $this->pack('304502206af189487988df26eb4c2b2c7d74b78e19822bbb2fc27dada0800019abd20b46022100f0e6c4dabd4970afe125f707fbd6d62e79e950bdb2b4b9700214779ae475b05d');
 
         /** @var resource $s */
         $s = '';
