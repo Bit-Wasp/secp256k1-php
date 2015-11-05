@@ -21,7 +21,7 @@ Only PHP 5.x is supported at the moment - PHP7 will come soon.
   
 ### To Install:
 ```
-    git clone git@github.com:bitwasp/secp256k1-php
+    git clone git@github.com:Bit-Wasp/secp256k1-php
     git clone git@github.com:bitcoin/secp256k1
     cd secp256k1
     ./autogen.sh && ./configure --enable-module-recovery && make && sudo make install
