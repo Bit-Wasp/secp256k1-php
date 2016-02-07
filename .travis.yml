@@ -5,17 +5,17 @@ php:
     - 5.4
     - 5.5
     - 5.6
-
-before_install:
-#    - sudo apt-get update -qq
-    - sudo apt-get install -qq libssl-dev
+env:
+    - EXT_SUDO=
+    - EXT_SUDO=yes
 
 install:
     - |
-        git clone git://github.com/bitcoin/secp256k1.git libsecp256k1 \
-        && cd libsecp256k1 \
-        && ./autogen.sh && ./configure --enable-module-recovery && make && sudo make install \
-        && cd ..
+        sh -c 'if [ "$EXT_SUDO" != "" ]; then \
+            git clone https://github.com/bitcoin/secp256k1.git \
+            && cd secp256k1 \
+            && ./autogen.sh && ./configure --enable-module-recovery && make && sudo make install \
+            && cd ..; fi'
     - phpize && ./configure && make 
     - composer update
 
@@ -25,10 +25,6 @@ before_script:
     - phpenv version-name
 
 script:
-    - |
-        cd libsecp256k1 \
-        && ./tests \
-        && cd ..
     - php -d"extension=modules/secp256k1.so" vendor/phpunit/phpunit/phpunit tests/
 
 notifications:
