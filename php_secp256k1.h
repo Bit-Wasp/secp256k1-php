@@ -1,6 +1,9 @@
 /* $Id$ */
+
+
 #include <secp256k1.h>
 #include <secp256k1_recovery.h>
+
 
 #ifndef PHP_SECP256K1_H
 #define PHP_SECP256K1_H
