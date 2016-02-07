@@ -18,7 +18,7 @@ if test "$PHP_SECP256K1" != "no"; then
       LIBSECP256K1_CFLAGS=`$PKG_CONFIG libsecp256k1 --cflags`
       LIBSECP256K1_LIBDIR=`$PKG_CONFIG libsecp256k1 --variable=libdir`
       LIBSECP256K1_VERSON=`$PKG_CONFIG libsecp256k1 --modversion`
-      AC_MSG_RESULT(from pkgconfig: version LIBSECP256K1_VERSON found in $LIBSECP256K1_LIBDIR)
+      AC_MSG_RESULT(from pkgconfig: version $LIBSECP256K1_VERSON found in $LIBSECP256K1_LIBDIR)
 
     else
       AC_MSG_ERROR(system libsecp2561 must be upgraded to version >= 0.11)
