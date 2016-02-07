@@ -1,13 +1,9 @@
 /* $Id$ */
 
 
-#if defined(HAVE_LIBSECP256K1)
 #include <secp256k1.h>
 #include <secp256k1_recovery.h>
-#else
-#include "secp256k1/include/secp256k1.h"
-#include "secp256k1/include/secp256k1_recovery.h"
-#endif
+
 
 #ifndef PHP_SECP256K1_H
 #define PHP_SECP256K1_H
