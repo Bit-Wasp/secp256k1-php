@@ -12,8 +12,8 @@ env:
 install:
     - |
         sh -c 'if [ "$EXT_SUDO" != "" ]; then \
-            git clone https://github.com/bitcoin/secp256k1.git \
-            && cd secp256k1 \
+            git clone https://github.com/bitcoin/secp256k1.git libsecp256k1 \
+            && cd libsecp256k1 \
             && ./autogen.sh && ./configure --enable-module-recovery && make && sudo make install \
             && cd ..; fi'
     - phpize && ./configure && make 
