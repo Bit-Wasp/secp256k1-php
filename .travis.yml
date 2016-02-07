@@ -17,9 +17,7 @@ install:
         && ./autogen.sh && ./configure --enable-module-recovery && make && sudo make install \
         && cd ..
     - |
-        cd secp256k1 \
-        && phpize && ./configure && make && sudo make install \
-        && cd ..
+        phpize && ./configure && make && sudo make install 
     - composer update
 
 before_script:
