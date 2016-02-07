@@ -1,7 +1,7 @@
 #!/bin/bash
 _PHPQA_DIR=$(git rev-parse --show-toplevel)/travis/phpqa
 _GCOV_DIR=${_PHPQA_DIR}/output
-_EXT_DIR=$(git rev-parse --show-toplevel)/secp256k1
+_EXT_DIR=$(git rev-parse --show-toplevel)
 _CMD=$1
 
 rm -rf ${_GCOV_DIR}
