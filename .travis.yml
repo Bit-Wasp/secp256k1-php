@@ -19,9 +19,7 @@ install:
         && ./autogen.sh && ./configure --enable-experimental --enable-module-{ecdh,recovery} && make && sudo make install \
         && cd ..
     - |
-        cd secp256k1 \
-        && phpize && ./configure && make && sudo make install \
-        && cd ..
+        phpize && ./configure && make && sudo make install 
     - composer update
 
 before_script:
