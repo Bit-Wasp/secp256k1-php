@@ -37,8 +37,9 @@ install:
       && ./configure --enable-tests=no --enable-benchmark=no                      \
              --enable-experimental --enable-module-{ecdh,recovery}                \
       && make -j$(nproc) && sudo make install && cd ..
-  - |
-          phpize && ./configure && make && sudo make install
+  - phpize && ./configure && make
+  - ls modules/
+  - ls .libs/
   - composer update
 
 before_script:
@@ -50,8 +51,9 @@ before_script:
 
 script:
   - travis/verify_stubs.sh
-  - cd secp256k1/ && REPORT_EXIT_STATUS=1 make test || (find tests/*.log -type f -exec cat {} + ; exit 1) && cd ..
+  - REPORT_EXIT_STATUS=1 make test || (find tests/*.log -type f -exec cat {} + ; exit 1)
   - travis/run_coverage_test.sh || exit 1
   - travis/validate_examples.sh || exit 1
+
 after_script:
-    - bash <(curl -s https://codecov.io/bash)
+  - bash <(curl -s https://codecov.io/bash)
