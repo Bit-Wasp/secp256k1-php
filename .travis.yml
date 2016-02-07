@@ -16,7 +16,7 @@ install:
             && cd libsecp256k1 \
             && ./autogen.sh && ./configure --enable-module-recovery && make && sudo make install \
             && cd ..; fi'
-    - phpize && ./configure && make 
+    - phpize && ./configure --with-secp256k1 && make 
     - composer update
 
 before_script:
