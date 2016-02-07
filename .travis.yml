@@ -18,8 +18,7 @@ install:
         && cd libsecp256k1 \
         && ./autogen.sh && ./configure --enable-experimental --enable-module-{ecdh,recovery} && make && sudo make install \
         && cd ..
-    - |
-        phpize && ./configure && make && sudo make install 
+    - phpize && ./configure && make 
     - composer update
 
 before_script:
@@ -32,4 +31,4 @@ script:
         cd libsecp256k1 \
         && ./tests \
         && cd ..
-    - php -dextension=secp256k1.so vendor/phpunit/phpunit/phpunit tests/
+    - php -d"extension=modules/secp256k1.so" vendor/phpunit/phpunit/phpunit tests/
