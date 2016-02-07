@@ -43,7 +43,7 @@ if test "$PHP_SECP256K1" != "no"; then
     PHP_SECP256K1_SOURCES="$PHP_SECP256K1_SOURCES secp256k1/src/secp256k1.c  "
 
     AC_DEFINE(HAVE_SECP256K1,1,[ ])
-    PHP_NEW_EXTENSION(secp256k1, secp256k1.c $PHP_SECP256K1_SOURCES, $ext_shared,, -L$secp256k1/.libs -lgmp)
+    PHP_NEW_EXTENSION(secp256k1, secp256k1.c $PHP_SECP256K1_SOURCES, $ext_shared,, -Lsecp256k1/.libs -lgmp)
     PHP_ADD_INCLUDE([$ext_srcdir/secp256k1])
     PHP_ADD_INCLUDE([$ext_srcdir/secp256k1/include])
     PHP_ADD_BUILD_DIR($ext_builddir/secp256k1/src, 1)
