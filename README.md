@@ -24,10 +24,14 @@ Only PHP 5.x is supported at the moment - PHP7 will come soon.
     git clone git@github.com:Bit-Wasp/secp256k1-php
     git clone git@github.com:bitcoin/secp256k1
     cd secp256k1
-    ./autogen.sh && ./configure --enable-module-recovery && make && sudo make install
+    ./autogen.sh && ./configure --disable-jni --enable-module-recovery && make && sudo make install
     cd ../secp256k1-php/secp256k1
     phpize && ./configure --with-secp256k1 && make && sudo make install
 ```
+
+The --disable-jni flag is set to override the automatic enabling of this configuration item, since the JNI
+bindings support the Schnorr and ECDH modules. Since ours presently doesn't, we won't compile them in. 
+Only the recovery module is used by this library.
 
 ### (Optional) - Enable extension by default!
 If you're a heavy user, you can add this line to your php.ini files for php-cli, apache2, or php-fpm. 
