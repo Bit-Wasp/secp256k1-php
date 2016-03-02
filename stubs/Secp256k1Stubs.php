@@ -51,6 +51,17 @@ namespace {
     }
 
     /**
+     * @param resource $context
+     * @param string $result
+     * @param resource $publicKey
+     * @param string $privateKey
+     * @return int
+     */
+    function secp256k1_ecdh($context, $result, $publicKey, $privateKey)
+    {
+    }
+
+    /**
      * Serializes a secp256k1_ecdsa_signature_t resource as DER into $signatureOut.
      *
      * @param resource $secp256k1_context_t

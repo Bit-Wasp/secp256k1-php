@@ -11,6 +11,13 @@
 
 static zend_class_entry *spl_ce_InvalidArgumentException;
 
+ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ecdh, 0)
+    ZEND_ARG_INFO(0, context)
+    ZEND_ARG_INFO(1, result)
+    ZEND_ARG_INFO(0, pubkey)
+    ZEND_ARG_INFO(0, privkey)
+ZEND_END_ARG_INFO();
+
 ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_context_create, 0)
     ZEND_ARG_INFO(0, flags)
 ZEND_END_ARG_INFO();
@@ -142,6 +149,7 @@ ZEND_END_ARG_INFO();
  * Every user visible function must have an entry in resource_functions[].
  */
 const zend_function_entry secp256k1_functions[] = {
+        PHP_FE(secp256k1_ecdh,                               arginfo_secp256k1_ecdh)
         PHP_FE(secp256k1_context_create,                     arginfo_secp256k1_context_create)
         PHP_FE(secp256k1_context_destroy,                    arginfo_secp256k1_context_destroy)
         PHP_FE(secp256k1_context_clone,                      arginfo_secp256k1_context_clone)
@@ -868,10 +876,33 @@ PHP_FUNCTION(secp256k1_ecdsa_recover)
     if (result) {
         ZEND_REGISTER_RESOURCE(zPubKey, pubkey, le_secp256k1_pubkey);
     }
-
     RETURN_LONG(result);
 }
 /* }}} */
+
+PHP_FUNCTION(secp256k1_ecdh)
+{
+    zval *zCtx, *zResult, *zPubKey;
+    secp256k1_context *ctx;
+    secp256k1_pubkey *pubkey;
+    unsigned char *privKey;
+    int result, privKeyLen;
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rzrs", &zCtx, &zResult, &zPubKey, &privKey, &privKeyLen) == FAILURE) {
+        return;
+    }
+
+    ZEND_FETCH_RESOURCE(ctx, secp256k1_context*, &zCtx, -1, SECP256K1_CTX_RES_NAME, le_secp256k1_ctx);
+    ZEND_FETCH_RESOURCE(pubkey, secp256k1_pubkey*, &zPubKey, -1, SECP256K1_PUBKEY_RES_NAME, le_secp256k1_pubkey);
+
+    unsigned char resultChars[32];
+    memset(resultChars, 0, 32);
+    result = secp256k1_ecdh(ctx, resultChars, pubkey, privKey);
+    if (result == 1) {
+        ZVAL_STRINGL(zResult, resultChars, 32, 1);
+    }
+
+    RETURN_LONG(result);
+}
 
  /*
 PHP_FUNCTION()
