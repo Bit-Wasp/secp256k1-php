@@ -14,7 +14,7 @@ install:
     - |
         git clone git://github.com/bitcoin/secp256k1.git libsecp256k1 \
         && cd libsecp256k1 \
-        && ./autogen.sh && ./configure --disable-jni --enable-module-recovery && make && sudo make install \
+        && ./autogen.sh && ./configure --disable-jni --enable-module-ecdh --enable-module-recovery && make && sudo make install \
         && cd ..
     - |
         cd secp256k1 \
