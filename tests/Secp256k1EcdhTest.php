@@ -29,7 +29,7 @@ class Secp256k1EcDHTest extends TestCase
         $this->assertEquals(1, secp256k1_ecdh($context, $result, $pub2, $priv1));
 
         $this->assertEquals(32, strlen($result));
-        $this->assertEquals(hex2bin($expectedSecret), $result);
+        $this->assertEquals(pack("H*", $expectedSecret), $result);
     }
 
 }
