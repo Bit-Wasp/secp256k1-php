@@ -57,10 +57,10 @@ class Secp256k1SchnorrSignTest extends TestCase
         $combinedKey2 = '';
         $combinedKey1 = '';
         $groupKey = '';
-        $this->assertEquals(1, secp256k1_ec_pubkey_combine($context, $groupKey, [$pub1, $pub2, $pub3]));
-        $this->assertEquals(1, secp256k1_ec_pubkey_combine($context, $combinedKey3, [$pubnonce1, $pubnonce2]));
-        $this->assertEquals(1, secp256k1_ec_pubkey_combine($context, $combinedKey2, [$pubnonce1, $pubnonce3]));
-        $this->assertEquals(1, secp256k1_ec_pubkey_combine($context, $combinedKey1, [$pubnonce2, $pubnonce3]));
+        $this->assertEquals(1, secp256k1_ec_pubkey_combine($context, $groupKey, array($pub1, $pub2, $pub3)));
+        $this->assertEquals(1, secp256k1_ec_pubkey_combine($context, $combinedKey3, array($pubnonce1, $pubnonce2)));
+        $this->assertEquals(1, secp256k1_ec_pubkey_combine($context, $combinedKey2, array($pubnonce1, $pubnonce3)));
+        $this->assertEquals(1, secp256k1_ec_pubkey_combine($context, $combinedKey1, array($pubnonce2, $pubnonce3)));
 
         $sig64a = '';
         $sig64b = '';
@@ -69,7 +69,7 @@ class Secp256k1SchnorrSignTest extends TestCase
         $this->assertEquals(1, secp256k1_schnorr_partial_sign($context, $sig64a, $msg32, $priv3, $combinedKey3, $privnonce3));
         $this->assertEquals(1, secp256k1_schnorr_partial_sign($context, $sig64b, $msg32, $priv2, $combinedKey2, $privnonce2));
         $this->assertEquals(1, secp256k1_schnorr_partial_sign($context, $sig64c, $msg32, $priv1, $combinedKey1, $privnonce1));
-        $this->assertEquals(1, secp256k1_schnorr_partial_combine($context, $groupSig, [$sig64a, $sig64b, $sig64c]));
+        $this->assertEquals(1, secp256k1_schnorr_partial_combine($context, $groupSig, array($sig64a, $sig64b, $sig64c)));
 
         $this->assertEquals(1, secp256k1_schnorr_verify($context, $groupSig, $msg32, $groupKey));
 
