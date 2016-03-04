@@ -172,11 +172,11 @@ namespace {
 
     /**
      * @param resource $secp256k1_context
-     * @param string $pubkeyIn
      * @param resource $secp256k1_pubkey
+     * @param string $pubkeyIn
      * @return int
      */
-    function secp256k1_ec_pubkey_parse($secp256k1_context, $pubkeyIn, $secp256k1_pubkey)
+    function secp256k1_ec_pubkey_parse($secp256k1_context, $secp256k1_pubkey, $pubkeyIn)
     {
     }
 

@@ -146,8 +146,8 @@ ZEND_END_ARG_INFO();
 
 ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ec_pubkey_parse, 0)
     ZEND_ARG_INFO(0, context)
-    ZEND_ARG_INFO(0, input)
     ZEND_ARG_INFO(1, publicKey)
+    ZEND_ARG_INFO(0, input)
 ZEND_END_ARG_INFO();
 
 
@@ -651,7 +651,7 @@ PHP_FUNCTION(secp256k1_ec_pubkey_parse)
     unsigned char *pubkeyin;
     int result;
     size_t pubkeylen;
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rsz", &zCtx, &pubkeyin, &pubkeylen, &zPubKey) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rzs", &zCtx, &zPubKey, &pubkeyin, &pubkeylen) == FAILURE) {
         RETURN_FALSE;
     }
 
