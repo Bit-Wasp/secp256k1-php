@@ -183,11 +183,11 @@ namespace {
     /**
      * @param resource $secp256k1_context
      * @param resource $secp256k1_pubkey
-     * @param bool $compressed
      * @param string $pubkeyOut
+     * @param bool $compressed
      * @return int
      */
-    function secp256k1_ec_pubkey_serialize($secp256k1_context, $secp256k1_pubkey, $compressed, $pubkeyOut)
+    function secp256k1_ec_pubkey_serialize($secp256k1_context, $pubkeyOut, $secp256k1_pubkey, $compressed)
     {
     }
 

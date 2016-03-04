@@ -52,7 +52,7 @@ class Secp256k1PubkeyCreateTest extends TestCase
         $this->assertEquals(SECP256K1_TYPE_PUBKEY, get_resource_type($pubkey));
 
         $serialized = '';
-        secp256k1_ec_pubkey_serialize($context, $pubkey, $fcompressed, $serialized);
+        secp256k1_ec_pubkey_serialize($context, $serialized, $pubkey, $fcompressed);
         $this->assertEquals($expectedKey, bin2hex($serialized));
         $this->assertEquals(($fcompressed ? 33 : 65), strlen($serialized));
     }

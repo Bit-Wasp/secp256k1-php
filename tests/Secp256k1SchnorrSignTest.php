@@ -8,7 +8,7 @@ class Secp256k1SchnorrSignTest extends TestCase
     public function serializePubkey($context, $pubkey)
     {
         $serialized = '';
-        secp256k1_ec_pubkey_serialize($context, $pubkey, true, $serialized);
+        secp256k1_ec_pubkey_serialize($context, $serialized, $pubkey, true);
         return bin2hex($serialized);
     }
 

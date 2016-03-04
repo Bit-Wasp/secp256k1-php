@@ -5,7 +5,7 @@ $context = secp256k1_context_create(SECP256K1_CONTEXT_SIGN | SECP256K1_CONTEXT_V
 function serializePubkey($context, $pubkey)
 {
     $serialized = '';
-    secp256k1_ec_pubkey_serialize($context, $pubkey, true, $serialized);
+    secp256k1_ec_pubkey_serialize($context, $serialized, $pubkey, true);
     return bin2hex($serialized);
 }
 

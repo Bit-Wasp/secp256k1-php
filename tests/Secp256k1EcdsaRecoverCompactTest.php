@@ -23,7 +23,7 @@ class Secp256k1EcdsaRecoverCompactTest extends TestCase
         $this->assertEquals(1, secp256k1_ec_pubkey_create($context, $privateKey, $publicKey));
 
         $ePubKey = '';
-        $this->assertEquals(1, secp256k1_ec_pubkey_serialize($context, $publicKey, $compressed, $ePubKey));
+        $this->assertEquals(1, secp256k1_ec_pubkey_serialize($context, $ePubKey, $publicKey, $compressed));
 
         $msg = pack("H*", '03acc83ba10066e791d51e8a8eb90ec325feea7251cb8f979996848fff551d13');
 
@@ -31,7 +31,7 @@ class Secp256k1EcdsaRecoverCompactTest extends TestCase
         $this->assertEquals(1, secp256k1_ecdsa_recover($context, $msg, $s, $recPubKey));
 
         $serPubKey = '';
-        $this->assertEquals(1, secp256k1_ec_pubkey_serialize($context, $recPubKey, $compressed, $serPubKey));
+        $this->assertEquals(1, secp256k1_ec_pubkey_serialize($context, $serPubKey, $recPubKey, $compressed));
         $this->assertEquals($ePubKey, $serPubKey);
     }
 

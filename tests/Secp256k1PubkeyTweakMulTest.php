@@ -65,7 +65,7 @@ class Secp256k1PubkeyTweakMulTest extends TestCase
         $result = secp256k1_ec_pubkey_tweak_mul($context, $p, $tweak);
         $this->assertEquals($eMul, $result);
         $ser = '';
-        secp256k1_ec_pubkey_serialize($context, $p, $compressed, $ser);
+        secp256k1_ec_pubkey_serialize($context, $ser, $p, $compressed);
         $this->assertEquals($expectedPublicKey, bin2hex($ser));
     }
 

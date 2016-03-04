@@ -159,9 +159,9 @@ ZEND_END_ARG_INFO();
 
 ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ec_pubkey_serialize, 0)
     ZEND_ARG_INFO(0, context)
+    ZEND_ARG_INFO(1, publicKeyStr)
     ZEND_ARG_INFO(0, secp256k1_pubkey)
     ZEND_ARG_INFO(0, compressed)
-    ZEND_ARG_INFO(1, publicKeyStr)
 ZEND_END_ARG_INFO();
 
 ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ec_pubkey_create, 0)
@@ -674,7 +674,7 @@ PHP_FUNCTION(secp256k1_ec_pubkey_serialize)
     int result;
     long compressed;
     unsigned int flags = 0;
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rrlz", &zCtx, &zPubKey, &compressed, &zPubOut) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rzrl", &zCtx, &zPubOut, &zPubKey, &compressed) == FAILURE) {
         RETURN_FALSE;
     }
 
