@@ -18,7 +18,7 @@ class Secp256k1SignRecoverableTest extends TestCase
         // Create recoverable signature
         $r_sig_t = '';
         /** @var resource $r_sig_t */
-        $this->assertEquals(1, secp256k1_ecdsa_sign_recoverable($context, $msg32, $privKey, $r_sig_t));
+        $this->assertEquals(1, secp256k1_ecdsa_sign_recoverable($context, $r_sig_t, $msg32, $privKey));
         $this->assertEquals(SECP256K1_TYPE_RECOVERABLE_SIG, get_resource_type($r_sig_t));
 
         // Recover public key from the signature

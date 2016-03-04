@@ -63,9 +63,9 @@ ZEND_END_ARG_INFO();
 
 ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ecdsa_sign_recoverable, 0)
     ZEND_ARG_INFO(0, secp256k1_context)
+    ZEND_ARG_INFO(1, secp256k1_ecdsa_recoverable_signature)
     ZEND_ARG_INFO(0, msg32)
     ZEND_ARG_INFO(0, secretKey)
-    ZEND_ARG_INFO(1, secp256k1_ecdsa_recoverable_signature)
 ZEND_END_ARG_INFO();
 
 ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ecdsa_recoverable_signature_serialize_compact, 0)
@@ -925,7 +925,7 @@ PHP_FUNCTION(secp256k1_ecdsa_sign_recoverable)
     secp256k1_ecdsa_recoverable_signature *newsig;
     int seckeylen, msg32len, result;
     unsigned char *seckey, *msg32;
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rssz", &zCtx, &msg32, &msg32len, &seckey, &seckeylen, &zSig) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rzss", &zCtx, &zSig, &msg32, &msg32len, &seckey, &seckeylen) == FAILURE) {
         return;
     }
 
