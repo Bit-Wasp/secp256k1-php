@@ -37,8 +37,8 @@ ZEND_END_ARG_INFO();
 
 ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ecdsa_signature_serialize_der, 0)
     ZEND_ARG_INFO(0, context)
-    ZEND_ARG_INFO(0, secp256k1_ecdsa_signature)
     ZEND_ARG_INFO(1, signatureStr)
+    ZEND_ARG_INFO(0, secp256k1_ecdsa_signature)
 ZEND_END_ARG_INFO();
 
 ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ecdsa_signature_normalize, 0)
