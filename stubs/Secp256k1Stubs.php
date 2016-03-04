@@ -97,12 +97,12 @@ namespace {
 
     /**
      * @param resource $secp256k1_context
+     * @param resource $secp256k1_ecdsa_signature
      * @param string $msg32
      * @param string $privateKey
-     * @param resource $secp256k1_ecdsa_signature
      * @return int
      */
-    function secp256k1_ecdsa_sign($secp256k1_context, $msg32, $privateKey, $secp256k1_ecdsa_signature)
+    function secp256k1_ecdsa_sign($secp256k1_context, $secp256k1_ecdsa_signature, $msg32, $privateKey)
     {
     }
 
