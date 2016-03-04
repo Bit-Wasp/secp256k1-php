@@ -18,8 +18,8 @@ class Secp256k1EcDHTest extends TestCase
 
         $pub1 = '';
         $pub2 = '';
-        $this->assertEquals(1, secp256k1_ec_pubkey_create($context, $priv1, $pub1));
-        $this->assertEquals(1, secp256k1_ec_pubkey_create($context, $priv2, $pub2));
+        $this->assertEquals(1, secp256k1_ec_pubkey_create($context, $pub1, $priv1));
+        $this->assertEquals(1, secp256k1_ec_pubkey_create($context, $pub2, $priv2));
 
         /**
          * @var resource $pub2

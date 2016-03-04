@@ -58,14 +58,15 @@ class Secp256k1PubkeyTweakAddTest extends TestCase
     private function genericTest($context, $publicKey, $tweak, $expectedPublicKey, $eAdd, $compressed)
     {
         $publicKey = $this->toBinary32($publicKey);
+        /** @var resource $p */
         $p = '';
-        secp256k1_ec_pubkey_parse($context, $publicKey, $p);
+        secp256k1_ec_pubkey_parse($context, $p, $publicKey);
         $tweak = $this->toBinary32($tweak);
         $result = secp256k1_ec_pubkey_tweak_add($context, $p, $tweak);
         $this->assertEquals($eAdd, $result);
 
         $pSer = '';
-        secp256k1_ec_pubkey_serialize($context, $p, $compressed, $pSer);
+        secp256k1_ec_pubkey_serialize($context, $pSer, $p, $compressed);
         $this->assertEquals(bin2hex($pSer), $expectedPublicKey);
     }
 
