@@ -41,7 +41,7 @@ class Secp256k1SignRecoverableTest extends TestCase
 
         $parsedSig = '';
         /** @var resource $parsedSig */
-        $this->assertEquals(1, secp256k1_ecdsa_recoverable_signature_parse_compact($context, $sSig, $recid, $parsedSig));
+        $this->assertEquals(1, secp256k1_ecdsa_recoverable_signature_parse_compact($context, $parsedSig, $sSig, $recid));
 
         $sSigAgain = '';
         $recidAgain = '';

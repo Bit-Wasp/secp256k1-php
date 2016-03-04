@@ -130,12 +130,12 @@ namespace {
 
     /**
      * @param resource $secp256k1_context
-     * @param string $output64
-     * @param int $recid
      * @param resource $secp256k1_ecdsa_recoverable_signature
+     * @param string $input64
+     * @param int $recid
      * @return int
      */
-    function secp256k1_ecdsa_recoverable_signature_parse_compact($secp256k1_context, $input64, $recid, $secp256k1_ecdsa_recoverable_signature)
+    function secp256k1_ecdsa_recoverable_signature_parse_compact($secp256k1_context, $secp256k1_ecdsa_recoverable_signature, $input64, $recid)
     {
     }
 
