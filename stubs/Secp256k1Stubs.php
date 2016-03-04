@@ -87,6 +87,16 @@ namespace {
 
     /**
      * @param resource $secp256k1_context
+     * @param resource $secp256k1_ecdsa_signature_out
+     * @param resource $secp256k1_ecdsa_signature_in
+     * @return int
+     */
+    function secp256k1_ecdsa_signature_normalize($secp256k1_context, $secp256k1_ecdsa_signature_out, $secp256k1_ecdsa_signature_in)
+    {
+    }
+
+    /**
+     * @param resource $secp256k1_context
      * @param string $msg32
      * @param string $privateKey
      * @param resource $secp256k1_ecdsa_signature

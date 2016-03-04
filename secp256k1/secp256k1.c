@@ -91,6 +91,12 @@ ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ecdsa_signature_serialize_der, 0)
     ZEND_ARG_INFO(1, signatureStr)
 ZEND_END_ARG_INFO();
 
+ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ecdsa_signature_normalize, 0)
+    ZEND_ARG_INFO(0, context)
+    ZEND_ARG_INFO(1, secp256k1_ecdsa_signature)
+    ZEND_ARG_INFO(0, secp256k1_ecdsa_signature)
+ZEND_END_ARG_INFO();
+
 ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ecdsa_verify, 0)
     ZEND_ARG_INFO(0, context)
     ZEND_ARG_INFO(0, msg32)
@@ -213,6 +219,7 @@ const zend_function_entry secp256k1_functions[] = {
         PHP_FE(secp256k1_context_randomize,                  arginfo_secp256k1_context_randomize)
         PHP_FE(secp256k1_ecdsa_signature_parse_der,          arginfo_secp256k1_ecdsa_signature_parse_der)
         PHP_FE(secp256k1_ecdsa_signature_serialize_der,      arginfo_secp256k1_ecdsa_signature_serialize_der)
+        PHP_FE(secp256k1_ecdsa_signature_normalize,          arginfo_secp256k1_ecdsa_signature_normalize)
         PHP_FE(secp256k1_ecdsa_verify,                       arginfo_secp256k1_ecdsa_verify)
         PHP_FE(secp256k1_ecdsa_sign,                         arginfo_secp256k1_ecdsa_sign)
         PHP_FE(secp256k1_ecdsa_recover,                      arginfo_secp256k1_ecdsa_recover)
@@ -457,6 +464,37 @@ PHP_FUNCTION(secp256k1_ecdsa_signature_parse_der)
     if (result) {
         ZEND_REGISTER_RESOURCE(zSig, sig, le_secp256k1_sig);
     }
+    RETURN_LONG(result);
+}
+/* }}} */
+
+/* Parse a DER signature into a signature resource */
+/**
+ * {{{ proto int secp256k1_ecdsa_signature_normalize(
+ *         resource secp256k1_context,
+ *         resource & secp256k1_ecdsa_signature_out
+ *         resource secp256k1_ecdsa_signature_in
+ *     );
+ */
+PHP_FUNCTION(secp256k1_ecdsa_signature_normalize)
+{
+    zval *zCtx, *zSigIn, *zSigOut;
+    secp256k1_context *ctx;
+    secp256k1_ecdsa_signature *sigin, *sigout;
+    int result;
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rzz", &zCtx, &zSigOut, &zSigIn) == FAILURE) {
+        RETURN_FALSE;
+    }
+
+    ZEND_FETCH_RESOURCE(ctx, secp256k1_context*, &zCtx, -1, SECP256K1_CTX_RES_NAME, le_secp256k1_ctx);
+    ZEND_FETCH_RESOURCE(sigin, secp256k1_ecdsa_signature*, &zSigIn, -1, SECP256K1_CTX_RES_NAME, le_secp256k1_ctx);
+
+    sigout = emalloc(sizeof(secp256k1_ecdsa_signature));
+    result = secp256k1_ecdsa_signature_normalize(ctx, sigout, sigin);
+    if (result) {
+        ZEND_REGISTER_RESOURCE(zSigOut, sigout, le_secp256k1_sig);
+    }
+
     RETURN_LONG(result);
 }
 /* }}} */
