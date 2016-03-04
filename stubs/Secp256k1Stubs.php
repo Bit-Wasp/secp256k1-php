@@ -151,12 +151,12 @@ namespace {
 
     /**
      * @param resource $secp256k1_context
-     * @param string $msg32
-     * @param resource $secp256k1_ecdsa_recoverable_signature
      * @param resource $secp256k1_pubkey
+     * @param resource $secp256k1_ecdsa_recoverable_signature
+     * @param string $msg32
      * @return int
      */
-    function secp256k1_ecdsa_recover($secp256k1_context, $msg32, $secp256k1_ecdsa_recoverable_signature, $secp256k1_pubkey)
+    function secp256k1_ecdsa_recover($secp256k1_context, $secp256k1_pubkey, $secp256k1_ecdsa_recoverable_signature, $msg32)
     {
     }
 

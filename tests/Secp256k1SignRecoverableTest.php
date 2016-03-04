@@ -24,7 +24,7 @@ class Secp256k1SignRecoverableTest extends TestCase
         // Recover public key from the signature
         $r_pubkey_t = '';
         /** @var resource $r_pubkey_t */
-        $this->assertEquals(1, secp256k1_ecdsa_recover($context, $msg32, $r_sig_t, $r_pubkey_t));
+        $this->assertEquals(1, secp256k1_ecdsa_recover($context, $r_pubkey_t, $r_sig_t, $msg32));
 
         // Compare the two public keys
         $sPubkey = '';

@@ -28,7 +28,7 @@ class Secp256k1EcdsaRecoverCompactTest extends TestCase
         $msg = pack("H*", '03acc83ba10066e791d51e8a8eb90ec325feea7251cb8f979996848fff551d13');
 
         $recPubKey = '';
-        $this->assertEquals(1, secp256k1_ecdsa_recover($context, $msg, $s, $recPubKey));
+        $this->assertEquals(1, secp256k1_ecdsa_recover($context, $recPubKey, $s, $msg));
 
         $serPubKey = '';
         $this->assertEquals(1, secp256k1_ec_pubkey_serialize($context, $serPubKey, $recPubKey, $compressed));
@@ -65,6 +65,6 @@ class Secp256k1EcdsaRecoverCompactTest extends TestCase
     public function testErroneousTypes($context, $msg32, $sig)
     {
         $publicKey = '';
-        \secp256k1_ecdsa_recover($context, $msg32, $sig, $publicKey);
+        \secp256k1_ecdsa_recover($context, $publicKey, $sig, $msg32);
     }/**/
 }
