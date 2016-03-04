@@ -279,6 +279,7 @@ namespace {
      * @param string $privnonce
      * @param string $msg32
      * @param string $seckey
+     * @return int
      */
     function secp256k1_schnorr_generate_nonce_pair($secp256k1_context, $pubnonce, $privnonce, $msg32, $seckey)
     {
