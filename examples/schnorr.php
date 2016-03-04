@@ -23,9 +23,9 @@ $pub2 = '';
 $priv3 = str_pad('', 32, "\x14");
 $pub3 = '';
 
-$c = secp256k1_ec_pubkey_create($context, $priv1, $pub1);
-$c = secp256k1_ec_pubkey_create($context, $priv2, $pub2);
-$c = secp256k1_ec_pubkey_create($context, $priv3, $pub3);
+$c = secp256k1_ec_pubkey_create($context, $pub1, $priv1);
+$c = secp256k1_ec_pubkey_create($context, $pub2, $priv2);
+$c = secp256k1_ec_pubkey_create($context, $pub3, $priv3);
 
 echo "Pubkey1: ".serializePubkey($context, $pub1).PHP_EOL;
 echo "Pubkey2: ". serializePubkey($context, $pub2).PHP_EOL;

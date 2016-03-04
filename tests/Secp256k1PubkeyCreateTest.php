@@ -48,7 +48,7 @@ class Secp256k1PubkeyCreateTest extends TestCase
 
         /** @var resource $pubkey */
         $pubkey = '';
-        $this->assertEquals($eResult, secp256k1_ec_pubkey_create($context, $secretKey, $pubkey));
+        $this->assertEquals($eResult, secp256k1_ec_pubkey_create($context, $pubkey, $secretKey));
         $this->assertEquals(SECP256K1_TYPE_PUBKEY, get_resource_type($pubkey));
 
         $serialized = '';
@@ -77,7 +77,7 @@ class Secp256k1PubkeyCreateTest extends TestCase
     public function testErroneousTypes($context, $seckey)
     {
         $pubkey = '';
-        \secp256k1_ec_pubkey_create($context, $seckey, $pubkey);
+        \secp256k1_ec_pubkey_create($context, $pubkey, $seckey);
     }
 
 }

@@ -162,11 +162,11 @@ namespace {
 
     /**
      * @param resource $secp256k1_context
-     * @param string $secretKey
      * @param resource $secp256k1_pubkey
+     * @param string $secretKey
      * @return int
      */
-    function secp256k1_ec_pubkey_create($secp256k1_context, $secretKey, $secp256k1_pubkey)
+    function secp256k1_ec_pubkey_create($secp256k1_context, $secp256k1_pubkey, $secretKey)
     {
     }
 

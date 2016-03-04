@@ -13,7 +13,7 @@ class Secp256k1SignRecoverableTest extends TestCase
         $context = TestCase::getContext();
 
         // Create public key of our private key
-        $this->assertEquals(1, secp256k1_ec_pubkey_create($context, $privKey, $pub_t));
+        $this->assertEquals(1, secp256k1_ec_pubkey_create($context, $pub_t, $privKey));
 
         // Create recoverable signature
         $r_sig_t = '';

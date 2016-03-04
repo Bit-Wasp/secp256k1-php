@@ -172,8 +172,8 @@ ZEND_END_ARG_INFO();
 
 ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ec_pubkey_create, 0)
     ZEND_ARG_INFO(0, context)
-    ZEND_ARG_INFO(0, secretKey)
     ZEND_ARG_INFO(1, publicKey)
+    ZEND_ARG_INFO(0, secretKey)
 ZEND_END_ARG_INFO();
 
 ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ec_privkey_tweak_add, 0)
@@ -627,6 +627,7 @@ PHP_FUNCTION(secp256k1_ec_seckey_verify)
         zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_ec_seckey_verify(): Parameter 1 should be 32 bytes");
         return;
     }
+
     result = secp256k1_ec_seckey_verify(ctx, seckey);
     RETURN_LONG(result);
 }
@@ -654,7 +655,7 @@ PHP_FUNCTION(secp256k1_ec_pubkey_create)
     secp256k1_pubkey *pubkey;
     int result, seckeylen;
     unsigned char *seckey;
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rsz", &zCtx, &seckey, &seckeylen, &zPubKey) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rzs", &zCtx, &zPubKey, &seckey, &seckeylen) == FAILURE) {
         return;
     }
 

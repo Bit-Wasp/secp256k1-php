@@ -27,9 +27,9 @@ class Secp256k1SchnorrSignTest extends TestCase
         $pub1 = '';
         $pub2 = '';
         $pub3 = '';
-        $this->assertEquals(1, secp256k1_ec_pubkey_create($context, $priv1, $pub1));
-        $this->assertEquals(1, secp256k1_ec_pubkey_create($context, $priv2, $pub2));
-        $this->assertEquals(1, secp256k1_ec_pubkey_create($context, $priv3, $pub3));
+        $this->assertEquals(1, secp256k1_ec_pubkey_create($context, $pub1, $priv1));
+        $this->assertEquals(1, secp256k1_ec_pubkey_create($context, $pub2, $priv2));
+        $this->assertEquals(1, secp256k1_ec_pubkey_create($context, $pub3, $priv3));
 
         $msg32 = hash('sha256','text', true);
 
