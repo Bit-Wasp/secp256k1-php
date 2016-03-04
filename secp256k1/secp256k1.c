@@ -77,8 +77,8 @@ ZEND_END_ARG_INFO();
 
 ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ecdsa_recoverable_signature_convert, 0)
     ZEND_ARG_INFO(0, secp256k1_context)
-    ZEND_ARG_INFO(0, secp256k1_ecdsa_recoverable_signature)
     ZEND_ARG_INFO(1, secp256k1_ecdsa_signature)
+    ZEND_ARG_INFO(0, secp256k1_ecdsa_recoverable_signature)
 ZEND_END_ARG_INFO();
 
 ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ecdsa_recoverable_signature_parse_compact, 0)
@@ -876,10 +876,10 @@ PHP_FUNCTION(secp256k1_ecdsa_recoverable_signature_convert)
 {
     zval *zCtx, *zRecoverableSig, *zNormalSig;
     secp256k1_context *ctx;
-    secp256k1_ecdsa_recoverable_signature * rSig;
     secp256k1_ecdsa_signature * nSig;
+    secp256k1_ecdsa_recoverable_signature * rSig;
     int result;
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rrz", &zCtx, &zRecoverableSig, &zNormalSig) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rzr", &zCtx, &zNormalSig, &zRecoverableSig) == FAILURE) {
         return;
     }
 

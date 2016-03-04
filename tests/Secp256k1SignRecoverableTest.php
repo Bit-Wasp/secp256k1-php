@@ -68,7 +68,7 @@ class Secp256k1SignRecoverableTest extends TestCase
         /** @var resource $plain */
 
         // Test that conversion is successful
-        $this->assertEquals(1, secp256k1_ecdsa_recoverable_signature_convert($context, $r_sig_t, $plain));
+        $this->assertEquals(1, secp256k1_ecdsa_recoverable_signature_convert($context, $plain, $r_sig_t));
 
         // Test the converted sig's DER output matches what we expect
         $derSer = '';

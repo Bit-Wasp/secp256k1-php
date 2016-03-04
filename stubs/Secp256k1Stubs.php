@@ -141,11 +141,11 @@ namespace {
 
     /**
      * @param resource $secp256k1_context
-     * @param resource $secp256k1_ecdsa_recoverable_signature
      * @param resource $secp256k1_ecdsa_signature
+     * @param resource $secp256k1_ecdsa_recoverable_signature
      * @return int
      */
-    function secp256k1_ecdsa_recoverable_signature_convert($secp256k1_context, $secp256k1_ecdsa_recoverable_signature, $secp256k1_ecdsa_signature)
+    function secp256k1_ecdsa_recoverable_signature_convert($secp256k1_context, $secp256k1_ecdsa_signature, $secp256k1_ecdsa_recoverable_signature)
     {
     }
 
