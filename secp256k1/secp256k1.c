@@ -150,6 +150,13 @@ ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ec_pubkey_parse, 0)
     ZEND_ARG_INFO(1, publicKey)
 ZEND_END_ARG_INFO();
 
+
+ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ec_pubkey_combine, 0)
+    ZEND_ARG_INFO(0, context)
+    ZEND_ARG_INFO(1, combinedKey)
+    ZEND_ARG_INFO(0, publicKeys)
+ZEND_END_ARG_INFO();
+
 ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ec_pubkey_serialize, 0)
     ZEND_ARG_INFO(0, context)
     ZEND_ARG_INFO(0, secp256k1_pubkey)
@@ -216,6 +223,7 @@ const zend_function_entry secp256k1_functions[] = {
         PHP_FE(secp256k1_ec_seckey_verify,                   arginfo_secp256k1_ec_seckey_verify)
         PHP_FE(secp256k1_ec_pubkey_create,                   arginfo_secp256k1_ec_pubkey_create)
         PHP_FE(secp256k1_ec_pubkey_parse,                    arginfo_secp256k1_ec_pubkey_parse)
+        PHP_FE(secp256k1_ec_pubkey_combine,                  arginfo_secp256k1_ec_pubkey_combine)
         PHP_FE(secp256k1_ec_pubkey_serialize,                arginfo_secp256k1_ec_pubkey_serialize)
         PHP_FE(secp256k1_ec_privkey_tweak_add,               arginfo_secp256k1_ec_privkey_tweak_add)
         PHP_FE(secp256k1_ec_privkey_tweak_mul,               arginfo_secp256k1_ec_privkey_tweak_mul)
@@ -658,7 +666,6 @@ PHP_FUNCTION(secp256k1_ec_pubkey_parse)
 }
 /* }}} */
 
-
 PHP_FUNCTION(secp256k1_ec_pubkey_serialize)
 {
     zval *zCtx, *zPubKey, *zPubOut;
@@ -937,7 +944,7 @@ PHP_FUNCTION(secp256k1_ecdh)
     secp256k1_pubkey *pubkey;
     unsigned char *privKey;
     int result, privKeyLen;
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rzrs", &zCtx, &zResult, &zPubKey, &privKey, &privKeyLen) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rzrs", &zCtx, &zResult, &zPubKey, &privKey, &privKeyLen)== FAILURE) {
         return;
     }
 
@@ -1042,8 +1049,7 @@ PHP_FUNCTION(secp256k1_schnorr_generate_nonce_pair)
 {
     zval *zCtx, *zPubNonce, *zPrivNonce;
     secp256k1_context *ctx;
-    unsigned char *privnonce32, *seckey, *msg32;
-    secp256k1_pubkey *pubnonce;
+    unsigned char privnonce32[32], *seckey, *msg32;
     int result, seckeylen, msg32len;
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rzzss", &zCtx, &zPubNonce, &zPrivNonce, &msg32, &msg32len, &seckey, &seckeylen) == FAILURE) {
         return;
@@ -1061,7 +1067,7 @@ PHP_FUNCTION(secp256k1_schnorr_generate_nonce_pair)
         return;
     }
 
-    pubnonce = emalloc(sizeof(secp256k1_pubkey));
+    secp256k1_pubkey *pubnonce = emalloc(sizeof(secp256k1_pubkey));
     result = secp256k1_schnorr_generate_nonce_pair(ctx, pubnonce, privnonce32, msg32, seckey, NULL, NULL);
     if (result) {
         ZEND_REGISTER_RESOURCE(zPubNonce, pubnonce, le_secp256k1_pubkey);
@@ -1100,9 +1106,9 @@ PHP_FUNCTION(secp256k1_schnorr_partial_sign)
         return;
     }
 
-    unsigned char newsig[64];
+    unsigned char *newsig = emalloc(64);
     result = secp256k1_schnorr_partial_sign(ctx, newsig, msg32, seckey, pubnonce_others, secnonce32);
-    if (result) {
+    if (result == 1) {
         ZVAL_STRINGL(zSig, newsig, 64, 1);
     }
 
@@ -1115,7 +1121,6 @@ PHP_FUNCTION(secp256k1_schnorr_partial_combine)
     secp256k1_context* ctx;
     HashTable *arr_hash;
     HashPosition pointer;
-    unsigned char *sig64;
     int result = 0;
     size_t array_count;
 
@@ -1127,22 +1132,57 @@ PHP_FUNCTION(secp256k1_schnorr_partial_combine)
 
     arr_hash = Z_ARRVAL_P(arr);
     array_count = (size_t) zend_hash_num_elements(arr_hash);
-    const unsigned char *  sigs[array_count];
+    const unsigned char *sigs[array_count];
     unsigned char *sig;
     int i = 0;
     for (zend_hash_internal_pointer_reset_ex(arr_hash, &pointer); zend_hash_get_current_data_ex(arr_hash, (void**) &data, &pointer) == SUCCESS; zend_hash_move_forward_ex(arr_hash, &pointer)) {
         sig = (unsigned char *) Z_STRVAL_PP(data);
-        sigs[i++] = &sig;
+        sigs[i++] = sig;
     }
 
-    sig64 = emalloc(64);
+    unsigned char * sig64 = emalloc(64);
     result = secp256k1_schnorr_partial_combine(ctx, sig64, sigs, array_count);
-    if (result) {
+    if (result == 1) {
         ZVAL_STRINGL(zSigCombined, sig64, 64, 1);
     }
 
     RETURN_LONG(result);
 }
+
+PHP_FUNCTION(secp256k1_ec_pubkey_combine)
+{
+    zval *arr, **data, *zCtx, *zPubkeyCombined;
+    secp256k1_context* ctx;
+    HashTable *arr_hash;
+    HashPosition pointer;
+    int result;
+    size_t array_count;
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rza", &zCtx, &zPubkeyCombined, &arr) == FAILURE) {
+        return;
+    }
+
+    ZEND_FETCH_RESOURCE(ctx, secp256k1_context*, &zCtx, -1, SECP256K1_CTX_RES_NAME, le_secp256k1_ctx);
+
+    arr_hash = Z_ARRVAL_P(arr);
+    array_count = (size_t) zend_hash_num_elements(arr_hash);
+    const secp256k1_pubkey *  pubkeys[array_count];
+    secp256k1_pubkey * ptr;
+    int i = 0;
+    for (zend_hash_internal_pointer_reset_ex(arr_hash, &pointer); zend_hash_get_current_data_ex(arr_hash, (void**) &data, &pointer) == SUCCESS; zend_hash_move_forward_ex(arr_hash, &pointer)) {
+        ZEND_FETCH_RESOURCE(ptr, secp256k1_pubkey*, data, -1, SECP256K1_PUBKEY_RES_NAME, le_secp256k1_pubkey);
+        pubkeys[i++] = ptr;
+    }
+
+    secp256k1_pubkey * combined = emalloc(sizeof(secp256k1_pubkey));
+    result = secp256k1_ec_pubkey_combine(ctx, combined, pubkeys, array_count);
+    if (result == 1) {
+        ZEND_REGISTER_RESOURCE(zPubkeyCombined, combined, le_secp256k1_pubkey);
+    }
+
+    RETURN_LONG(result);
+}
+
 
 /*
  * Local variables:
