@@ -113,7 +113,7 @@ class Secp256k1EcdsaVerifyTest extends TestCase
     {
         $seckey = $this->toBinary32($privkey);
         $msg = $this->toBinary32($msg);
-        $sig = hex2bin($sig);
+        $sig = pack("H*", $sig);
 
         /** @var resource $pubkey */
         $pubkey = '';
