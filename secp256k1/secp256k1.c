@@ -81,8 +81,8 @@ ZEND_END_ARG_INFO();
 
 ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ecdsa_signature_parse_der, 0)
     ZEND_ARG_INFO(0, context)
-    ZEND_ARG_INFO(0, signatureStr)
     ZEND_ARG_INFO(1, secp256k1_ecdsa_signature)
+    ZEND_ARG_INFO(0, signatureStr)
 ZEND_END_ARG_INFO();
 
 ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ecdsa_signature_serialize_der, 0)
@@ -446,7 +446,7 @@ PHP_FUNCTION(secp256k1_ecdsa_signature_parse_der)
     secp256k1_ecdsa_signature *sig;
     unsigned char *sigin;
     int result, siglen;
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rsz", &zCtx, &sigin, &siglen, &zSig) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rzs", &zCtx, &zSig, &sigin, &siglen) == FAILURE) {
         RETURN_FALSE;
     }
 

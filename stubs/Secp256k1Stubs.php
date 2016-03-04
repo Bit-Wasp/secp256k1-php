@@ -66,11 +66,11 @@ namespace {
      * Parses a DER signature into a secp256k1_ecdsa_signature_t resource.
      *
      * @param resource $secp256k1_context
-     * @param string $signatureIn
      * @param resource $secp256k1_ecdsa_signature
+     * @param string $signatureIn
      * @return int
      */
-    function secp256k1_ecdsa_signature_parse_der($secp256k1_context, $signatureIn, $secp256k1_ecdsa_signature)
+    function secp256k1_ecdsa_signature_parse_der($secp256k1_context, $secp256k1_ecdsa_signature, $signatureIn)
     {
     }
 

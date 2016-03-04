@@ -74,7 +74,7 @@ class Secp256k1EcdsaVerifyTest extends TestCase
     {
         $s = '';
         $p = '';
-        secp256k1_ecdsa_signature_parse_der($context, $sig, $s);
+        secp256k1_ecdsa_signature_parse_der($context, $s, $sig);
         secp256k1_ec_pubkey_parse($context, $public, $p);
 
         \secp256k1_ecdsa_verify($context, $msg32, $s, $p);
@@ -89,7 +89,7 @@ class Secp256k1EcdsaVerifyTest extends TestCase
 
         /** @var resource $s */
         $s = '';
-        secp256k1_ecdsa_signature_parse_der($context, $sig, $s);
+        secp256k1_ecdsa_signature_parse_der($context, $s, $sig);
         /** @var resource $public */
         $public = '';
         $this->assertEquals(1, \secp256k1_ec_pubkey_create($context, $private, $public), 'public');
@@ -113,7 +113,7 @@ class Secp256k1EcdsaVerifyTest extends TestCase
     {
         $seckey = $this->toBinary32($privkey);
         $msg = $this->toBinary32($msg);
-        $sig = $this->toBinary32($sig);
+        $sig = hex2bin($sig);
 
         /** @var resource $pubkey */
         $pubkey = '';
@@ -121,7 +121,7 @@ class Secp256k1EcdsaVerifyTest extends TestCase
 
         /** @var resource $s */
         $s = '';
-        secp256k1_ecdsa_signature_parse_der($context, $sig, $s);
+        secp256k1_ecdsa_signature_parse_der($context, $s, $sig);
         $this->assertEquals($eSigCreate, \secp256k1_ecdsa_verify($context, $msg, $s, $pubkey));
     }
 }
