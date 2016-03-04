@@ -416,7 +416,7 @@ PHP_FUNCTION(secp256k1_ecdsa_signature_serialize_der)
     int result;
     size_t sigoutlen = MAX_SIGNATURE_LENGTH;
     unsigned char *sigout;
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rrz", &zCtx, &zSig, &zSigOut) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rzr", &zCtx, &zSigOut, &zSig) == FAILURE) {
         RETURN_FALSE;
     }
 
@@ -479,7 +479,7 @@ PHP_FUNCTION(secp256k1_ecdsa_verify) {
     secp256k1_pubkey *pubkey;
     unsigned char *msg32;
     int result, msg32len;
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rsrr", &zCtx, &msg32, &msg32len, &zSig, &zPubKey) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rrsr", &zCtx, &zSig, &msg32, &msg32len, &zPubKey) == FAILURE) {
         return;
     }
 

@@ -54,11 +54,11 @@ namespace {
      * Serializes a secp256k1_ecdsa_signature_t resource as DER into $signatureOut.
      *
      * @param resource $secp256k1_context
-     * @param resource $secp256k1_ecdsa_signature
      * @param string $signatureOut
+     * @param resource $secp256k1_ecdsa_signature
      * @return int
      */
-    function secp256k1_ecdsa_signature_serialize_der($secp256k1_context, $secp256k1_ecdsa_signature, &$signatureOut)
+    function secp256k1_ecdsa_signature_serialize_der($secp256k1_context, $signatureOut, $secp256k1_ecdsa_signature)
     {
     }
 
@@ -76,12 +76,12 @@ namespace {
 
     /**
      * @param resource $secp256k1_context
-     * @param string $msg32
      * @param resource $secp256k1_ecdsa_signature - signature resource
+     * @param string $msg32 - hash of data to be verified
      * @param resource $secp256k1_pubkey - the public key resource
      * @return int
      */
-    function secp256k1_ecdsa_verify($secp256k1_context, $msg32, $secp256k1_ecdsa_signature, $secp256k1_pubkey)
+    function secp256k1_ecdsa_verify($secp256k1_context, $secp256k1_ecdsa_signature, $msg32, $secp256k1_pubkey)
     {
     }
 

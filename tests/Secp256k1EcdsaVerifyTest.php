@@ -77,7 +77,7 @@ class Secp256k1EcdsaVerifyTest extends TestCase
         secp256k1_ecdsa_signature_parse_der($context, $s, $sig);
         secp256k1_ec_pubkey_parse($context, $public, $p);
 
-        \secp256k1_ecdsa_verify($context, $msg32, $s, $p);
+        \secp256k1_ecdsa_verify($context, $s, $msg32, $p);
     }
 
     public function testVerifyWithInvalidInput()
@@ -93,11 +93,11 @@ class Secp256k1EcdsaVerifyTest extends TestCase
         /** @var resource $public */
         $public = '';
         $this->assertEquals(1, \secp256k1_ec_pubkey_create($context, $private, $public), 'public');
-        $this->assertEquals(1, \secp256k1_ecdsa_verify($context, $msg32, $s, $public), 'initial check');
+        $this->assertEquals(1, \secp256k1_ecdsa_verify($context, $s, $msg32, $public), 'initial check');
 
-        $this->assertEquals(0, \secp256k1_ecdsa_verify($context, '', $s, $public), 'msg32 as empty string');
+        $this->assertEquals(0, \secp256k1_ecdsa_verify($context, $s, '', $public), 'msg32 as empty string');
 
-        $this->assertEquals(0, \secp256k1_ecdsa_verify($context, 1, $s, $public), 'msg32 as 1');
+        $this->assertEquals(0, \secp256k1_ecdsa_verify($context, $s, 1, $public), 'msg32 as 1');
         
 
     }
@@ -122,6 +122,6 @@ class Secp256k1EcdsaVerifyTest extends TestCase
         /** @var resource $s */
         $s = '';
         secp256k1_ecdsa_signature_parse_der($context, $s, $sig);
-        $this->assertEquals($eSigCreate, \secp256k1_ecdsa_verify($context, $msg, $s, $pubkey));
+        $this->assertEquals($eSigCreate, \secp256k1_ecdsa_verify($context, $s, $msg, $pubkey));
     }
 }
