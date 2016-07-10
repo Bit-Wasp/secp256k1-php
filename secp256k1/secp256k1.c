@@ -341,6 +341,7 @@ zend_module_entry secp256k1_module_entry = {
 ZEND_GET_MODULE(secp256k1)
 #endif
 
+
 size_t pubkeyLengthFromCompressed(int compressed)
 {
     return compressed ? PUBKEY_COMPRESSED_LENGTH : PUBKEY_UNCOMPRESSED_LENGTH;
@@ -428,6 +429,7 @@ PHP_FUNCTION(secp256k1_ecdsa_signature_serialize_der)
     secp256k1_context *ctx;
     secp256k1_ecdsa_signature *sig;
     int result;
+
     size_t sigoutlen = MAX_SIGNATURE_LENGTH;
     unsigned char *sigout;
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rzr", &zCtx, &zSigOut, &zSig) == FAILURE) {
@@ -696,7 +698,7 @@ PHP_FUNCTION(secp256k1_ec_pubkey_parse)
     secp256k1_pubkey *pubkey;
     unsigned char *pubkeyin;
     int result;
-    size_t pubkeylen;
+    int pubkeylen;
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rzs", &zCtx, &zPubKey, &pubkeyin, &pubkeylen) == FAILURE) {
         RETURN_FALSE;
     }
