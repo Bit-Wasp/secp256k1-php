@@ -32,7 +32,7 @@ script:
         cd libsecp256k1 \
         && ./tests \
         && cd ..
-    - php -dextension=secp256k1.so vendor/phpunit/phpunit/phpunit tests/
+    - php -dextension=secp256k1.so vendor/phpunit/phpunit/phpunit tests/ --coverage-html=build/docs
 
 notifications:
   webhooks:
