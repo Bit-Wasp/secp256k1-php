@@ -52,8 +52,7 @@ class Secp256k1EcdsaSignTest extends TestCase
         /** @var resource $signature */
         $signature = '';
         $sign = secp256k1_ecdsa_sign($context, $signature, $msg, $privkey);
-        var_dump($sign);
-        var_dump($signature);
+
         $this->assertEquals($eSigCreate, $sign);
         $this->assertEquals(SECP256K1_TYPE_SIG, get_resource_type($signature));
         

@@ -489,8 +489,8 @@ PHP_FUNCTION(secp256k1_ecdsa_signature_serialize_der)
 /**
  * {{{ proto int secp256k1_ecdsa_signature_parse_der(
  *         resource secp256k1_context,
- *         string serializedSignature,
- *         resource & secp256k1_ecdsa_signature
+ *         resource & secp256k1_ecdsa_signature,
+ *         string serializedSignature
  *     );
  */
 PHP_FUNCTION(secp256k1_ecdsa_signature_parse_der)
@@ -498,22 +498,25 @@ PHP_FUNCTION(secp256k1_ecdsa_signature_parse_der)
     zval *zCtx, *zSig;
     secp256k1_context *ctx;
     secp256k1_ecdsa_signature *sig;
+    int result = 0;
     unsigned char *sigin;
-    int result;
-    int siglen;
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rzs", &zCtx, &zSig, &sigin, &siglen) == FAILURE) {
+    size_t siginlen;
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rz/s", &zCtx, &zSig, &sigin, &siginlen) == FAILURE) {
         RETURN_FALSE;
     }
 
-    if ((ctx = (secp256k1_context *)zend_fetch_resource2(Z_RES_P(zCtx), SECP256K1_CTX_RES_NAME, le_secp256k1_ctx, -1)) == NULL) {
+    if ((ctx = (secp256k1_context *)zend_fetch_resource2_ex(zCtx, SECP256K1_CTX_RES_NAME, le_secp256k1_ctx, -1)) == NULL) {
         RETURN_FALSE;
     }
 
     sig = emalloc(sizeof(secp256k1_ecdsa_signature));
-    result = secp256k1_ecdsa_signature_parse_der(ctx, sig, sigin, siglen);
+    result = secp256k1_ecdsa_signature_parse_der(ctx, sig, sigin, siginlen);
     if (result) {
+        ZVAL_NULL(zSig);
         ZVAL_RES(zSig, zend_register_resource(sig, le_secp256k1_sig));
     }
+
     RETURN_LONG(result);
 }
 /* }}} */
@@ -577,15 +580,24 @@ PHP_FUNCTION(secp256k1_ecdsa_verify) {
         return;
     }
 
-        if ((ctx = (secp256k1_context *)zend_fetch_resource2(Z_RES_P(zCtx), SECP256K1_CTX_RES_NAME, le_secp256k1_ctx, -1)) == NULL) {
-            RETURN_FALSE;
-        }
-        if ((sig = (secp256k1_ecdsa_signature *)zend_fetch_resource2(Z_RES_P(zSig), SECP256K1_SIG_RES_NAME, le_secp256k1_sig, -1)) == NULL) {
-            RETURN_FALSE;
-        }
-        if ((pubkey = (secp256k1_pubkey *)zend_fetch_resource2(Z_RES_P(zPubKey), SECP256K1_PUBKEY_RES_NAME, le_secp256k1_pubkey, -1)) == NULL) {
-            RETURN_FALSE;
-        }
+    if (Z_TYPE_P(zCtx) != IS_RESOURCE ||
+        Z_TYPE_P(zSig) != IS_RESOURCE ||
+        Z_TYPE_P(zPubKey) != IS_RESOURCE
+    ) {
+        RETURN_FALSE;
+    }
+
+    if ((ctx = (secp256k1_context *)zend_fetch_resource2_ex(zCtx, SECP256K1_CTX_RES_NAME, le_secp256k1_ctx, -1)) == NULL) {
+        RETURN_FALSE;
+    }
+
+    if ((sig = (secp256k1_ecdsa_signature *)zend_fetch_resource2_ex(zSig, SECP256K1_SIG_RES_NAME, le_secp256k1_sig, -1)) == NULL) {
+        RETURN_FALSE;
+    }
+
+    if ((pubkey = (secp256k1_pubkey *)zend_fetch_resource2_ex(zPubKey, SECP256K1_PUBKEY_RES_NAME, le_secp256k1_pubkey, -1)) == NULL) {
+        RETURN_FALSE;
+    }
 
     secp256k1_ecdsa_signature *sigcpy = emalloc(sizeof(secp256k1_ecdsa_signature));
     secp256k1_ecdsa_signature_normalize(ctx, sigcpy, sig);
@@ -647,7 +659,7 @@ PHP_FUNCTION (secp256k1_ecdsa_sign) {
             RETURN_FALSE;
         }
 
-        if ((ctx = (secp256k1_context *)zend_fetch_resource2(Z_RES_P(zCtx), SECP256K1_CTX_RES_NAME, le_secp256k1_ctx, -1)) == NULL) {
+        if ((ctx = (secp256k1_context *)zend_fetch_resource2_ex(zCtx, SECP256K1_CTX_RES_NAME, le_secp256k1_ctx, -1)) == NULL) {
             RETURN_FALSE;
         }
 
@@ -738,7 +750,7 @@ PHP_FUNCTION(secp256k1_ec_pubkey_create)
     }
 
     pubkey = emalloc(sizeof(secp256k1_pubkey));
-    result = secp256k1_ec_pubkey_create(ctx, pubkey, seckey->val);
+    result = secp256k1_ec_pubkey_create(ctx, pubkey, (unsigned char *)seckey->val);
 
     if (result) {
         ZVAL_RES(zPubKey, zend_register_resource(pubkey, le_secp256k1_pubkey));
@@ -788,13 +800,14 @@ PHP_FUNCTION(secp256k1_ec_pubkey_serialize)
     int result;
     long compressed;
     unsigned int flags = 0;
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rzrl", &zCtx, &zPubOut, &zPubKey, &compressed) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rz/rl", &zCtx, &zPubOut, &zPubKey, &compressed) == FAILURE) {
         RETURN_FALSE;
     }
 
 if ((ctx = (secp256k1_context *)zend_fetch_resource2(Z_RES_P(zCtx), SECP256K1_CTX_RES_NAME, le_secp256k1_ctx, -1)) == NULL) {
     RETURN_FALSE;
 }
+
 if ((pubkey = (secp256k1_pubkey *)zend_fetch_resource2(Z_RES_P(zPubKey), SECP256K1_PUBKEY_RES_NAME, le_secp256k1_pubkey, -1)) == NULL) {
     RETURN_FALSE;
 }
@@ -860,12 +873,13 @@ PHP_FUNCTION(secp256k1_ec_pubkey_tweak_add)
         return;
     }
 
-if ((ctx = (secp256k1_context *)zend_fetch_resource2(Z_RES_P(zCtx), SECP256K1_CTX_RES_NAME, le_secp256k1_ctx, 0)) == NULL) {
-    RETURN_FALSE;
-}
-if ((pubkey = (secp256k1_pubkey *)zend_fetch_resource2(Z_RES_P(zPubKey), SECP256K1_PUBKEY_RES_NAME, le_secp256k1_pubkey, 0)) == NULL) {
-    RETURN_FALSE;
-}
+    if ((ctx = (secp256k1_context *)zend_fetch_resource2_ex(zCtx, SECP256K1_CTX_RES_NAME, le_secp256k1_ctx, 0)) == NULL) {
+        RETURN_FALSE;
+    }
+
+    if ((pubkey = (secp256k1_pubkey *)zend_fetch_resource2_ex(zPubKey, SECP256K1_PUBKEY_RES_NAME, le_secp256k1_pubkey, 0)) == NULL) {
+        RETURN_FALSE;
+    }
 
     if (tweaklen != SECRETKEY_LENGTH) {
         zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_ec_pubkey_tweak_add(): Parameter 3 should be 32 bytes");
@@ -888,9 +902,10 @@ PHP_FUNCTION(secp256k1_ec_privkey_tweak_mul)
         return;
     }
 
-if ((ctx = (secp256k1_context *)zend_fetch_resource2(Z_RES_P(zCtx), SECP256K1_CTX_RES_NAME, le_secp256k1_ctx, -1)) == NULL) {
-    RETURN_FALSE;
-}
+    if ((ctx = (secp256k1_context *)zend_fetch_resource2(Z_RES_P(zCtx), SECP256K1_CTX_RES_NAME, le_secp256k1_ctx, -1)) == NULL) {
+        RETURN_FALSE;
+    }
+
     if (Z_TYPE_P(zSecKey) != IS_STRING) {
         zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_ec_privkey_tweak_mul(): Parameter 2 should be string");
         return;
@@ -974,12 +989,13 @@ PHP_FUNCTION(secp256k1_ecdsa_recoverable_signature_convert)
         return;
     }
 
-if ((ctx = (secp256k1_context *)zend_fetch_resource2(Z_RES_P(zCtx), SECP256K1_CTX_RES_NAME, le_secp256k1_ctx, -1)) == NULL) {
-    RETURN_FALSE;
-}
-if ((rSig = (secp256k1_ecdsa_recoverable_signature *)zend_fetch_resource2(Z_RES_P(zRecoverableSig), SECP256K1_RECOVERABLE_SIG_RES_NAME, le_secp256k1_recoverable_sig, -1)) == NULL) {
-    RETURN_FALSE;
-}
+    if ((ctx = (secp256k1_context *)zend_fetch_resource2(Z_RES_P(zCtx), SECP256K1_CTX_RES_NAME, le_secp256k1_ctx, -1)) == NULL) {
+        RETURN_FALSE;
+    }
+
+    if ((rSig = (secp256k1_ecdsa_recoverable_signature *)zend_fetch_resource2(Z_RES_P(zRecoverableSig), SECP256K1_RECOVERABLE_SIG_RES_NAME, le_secp256k1_recoverable_sig, -1)) == NULL) {
+        RETURN_FALSE;
+    }
 
 
     nSig = emalloc(sizeof(secp256k1_ecdsa_recoverable_signature));
@@ -1002,12 +1018,13 @@ PHP_FUNCTION(secp256k1_ecdsa_recoverable_signature_serialize_compact)
         return;
     }
 
-if ((ctx = (secp256k1_context *)zend_fetch_resource2(Z_RES_P(zCtx), SECP256K1_CTX_RES_NAME, le_secp256k1_ctx, -1)) == NULL) {
-    RETURN_FALSE;
-}
-if ((recsig = (secp256k1_ecdsa_recoverable_signature *)zend_fetch_resource2(Z_RES_P(zRecSig), SECP256K1_RECOVERABLE_SIG_RES_NAME, le_secp256k1_recoverable_sig, -1)) == NULL) {
-    RETURN_FALSE;
-}
+    if ((ctx = (secp256k1_context *)zend_fetch_resource2(Z_RES_P(zCtx), SECP256K1_CTX_RES_NAME, le_secp256k1_ctx, -1)) == NULL) {
+        RETURN_FALSE;
+    }
+
+    if ((recsig = (secp256k1_ecdsa_recoverable_signature *)zend_fetch_resource2(Z_RES_P(zRecSig), SECP256K1_RECOVERABLE_SIG_RES_NAME, le_secp256k1_recoverable_sig, -1)) == NULL) {
+        RETURN_FALSE;
+    }
 
     sig = emalloc(COMPACT_SIGNATURE_LENGTH);
     result = secp256k1_ecdsa_recoverable_signature_serialize_compact(ctx, sig, &recid, recsig);
@@ -1031,9 +1048,9 @@ PHP_FUNCTION(secp256k1_ecdsa_sign_recoverable)
         return;
     }
 
-if ((ctx = (secp256k1_context *)zend_fetch_resource2(Z_RES_P(zCtx), SECP256K1_CTX_RES_NAME, le_secp256k1_ctx, -1)) == NULL) {
-    RETURN_FALSE;
-}
+    if ((ctx = (secp256k1_context *)zend_fetch_resource2(Z_RES_P(zCtx), SECP256K1_CTX_RES_NAME, le_secp256k1_ctx, -1)) == NULL) {
+        RETURN_FALSE;
+    }
 
     if (msg32len != HASH_LENGTH) {
         zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_ecdsa_sign(): Parameter 2 should be 32 bytes");
@@ -1105,13 +1122,14 @@ PHP_FUNCTION(secp256k1_ecdh)
         return;
     }
 
-if ((ctx = (secp256k1_context *)zend_fetch_resource2(Z_RES_P(zCtx), SECP256K1_CTX_RES_NAME, le_secp256k1_ctx, -1)) == NULL) {
-    RETURN_FALSE;
-}
+    if ((ctx = (secp256k1_context *)zend_fetch_resource2(Z_RES_P(zCtx), SECP256K1_CTX_RES_NAME, le_secp256k1_ctx, -1)) == NULL) {
+        RETURN_FALSE;
+    }
 
-if ((pubkey = (secp256k1_pubkey *)zend_fetch_resource2(Z_RES_P(zPubKey), SECP256K1_PUBKEY_RES_NAME, le_secp256k1_pubkey, -1)) == NULL) {
-    RETURN_FALSE;
-}
+    if ((pubkey = (secp256k1_pubkey *)zend_fetch_resource2(Z_RES_P(zPubKey), SECP256K1_PUBKEY_RES_NAME, le_secp256k1_pubkey, -1)) == NULL) {
+        RETURN_FALSE;
+    }
+
     unsigned char resultChars[32];
     memset(resultChars, 0, 32);
     result = secp256k1_ecdh(ctx, resultChars, pubkey, privKey);
@@ -1137,12 +1155,13 @@ PHP_FUNCTION(secp256k1_schnorr_verify)
         return;
     }
 
-if ((ctx = (secp256k1_context *)zend_fetch_resource2(Z_RES_P(zCtx), SECP256K1_CTX_RES_NAME, le_secp256k1_ctx, -1)) == NULL) {
-    RETURN_FALSE;
-}
-if ((pubkey = (secp256k1_pubkey *)zend_fetch_resource2(Z_RES_P(zPubKey), SECP256K1_PUBKEY_RES_NAME, le_secp256k1_pubkey, -1)) == NULL) {
-    RETURN_FALSE;
-}
+    if ((ctx = (secp256k1_context *)zend_fetch_resource2(Z_RES_P(zCtx), SECP256K1_CTX_RES_NAME, le_secp256k1_ctx, -1)) == NULL) {
+        RETURN_FALSE;
+    }
+
+    if ((pubkey = (secp256k1_pubkey *)zend_fetch_resource2(Z_RES_P(zPubKey), SECP256K1_PUBKEY_RES_NAME, le_secp256k1_pubkey, -1)) == NULL) {
+        RETURN_FALSE;
+    }
 
     result = secp256k1_schnorr_verify(ctx, sig64, msg32, pubkey);
 
@@ -1206,9 +1225,9 @@ PHP_FUNCTION(secp256k1_schnorr_recover)
         return;
     }
 
-if ((ctx = (secp256k1_context *)zend_fetch_resource2(Z_RES_P(zCtx), SECP256K1_CTX_RES_NAME, le_secp256k1_ctx, -1)) == NULL) {
-    RETURN_FALSE;
-}
+    if ((ctx = (secp256k1_context *)zend_fetch_resource2(Z_RES_P(zCtx), SECP256K1_CTX_RES_NAME, le_secp256k1_ctx, -1)) == NULL) {
+        RETURN_FALSE;
+    }
 
     pubkey = emalloc(sizeof(secp256k1_pubkey));
     result = secp256k1_schnorr_recover(ctx, pubkey, sig64, msg32);
@@ -1232,9 +1251,9 @@ PHP_FUNCTION(secp256k1_schnorr_generate_nonce_pair)
         return;
     }
 
-if ((ctx = (secp256k1_context *)zend_fetch_resource2(Z_RES_P(zCtx), SECP256K1_CTX_RES_NAME, le_secp256k1_ctx, -1)) == NULL) {
-    RETURN_FALSE;
-}
+    if ((ctx = (secp256k1_context *)zend_fetch_resource2(Z_RES_P(zCtx), SECP256K1_CTX_RES_NAME, le_secp256k1_ctx, -1)) == NULL) {
+        RETURN_FALSE;
+    }
 
     if (msg32len != HASH_LENGTH) {
         zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_schnorr_generate_nonce_pair(): Parameter 3 should be 32 bytes");
@@ -1268,13 +1287,13 @@ PHP_FUNCTION(secp256k1_schnorr_partial_sign)
         return;
     }
 
-if ((ctx = (secp256k1_context *)zend_fetch_resource2(Z_RES_P(zCtx), SECP256K1_CTX_RES_NAME, le_secp256k1_ctx, -1)) == NULL) {
-    RETURN_FALSE;
-}
-if ((pubnonce_others = (secp256k1_pubkey *)zend_fetch_resource2(Z_RES_P(zPubNonceOthers), SECP256K1_PUBKEY_RES_NAME, le_secp256k1_pubkey, -1)) == NULL) {
-    RETURN_FALSE;
-}
+    if ((ctx = (secp256k1_context *)zend_fetch_resource2(Z_RES_P(zCtx), SECP256K1_CTX_RES_NAME, le_secp256k1_ctx, -1)) == NULL) {
+        RETURN_FALSE;
+    }
 
+    if ((pubnonce_others = (secp256k1_pubkey *)zend_fetch_resource2(Z_RES_P(zPubNonceOthers), SECP256K1_PUBKEY_RES_NAME, le_secp256k1_pubkey, -1)) == NULL) {
+        RETURN_FALSE;
+    }
 
     if (msg32len != HASH_LENGTH) {
         zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_schnorr_partial_sign(): Parameter 3 should be 32 bytes");
@@ -1313,9 +1332,9 @@ PHP_FUNCTION(secp256k1_schnorr_partial_combine)
         return;
     }
 
-if ((ctx = (secp256k1_context *)zend_fetch_resource2(Z_RES_P(zCtx), SECP256K1_CTX_RES_NAME, le_secp256k1_ctx, -1)) == NULL) {
-    RETURN_FALSE;
-}
+    if ((ctx = (secp256k1_context *)zend_fetch_resource2(Z_RES_P(zCtx), SECP256K1_CTX_RES_NAME, le_secp256k1_ctx, -1)) == NULL) {
+        RETURN_FALSE;
+    }
 
     array_count = (size_t) zend_hash_num_elements(arr_hash);
     const unsigned char *sigs[array_count];
@@ -1352,9 +1371,9 @@ PHP_FUNCTION(secp256k1_ec_pubkey_combine)
         return;
     }
 
-if ((ctx = (secp256k1_context *)zend_fetch_resource2(Z_RES_P(zCtx), SECP256K1_CTX_RES_NAME, le_secp256k1_ctx, -1)) == NULL) {
-    RETURN_FALSE;
-}
+    if ((ctx = (secp256k1_context *)zend_fetch_resource2(Z_RES_P(zCtx), SECP256K1_CTX_RES_NAME, le_secp256k1_ctx, -1)) == NULL) {
+        RETURN_FALSE;
+    }
 
     arr_hash = Z_ARRVAL_P(arr);
     array_count = (size_t) zend_hash_num_elements(arr_hash);
