@@ -4,7 +4,7 @@ namespace BitWasp\Secp256k1Tests;
 
 class Secp256k1EcdsaRecoverCompactTest extends TestCase
 {
-   /* public function testVerifyCompact()
+   public function testVerifyCompact()
     {
 
         $context = TestCase::getContext();
@@ -12,7 +12,7 @@ class Secp256k1EcdsaRecoverCompactTest extends TestCase
         $compressed = 0;
 
         $sig = pack("H*", 'fe5fe404f3d8c21e1204a08c38ff3912d43c5a22541d2f1cdc4977cbcad240015a3b6e9040f62cacf016df4fef9412091592e4908e5e3a7bd2a42a4d1be01951');
-        / ** @var resource $s * /
+        /** @var resource $s */
         $s = '';
 
         $this->assertEquals(1, secp256k1_ecdsa_recoverable_signature_parse_compact($context, $s, $sig, $recid));
@@ -33,7 +33,7 @@ class Secp256k1EcdsaRecoverCompactTest extends TestCase
         $serPubKey = '';
         $this->assertEquals(1, secp256k1_ec_pubkey_serialize($context, $serPubKey, $recPubKey, $compressed));
         $this->assertEquals($ePubKey, $serPubKey);
-    }*/
+    }
 
     public function getErroneousTypeVectors()
     {

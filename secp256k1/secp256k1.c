@@ -467,7 +467,7 @@ PHP_FUNCTION(secp256k1_ecdsa_signature_serialize_der)
     int result;
     size_t sigoutlen = MAX_SIGNATURE_LENGTH;
     unsigned char *sigout;
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rzr", &zCtx, &zSigOut, &zSig) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rz/r", &zCtx, &zSigOut, &zSig) == FAILURE) {
         RETURN_FALSE;
     }
 
@@ -774,18 +774,19 @@ PHP_FUNCTION(secp256k1_ec_pubkey_parse)
     secp256k1_pubkey *pubkey;
     unsigned char *pubkeyin;
     int result;
-    int pubkeylen;
+    size_t pubkeylen;
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rz/s", &zCtx, &zPubKey, &pubkeyin, &pubkeylen) == FAILURE) {
         RETURN_FALSE;
     }
 
-if ((ctx = (secp256k1_context *)zend_fetch_resource2(Z_RES_P(zCtx), SECP256K1_CTX_RES_NAME, le_secp256k1_ctx, -1)) == NULL) {
-    RETURN_FALSE;
-}
+    if ((ctx = (secp256k1_context *)zend_fetch_resource2(Z_RES_P(zCtx), SECP256K1_CTX_RES_NAME, le_secp256k1_ctx, -1)) == NULL) {
+        RETURN_FALSE;
+    }
 
     pubkey = emalloc(sizeof(secp256k1_pubkey));
     result = secp256k1_ec_pubkey_parse(ctx, pubkey, pubkeyin, pubkeylen);
     if (result) {
+        ZVAL_NULL(zPubKey);
         ZVAL_RES(zPubKey, zend_register_resource(pubkey, le_secp256k1_pubkey));
     }
     RETURN_LONG(result);
@@ -804,13 +805,13 @@ PHP_FUNCTION(secp256k1_ec_pubkey_serialize)
         RETURN_FALSE;
     }
 
-if ((ctx = (secp256k1_context *)zend_fetch_resource2(Z_RES_P(zCtx), SECP256K1_CTX_RES_NAME, le_secp256k1_ctx, -1)) == NULL) {
-    RETURN_FALSE;
-}
+    if ((ctx = (secp256k1_context *)zend_fetch_resource2(Z_RES_P(zCtx), SECP256K1_CTX_RES_NAME, le_secp256k1_ctx, -1)) == NULL) {
+        RETURN_FALSE;
+    }
 
-if ((pubkey = (secp256k1_pubkey *)zend_fetch_resource2(Z_RES_P(zPubKey), SECP256K1_PUBKEY_RES_NAME, le_secp256k1_pubkey, -1)) == NULL) {
-    RETURN_FALSE;
-}
+    if ((pubkey = (secp256k1_pubkey *)zend_fetch_resource2(Z_RES_P(zPubKey), SECP256K1_PUBKEY_RES_NAME, le_secp256k1_pubkey, -1)) == NULL) {
+        RETURN_FALSE;
+    }
 
     flags |= compressed ? SECP256K1_EC_COMPRESSED : SECP256K1_EC_UNCOMPRESSED;
 
@@ -1104,7 +1105,7 @@ PHP_FUNCTION(secp256k1_ecdsa_recover)
     pubkey = emalloc(sizeof(secp256k1_pubkey));
     result = secp256k1_ecdsa_recover(ctx, pubkey, sig, msg32);
     if (result) {
-        ZVAL_RES(zPubKey, zend_register_resource(zPubKey, le_secp256k1_pubkey));
+        ZVAL_RES(zPubKey, zend_register_resource(pubkey, le_secp256k1_pubkey));
     }
     RETURN_LONG(result);
 }
@@ -1312,7 +1313,7 @@ PHP_FUNCTION(secp256k1_schnorr_partial_sign)
 
     unsigned char *newsig = emalloc(64);
     result = secp256k1_schnorr_partial_sign(ctx, newsig, msg32, seckey, pubnonce_others, secnonce32);
-    if (result == 1) {
+    if (result) {
         ZVAL_STRINGL(zSig, newsig, 64);
     }
 
@@ -1321,7 +1322,7 @@ PHP_FUNCTION(secp256k1_schnorr_partial_sign)
 
 PHP_FUNCTION(secp256k1_schnorr_partial_combine)
 {
-    zval *arr, **data, *zCtx, *zSigCombined;
+    zval *arr, *zCtx, *zSigCombined;
     secp256k1_context* ctx;
     HashTable *arr_hash;
     HashPosition pointer;
@@ -1332,26 +1333,26 @@ PHP_FUNCTION(secp256k1_schnorr_partial_combine)
         return;
     }
 
-    if ((ctx = (secp256k1_context *)zend_fetch_resource2(Z_RES_P(zCtx), SECP256K1_CTX_RES_NAME, le_secp256k1_ctx, -1)) == NULL) {
+    if ((ctx = (secp256k1_context *)zend_fetch_resource2_ex(zCtx, SECP256K1_CTX_RES_NAME, le_secp256k1_ctx, -1)) == NULL) {
         RETURN_FALSE;
     }
 
+    arr_hash = Z_ARRVAL_P(arr);
     array_count = (size_t) zend_hash_num_elements(arr_hash);
     const unsigned char *sigs[array_count];
     unsigned char *sig;
-    int i = 0;
+    ulong i = 0;
+
     zend_string *key;
     zval *val;
-ZEND_HASH_FOREACH_KEY_VAL(arr_hash, i, key, val) {
-    if (key) {
+    ZEND_HASH_FOREACH_KEY_VAL(arr_hash, i, key, val) {
         sig = (unsigned char *) Z_STRVAL_P(val);
         sigs[i++] = sig;
-    }
-} ZEND_HASH_FOREACH_END();
+    } ZEND_HASH_FOREACH_END();
 
     unsigned char * sig64 = emalloc(64);
     result = secp256k1_schnorr_partial_combine(ctx, sig64, sigs, array_count);
-    if (result == 1) {
+    if (result) {
         ZVAL_STRINGL(zSigCombined, sig64, 64);
     }
 
@@ -1360,7 +1361,7 @@ ZEND_HASH_FOREACH_KEY_VAL(arr_hash, i, key, val) {
 
 PHP_FUNCTION(secp256k1_ec_pubkey_combine)
 {
-    zval *arr, **data, *zCtx, *zPubkeyCombined;
+    zval *arr, *zCtx, *zPubkeyCombined;
     secp256k1_context* ctx;
     HashTable *arr_hash;
     HashPosition pointer;
@@ -1381,22 +1382,21 @@ PHP_FUNCTION(secp256k1_ec_pubkey_combine)
     secp256k1_pubkey * ptr;
     int i = 0;
 
-zend_string *key;
-zval *val;
-ZEND_HASH_FOREACH_KEY_VAL(arr_hash, i, key, val) {
-    if (key) {
+    zend_string *key;
+    zval *val;
+    ZEND_HASH_FOREACH_KEY_VAL(arr_hash, i, key, val) {
         if ((ptr = (secp256k1_pubkey *)zend_fetch_resource2(Z_RES_P(val), SECP256K1_PUBKEY_RES_NAME, le_secp256k1_pubkey, -1)) == NULL) {
             RETURN_FALSE;
         }
 
         pubkeys[i++] = ptr;
-    }
-} ZEND_HASH_FOREACH_END();
+    } ZEND_HASH_FOREACH_END();
 
     secp256k1_pubkey * combined = emalloc(sizeof(secp256k1_pubkey));
     result = secp256k1_ec_pubkey_combine(ctx, combined, pubkeys, array_count);
     if (result == 1) {
-        ZEND_REGISTER_RESOURCE(zPubkeyCombined, combined, le_secp256k1_pubkey);
+        ZVAL_NULL(zPubkeyCombined);
+        ZVAL_RES(zPubkeyCombined, zend_register_resource(combined, le_secp256k1_pubkey));
     }
 
     RETURN_LONG(result);
