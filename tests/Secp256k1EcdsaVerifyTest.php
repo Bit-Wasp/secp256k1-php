@@ -72,12 +72,8 @@ class Secp256k1EcdsaVerifyTest extends TestCase
      */
     public function testErroneousTypes($context, $msg32, $sig, $public)
     {
-        $s = '';
-        $p = '';
-        secp256k1_ecdsa_signature_parse_der($context, $s, $sig);
-        secp256k1_ec_pubkey_parse($context, $public, $p);
 
-        \secp256k1_ecdsa_verify($context, $s, $msg32, $p);
+        \secp256k1_ecdsa_verify($context, $sig, $msg32, $public);
     }
 
     public function testVerifyWithInvalidInput()
