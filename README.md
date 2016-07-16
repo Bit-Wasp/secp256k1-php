@@ -12,7 +12,8 @@ discouraged. For consensus systems this warning is critical.
 The library supports the EcDH, Schnorr, and signature recovery modules - these libraries are required for installation.
 
 ### Requirements
-PHP 5.* versions are supported in the v0.0.x releases.    
+PHP 5.* versions are supported in the v0.0.x release.
+PHP 7 is supported in the v0.1.x series. 
 
 ### About the extension
   - Runs against latest libsecp256k1 (until upstream produces versioned releases)
