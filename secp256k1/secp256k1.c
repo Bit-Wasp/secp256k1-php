@@ -11,6 +11,7 @@
 
 static zend_class_entry *spl_ce_InvalidArgumentException;
 
+/* Function argument documentation */
 
 ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_context_create, 0)
     ZEND_ARG_INFO(0, flags)
@@ -248,37 +249,13 @@ const zend_function_entry secp256k1_functions[] = {
 };
 /* }}} */
 
+/* resource numbers */
 static int le_secp256k1_ctx;
-static int le_psecp256k1_ctx;
 static int le_secp256k1_pubkey;
-static int le_psecp256k1_pubkey;
 static int le_secp256k1_sig;
-static int le_psecp256k1_sig;
 static int le_secp256k1_recoverable_sig;
-static int le_psecp256k1_recoverable_sig;
 
-
-static secp256k1_context * secp256k1_context_from_zval(zval * val,  zend_resource ** resourceval)
-{
-    if (Z_TYPE_P(val) == IS_RESOURCE) {
-        void * what;
-        zend_resource *res = Z_RES_P(val);
-        what = zend_fetch_resource(res, SECP256K1_CTX_RES_NAME, le_secp256k1_ctx);
-        if (!what) {
-            return NULL;
-        }
-
-        if (resourceval) {
-            *resourceval = res;
-            //Z_ADDREF_P(val);
-        }
-        return (secp256k1_context*)what;
-    } else {
-        return NULL;
-    }
-}
-
-
+/* dtor functions */
 static void secp256k1_ctx_dtor(zend_resource *rsrc TSRMLS_DC)
 {
     secp256k1_context *ctx = (secp256k1_context*) rsrc->ptr;
@@ -313,13 +290,9 @@ static void secp256k1_recoverable_sig_dtor(zend_resource * rsrc TSRMLS_DC)
 
 PHP_MINIT_FUNCTION(secp256k1) {
     le_secp256k1_ctx = zend_register_list_destructors_ex(secp256k1_ctx_dtor, NULL, SECP256K1_CTX_RES_NAME, module_number);
-    le_psecp256k1_ctx = zend_register_list_destructors_ex(secp256k1_ctx_dtor, NULL, SECP256K1_CTX_RES_NAME, module_number);
     le_secp256k1_pubkey = zend_register_list_destructors_ex(secp256k1_pubkey_dtor, NULL, SECP256K1_PUBKEY_RES_NAME, module_number);
-    le_psecp256k1_pubkey = zend_register_list_destructors_ex(secp256k1_pubkey_dtor, NULL, SECP256K1_PUBKEY_RES_NAME, module_number);
     le_secp256k1_sig = zend_register_list_destructors_ex(secp256k1_sig_dtor, NULL, SECP256K1_SIG_RES_NAME, module_number);
-    le_psecp256k1_sig = zend_register_list_destructors_ex(secp256k1_sig_dtor, NULL, SECP256K1_SIG_RES_NAME, module_number);
     le_secp256k1_recoverable_sig = zend_register_list_destructors_ex(secp256k1_recoverable_sig_dtor, NULL, SECP256K1_RECOVERABLE_SIG_RES_NAME, module_number);
-    le_psecp256k1_recoverable_sig = zend_register_list_destructors_ex(secp256k1_recoverable_sig_dtor, NULL, SECP256K1_RECOVERABLE_SIG_RES_NAME, module_number);
 
     REGISTER_LONG_CONSTANT("SECP256K1_CONTEXT_VERIFY", SECP256K1_CONTEXT_VERIFY, CONST_CS | CONST_PERSISTENT);
     REGISTER_LONG_CONSTANT("SECP256K1_CONTEXT_SIGN", SECP256K1_CONTEXT_SIGN, CONST_CS | CONST_PERSISTENT);
@@ -371,11 +344,6 @@ zend_module_entry secp256k1_module_entry = {
 #ifdef COMPILE_DL_SECP256K1
 ZEND_GET_MODULE(secp256k1)
 #endif
-
-size_t pubkeyLengthFromCompressed(int compressed)
-{
-    return compressed ? PUBKEY_COMPRESSED_LENGTH : PUBKEY_UNCOMPRESSED_LENGTH;
-}
 
 /* Create a secp256k1 context resource */
 /* {{{ proto resource secp256k1_context_create(int flags)
@@ -470,7 +438,10 @@ PHP_FUNCTION(secp256k1_ecdsa_signature_serialize_der)
         RETURN_FALSE;
     }
 
-    ctx = secp256k1_context_from_zval(zCtx, 0);
+    if ((ctx = (secp256k1_context *)zend_fetch_resource2_ex(zCtx, SECP256K1_CTX_RES_NAME, le_secp256k1_ctx, -1)) == NULL) {
+        RETURN_FALSE;
+    }
+
     if ((sig = (secp256k1_ecdsa_signature *)zend_fetch_resource2(Z_RES_P(zSig), SECP256K1_SIG_RES_NAME, le_secp256k1_sig, -1)) == NULL) {
         RETURN_FALSE;
     }
@@ -812,8 +783,7 @@ PHP_FUNCTION(secp256k1_ec_pubkey_serialize)
     }
 
     flags |= compressed ? SECP256K1_EC_COMPRESSED : SECP256K1_EC_UNCOMPRESSED;
-
-    size_t pubkeylen = pubkeyLengthFromCompressed(compressed);
+    size_t pubkeylen = compressed ? PUBKEY_COMPRESSED_LENGTH : PUBKEY_UNCOMPRESSED_LENGTH;
     unsigned char *pubkeyout = emalloc(pubkeylen);
     result = secp256k1_ec_pubkey_serialize(ctx, pubkeyout, &pubkeylen, pubkey, flags);
     if (result) {
