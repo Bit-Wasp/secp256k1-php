@@ -12,7 +12,7 @@ discouraged. For consensus systems this warning is critical.
 The library supports the EcDH, Schnorr, and signature recovery modules - these libraries are required for installation.
 
 ### Requirements
-Only PHP 5.x is supported at the moment - PHP7 will come soon.  
+PHP 5.* versions are supported in the v0.0.x releases.    
 
 ### About the extension
   - Runs against latest libsecp256k1 (until upstream produces versioned releases)
@@ -26,7 +26,7 @@ Only PHP 5.x is supported at the moment - PHP7 will come soon.
     git clone git@github.com:Bit-Wasp/secp256k1-php
     git clone git@github.com:bitcoin/secp256k1
     cd secp256k1
-    ./autogen.sh && ./configure --disable-jni --enable-experimental --enable-module-schnorr --enable-module-ecdh --enable-module-recovery && make && sudo make install
+    ./autogen.sh && ./configure --enable-experimental --enable-module-{schnorr,ecdh,recovery} && make && sudo make install
     cd ../secp256k1-php/secp256k1
     phpize && ./configure --with-secp256k1 && make && sudo make install
 ```
