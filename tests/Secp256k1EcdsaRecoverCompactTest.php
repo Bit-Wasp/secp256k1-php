@@ -4,7 +4,7 @@ namespace BitWasp\Secp256k1Tests;
 
 class Secp256k1EcdsaRecoverCompactTest extends TestCase
 {
-    public function testVerifyCompact()
+   public function testVerifyCompact()
     {
 
         $context = TestCase::getContext();
@@ -61,7 +61,7 @@ class Secp256k1EcdsaRecoverCompactTest extends TestCase
     /**
      * @dataProvider getErroneousTypeVectors
      * @expectedException \PHPUnit_Framework_Error_Warning
-     */
+     *
     public function testErroneousTypes($context, $msg32, $sig)
     {
         $publicKey = '';
