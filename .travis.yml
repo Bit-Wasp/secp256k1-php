@@ -39,3 +39,7 @@ notifications:
     on_success: change  # options: [always|never|change] default: always
     on_failure: always  # options: [always|never|change] default: always
     on_start: false     # default: false
+
+matrix:
+    allow_failures:
+        -php: nightly
