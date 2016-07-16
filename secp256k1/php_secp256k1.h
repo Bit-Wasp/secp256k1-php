@@ -59,6 +59,7 @@ PHP_FUNCTION(secp256k1_ecdsa_recoverable_signature_convert);
 PHP_FUNCTION(secp256k1_ecdsa_recoverable_signature_serialize_compact);
 PHP_FUNCTION(secp256k1_ecdsa_recoverable_signature_parse_compact);
 
+
 /* ECDH module */
 PHP_FUNCTION(secp256k1_ecdh);
 
@@ -69,6 +70,5 @@ PHP_FUNCTION(secp256k1_schnorr_recover);
 PHP_FUNCTION(secp256k1_schnorr_generate_nonce_pair);
 PHP_FUNCTION(secp256k1_schnorr_partial_sign);
 PHP_FUNCTION(secp256k1_schnorr_partial_combine);
-
 
 #endif	/* PHP_SECP256K1_H */

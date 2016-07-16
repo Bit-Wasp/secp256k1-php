@@ -14,6 +14,7 @@ class Secp256k1SchnorrSignTest extends TestCase
 
     public function testEndtoEnd()
     {
+
         $context = TestCase::getContext();
 
         /**
