@@ -11,6 +11,7 @@
 
 static zend_class_entry *spl_ce_InvalidArgumentException;
 
+/* Function argument documentation */
 
 ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_context_create, 0)
     ZEND_ARG_INFO(0, flags)
@@ -248,37 +249,13 @@ const zend_function_entry secp256k1_functions[] = {
 };
 /* }}} */
 
+/* resource numbers */
 static int le_secp256k1_ctx;
-static int le_psecp256k1_ctx;
 static int le_secp256k1_pubkey;
-static int le_psecp256k1_pubkey;
 static int le_secp256k1_sig;
-static int le_psecp256k1_sig;
 static int le_secp256k1_recoverable_sig;
-static int le_psecp256k1_recoverable_sig;
 
-
-static secp256k1_context * secp256k1_context_from_zval(zval * val,  zend_resource ** resourceval)
-{
-    if (Z_TYPE_P(val) == IS_RESOURCE) {
-        void * what;
-        zend_resource *res = Z_RES_P(val);
-        what = zend_fetch_resource(res, SECP256K1_CTX_RES_NAME, le_secp256k1_ctx);
-        if (!what) {
-            return NULL;
-        }
-
-        if (resourceval) {
-            *resourceval = res;
-            //Z_ADDREF_P(val);
-        }
-        return (secp256k1_context*)what;
-    } else {
-        return NULL;
-    }
-}
-
-
+/* dtor functions */
 static void secp256k1_ctx_dtor(zend_resource *rsrc TSRMLS_DC)
 {
     secp256k1_context *ctx = (secp256k1_context*) rsrc->ptr;
@@ -313,13 +290,9 @@ static void secp256k1_recoverable_sig_dtor(zend_resource * rsrc TSRMLS_DC)
 
 PHP_MINIT_FUNCTION(secp256k1) {
     le_secp256k1_ctx = zend_register_list_destructors_ex(secp256k1_ctx_dtor, NULL, SECP256K1_CTX_RES_NAME, module_number);
-    le_psecp256k1_ctx = zend_register_list_destructors_ex(secp256k1_ctx_dtor, NULL, SECP256K1_CTX_RES_NAME, module_number);
     le_secp256k1_pubkey = zend_register_list_destructors_ex(secp256k1_pubkey_dtor, NULL, SECP256K1_PUBKEY_RES_NAME, module_number);
-    le_psecp256k1_pubkey = zend_register_list_destructors_ex(secp256k1_pubkey_dtor, NULL, SECP256K1_PUBKEY_RES_NAME, module_number);
     le_secp256k1_sig = zend_register_list_destructors_ex(secp256k1_sig_dtor, NULL, SECP256K1_SIG_RES_NAME, module_number);
-    le_psecp256k1_sig = zend_register_list_destructors_ex(secp256k1_sig_dtor, NULL, SECP256K1_SIG_RES_NAME, module_number);
     le_secp256k1_recoverable_sig = zend_register_list_destructors_ex(secp256k1_recoverable_sig_dtor, NULL, SECP256K1_RECOVERABLE_SIG_RES_NAME, module_number);
-    le_psecp256k1_recoverable_sig = zend_register_list_destructors_ex(secp256k1_recoverable_sig_dtor, NULL, SECP256K1_RECOVERABLE_SIG_RES_NAME, module_number);
 
     REGISTER_LONG_CONSTANT("SECP256K1_CONTEXT_VERIFY", SECP256K1_CONTEXT_VERIFY, CONST_CS | CONST_PERSISTENT);
     REGISTER_LONG_CONSTANT("SECP256K1_CONTEXT_SIGN", SECP256K1_CONTEXT_SIGN, CONST_CS | CONST_PERSISTENT);
@@ -372,12 +345,6 @@ zend_module_entry secp256k1_module_entry = {
 ZEND_GET_MODULE(secp256k1)
 #endif
 
-
-size_t pubkeyLengthFromCompressed(int compressed)
-{
-    return compressed ? PUBKEY_COMPRESSED_LENGTH : PUBKEY_UNCOMPRESSED_LENGTH;
-}
-
 /* Create a secp256k1 context resource */
 /* {{{ proto resource secp256k1_context_create(int flags)
    Return a secp256k1 context initialized with the desired pregenerated tables.
@@ -423,7 +390,7 @@ PHP_FUNCTION(secp256k1_context_clone)
         RETURN_FALSE;
     }
 
-    if ((ctx = (secp256k1_context *)zend_fetch_resource2(Z_RES_P(zCtx), SECP256K1_CTX_RES_NAME, le_secp256k1_ctx, -1)) == NULL) {
+    if ((ctx = (secp256k1_context *)zend_fetch_resource2_ex(zCtx, SECP256K1_CTX_RES_NAME, le_secp256k1_ctx, -1)) == NULL) {
         RETURN_FALSE;
     }
 
@@ -450,7 +417,7 @@ PHP_FUNCTION(secp256k1_context_randomize)
         RETURN_FALSE;
     }
 
-    if ((ctx = (secp256k1_context *)zend_fetch_resource2(Z_RES_P(zCtx), SECP256K1_CTX_RES_NAME, le_secp256k1_ctx, -1)) == NULL) {
+    if ((ctx = (secp256k1_context *)zend_fetch_resource2_ex(zCtx, SECP256K1_CTX_RES_NAME, le_secp256k1_ctx, -1)) == NULL) {
         RETURN_FALSE;
     }
 
@@ -472,8 +439,11 @@ PHP_FUNCTION(secp256k1_ecdsa_signature_serialize_der)
         RETURN_FALSE;
     }
 
-    ctx = secp256k1_context_from_zval(zCtx, 0);
-    if ((sig = (secp256k1_ecdsa_signature *)zend_fetch_resource2(Z_RES_P(zSig), SECP256K1_SIG_RES_NAME, le_secp256k1_sig, -1)) == NULL) {
+    if ((ctx = (secp256k1_context *)zend_fetch_resource2_ex(zCtx, SECP256K1_CTX_RES_NAME, le_secp256k1_ctx, -1)) == NULL) {
+        RETURN_FALSE;
+    }
+
+    if ((sig = (secp256k1_ecdsa_signature *)zend_fetch_resource2_ex(zSig, SECP256K1_SIG_RES_NAME, le_secp256k1_sig, -1)) == NULL) {
         RETURN_FALSE;
     }
 
@@ -697,7 +667,7 @@ PHP_FUNCTION(secp256k1_ec_seckey_verify)
         return;
     }
 
-    if ((ctx = (secp256k1_context *)zend_fetch_resource2(Z_RES_P(zCtx), SECP256K1_CTX_RES_NAME, le_secp256k1_ctx, -1)) == NULL) {
+    if ((ctx = (secp256k1_context *)zend_fetch_resource2_ex(zCtx, SECP256K1_CTX_RES_NAME, le_secp256k1_ctx, -1)) == NULL) {
         RETURN_FALSE;
     }
 
@@ -772,23 +742,24 @@ PHP_FUNCTION(secp256k1_ec_pubkey_parse)
     zval *zCtx, *zPubKey;
     secp256k1_context *ctx;
     secp256k1_pubkey *pubkey;
-    unsigned char *pubkeyin;
+    zend_string *pubkeyin;
     int result;
-    size_t pubkeylen;
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rz/s", &zCtx, &zPubKey, &pubkeyin, &pubkeylen) == FAILURE) {
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rz/S", &zCtx, &zPubKey, &pubkeyin) == FAILURE) {
         RETURN_FALSE;
     }
 
-    if ((ctx = (secp256k1_context *)zend_fetch_resource2(Z_RES_P(zCtx), SECP256K1_CTX_RES_NAME, le_secp256k1_ctx, -1)) == NULL) {
+    if ((ctx = (secp256k1_context *)zend_fetch_resource2_ex(zCtx, SECP256K1_CTX_RES_NAME, le_secp256k1_ctx, -1)) == NULL) {
         RETURN_FALSE;
     }
 
     pubkey = emalloc(sizeof(secp256k1_pubkey));
-    result = secp256k1_ec_pubkey_parse(ctx, pubkey, pubkeyin, pubkeylen);
+    result = secp256k1_ec_pubkey_parse(ctx, pubkey, pubkeyin->val, pubkeyin->len);
     if (result) {
         ZVAL_NULL(zPubKey);
         ZVAL_RES(zPubKey, zend_register_resource(pubkey, le_secp256k1_pubkey));
     }
+
     RETURN_LONG(result);
 }
 /* }}} */
@@ -805,17 +776,16 @@ PHP_FUNCTION(secp256k1_ec_pubkey_serialize)
         RETURN_FALSE;
     }
 
-    if ((ctx = (secp256k1_context *)zend_fetch_resource2(Z_RES_P(zCtx), SECP256K1_CTX_RES_NAME, le_secp256k1_ctx, -1)) == NULL) {
+    if ((ctx = (secp256k1_context *)zend_fetch_resource2_ex(zCtx, SECP256K1_CTX_RES_NAME, le_secp256k1_ctx, -1)) == NULL) {
         RETURN_FALSE;
     }
 
-    if ((pubkey = (secp256k1_pubkey *)zend_fetch_resource2(Z_RES_P(zPubKey), SECP256K1_PUBKEY_RES_NAME, le_secp256k1_pubkey, -1)) == NULL) {
+    if ((pubkey = (secp256k1_pubkey *)zend_fetch_resource2_ex(zPubKey, SECP256K1_PUBKEY_RES_NAME, le_secp256k1_pubkey, -1)) == NULL) {
         RETURN_FALSE;
     }
 
     flags |= compressed ? SECP256K1_EC_COMPRESSED : SECP256K1_EC_UNCOMPRESSED;
-
-    size_t pubkeylen = pubkeyLengthFromCompressed(compressed);
+    size_t pubkeylen = compressed ? PUBKEY_COMPRESSED_LENGTH : PUBKEY_UNCOMPRESSED_LENGTH;
     unsigned char *pubkeyout = emalloc(pubkeylen);
     result = secp256k1_ec_pubkey_serialize(ctx, pubkeyout, &pubkeylen, pubkey, flags);
     if (result) {
@@ -841,7 +811,7 @@ PHP_FUNCTION(secp256k1_ec_privkey_tweak_add)
         return;
     }
 
-    if ((ctx = (secp256k1_context *)zend_fetch_resource2(Z_RES_P(zCtx), SECP256K1_CTX_RES_NAME, le_secp256k1_ctx, 0)) == NULL) {
+    if ((ctx = (secp256k1_context *)zend_fetch_resource2_ex(zCtx, SECP256K1_CTX_RES_NAME, le_secp256k1_ctx, 0)) == NULL) {
         RETURN_FALSE;
     }
 
@@ -903,7 +873,7 @@ PHP_FUNCTION(secp256k1_ec_privkey_tweak_mul)
         return;
     }
 
-    if ((ctx = (secp256k1_context *)zend_fetch_resource2(Z_RES_P(zCtx), SECP256K1_CTX_RES_NAME, le_secp256k1_ctx, -1)) == NULL) {
+    if ((ctx = (secp256k1_context *)zend_fetch_resource2_ex(zCtx, SECP256K1_CTX_RES_NAME, le_secp256k1_ctx, -1)) == NULL) {
         RETURN_FALSE;
     }
 
@@ -942,11 +912,11 @@ PHP_FUNCTION(secp256k1_ec_pubkey_tweak_mul)
         return;
     }
 
-    if ((ctx = (secp256k1_context *)zend_fetch_resource2(Z_RES_P(zCtx), SECP256K1_CTX_RES_NAME, le_secp256k1_ctx, -1)) == NULL) {
+    if ((ctx = (secp256k1_context *)zend_fetch_resource2_ex(zCtx, SECP256K1_CTX_RES_NAME, le_secp256k1_ctx, -1)) == NULL) {
         RETURN_FALSE;
     }
 
-    if ((pubkey = (secp256k1_pubkey *)zend_fetch_resource2(Z_RES_P(zPubKey), SECP256K1_PUBKEY_RES_NAME, le_secp256k1_pubkey, -1)) == NULL) {
+    if ((pubkey = (secp256k1_pubkey *)zend_fetch_resource2_ex(zPubKey, SECP256K1_PUBKEY_RES_NAME, le_secp256k1_pubkey, -1)) == NULL) {
         RETURN_FALSE;
     }
 
@@ -970,7 +940,7 @@ PHP_FUNCTION(secp256k1_ecdsa_recoverable_signature_parse_compact)
         return;
     }
 
-    if ((ctx = (secp256k1_context *)zend_fetch_resource2(Z_RES_P(zCtx), SECP256K1_CTX_RES_NAME, le_secp256k1_ctx, -1)) == NULL) {
+    if ((ctx = (secp256k1_context *)zend_fetch_resource2_ex(zCtx, SECP256K1_CTX_RES_NAME, le_secp256k1_ctx, -1)) == NULL) {
         RETURN_FALSE;
     }
 
@@ -996,11 +966,11 @@ PHP_FUNCTION(secp256k1_ecdsa_recoverable_signature_convert)
         return;
     }
 
-    if ((ctx = (secp256k1_context *)zend_fetch_resource2(Z_RES_P(zCtx), SECP256K1_CTX_RES_NAME, le_secp256k1_ctx, -1)) == NULL) {
+    if ((ctx = (secp256k1_context *)zend_fetch_resource2_ex(zCtx, SECP256K1_CTX_RES_NAME, le_secp256k1_ctx, -1)) == NULL) {
         RETURN_FALSE;
     }
 
-    if ((rSig = (secp256k1_ecdsa_recoverable_signature *)zend_fetch_resource2(Z_RES_P(zRecoverableSig), SECP256K1_RECOVERABLE_SIG_RES_NAME, le_secp256k1_recoverable_sig, -1)) == NULL) {
+    if ((rSig = (secp256k1_ecdsa_recoverable_signature *)zend_fetch_resource2_ex(zRecoverableSig, SECP256K1_RECOVERABLE_SIG_RES_NAME, le_secp256k1_recoverable_sig, -1)) == NULL) {
         RETURN_FALSE;
     }
 
@@ -1026,11 +996,11 @@ PHP_FUNCTION(secp256k1_ecdsa_recoverable_signature_serialize_compact)
         return;
     }
 
-    if ((ctx = (secp256k1_context *)zend_fetch_resource2(Z_RES_P(zCtx), SECP256K1_CTX_RES_NAME, le_secp256k1_ctx, -1)) == NULL) {
+    if ((ctx = (secp256k1_context *)zend_fetch_resource2_ex(zCtx, SECP256K1_CTX_RES_NAME, le_secp256k1_ctx, -1)) == NULL) {
         RETURN_FALSE;
     }
 
-    if ((recsig = (secp256k1_ecdsa_recoverable_signature *)zend_fetch_resource2(Z_RES_P(zRecSig), SECP256K1_RECOVERABLE_SIG_RES_NAME, le_secp256k1_recoverable_sig, -1)) == NULL) {
+    if ((recsig = (secp256k1_ecdsa_recoverable_signature *)zend_fetch_resource2_ex(zRecSig, SECP256K1_RECOVERABLE_SIG_RES_NAME, le_secp256k1_recoverable_sig, -1)) == NULL) {
         RETURN_FALSE;
     }
 
@@ -1056,7 +1026,7 @@ PHP_FUNCTION(secp256k1_ecdsa_sign_recoverable)
         return;
     }
 
-    if ((ctx = (secp256k1_context *)zend_fetch_resource2(Z_RES_P(zCtx), SECP256K1_CTX_RES_NAME, le_secp256k1_ctx, -1)) == NULL) {
+    if ((ctx = (secp256k1_context *)zend_fetch_resource2_ex(zCtx, SECP256K1_CTX_RES_NAME, le_secp256k1_ctx, -1)) == NULL) {
         RETURN_FALSE;
     }
 
@@ -1102,11 +1072,11 @@ PHP_FUNCTION(secp256k1_ecdsa_recover)
         return;
     }
 
-    if ((ctx = (secp256k1_context *)zend_fetch_resource2(Z_RES_P(zCtx), SECP256K1_CTX_RES_NAME, le_secp256k1_ctx, 0)) == NULL) {
+    if ((ctx = (secp256k1_context *)zend_fetch_resource2_ex(zCtx, SECP256K1_CTX_RES_NAME, le_secp256k1_ctx, 0)) == NULL) {
         return;
     }
 
-    if ((sig = (secp256k1_ecdsa_recoverable_signature *)zend_fetch_resource2(Z_RES_P(zSig), SECP256K1_RECOVERABLE_SIG_RES_NAME, le_secp256k1_recoverable_sig, 0)) == NULL) {
+    if ((sig = (secp256k1_ecdsa_recoverable_signature *)zend_fetch_resource2_ex(zSig, SECP256K1_RECOVERABLE_SIG_RES_NAME, le_secp256k1_recoverable_sig, 0)) == NULL) {
         return;
     }
 
@@ -1132,11 +1102,11 @@ PHP_FUNCTION(secp256k1_ecdh)
         return;
     }
 
-    if ((ctx = (secp256k1_context *)zend_fetch_resource2(Z_RES_P(zCtx), SECP256K1_CTX_RES_NAME, le_secp256k1_ctx, -1)) == NULL) {
+    if ((ctx = (secp256k1_context *)zend_fetch_resource2_ex(zCtx, SECP256K1_CTX_RES_NAME, le_secp256k1_ctx, -1)) == NULL) {
         RETURN_FALSE;
     }
 
-    if ((pubkey = (secp256k1_pubkey *)zend_fetch_resource2(Z_RES_P(zPubKey), SECP256K1_PUBKEY_RES_NAME, le_secp256k1_pubkey, -1)) == NULL) {
+    if ((pubkey = (secp256k1_pubkey *)zend_fetch_resource2_ex(zPubKey, SECP256K1_PUBKEY_RES_NAME, le_secp256k1_pubkey, -1)) == NULL) {
         RETURN_FALSE;
     }
 
@@ -1164,11 +1134,11 @@ PHP_FUNCTION(secp256k1_schnorr_verify)
         return;
     }
 
-    if ((ctx = (secp256k1_context *)zend_fetch_resource2(Z_RES_P(zCtx), SECP256K1_CTX_RES_NAME, le_secp256k1_ctx, -1)) == NULL) {
+    if ((ctx = (secp256k1_context *)zend_fetch_resource2_ex(zCtx, SECP256K1_CTX_RES_NAME, le_secp256k1_ctx, -1)) == NULL) {
         RETURN_FALSE;
     }
 
-    if ((pubkey = (secp256k1_pubkey *)zend_fetch_resource2(Z_RES_P(zPubKey), SECP256K1_PUBKEY_RES_NAME, le_secp256k1_pubkey, -1)) == NULL) {
+    if ((pubkey = (secp256k1_pubkey *)zend_fetch_resource2_ex(zPubKey, SECP256K1_PUBKEY_RES_NAME, le_secp256k1_pubkey, -1)) == NULL) {
         RETURN_FALSE;
     }
 
@@ -1188,7 +1158,7 @@ PHP_FUNCTION(secp256k1_schnorr_sign)
         return;
     }
 
-    if ((ctx = (secp256k1_context *)zend_fetch_resource2(Z_RES_P(zCtx), SECP256K1_CTX_RES_NAME, le_secp256k1_ctx, -1)) == NULL) {
+    if ((ctx = (secp256k1_context *)zend_fetch_resource2_ex(zCtx, SECP256K1_CTX_RES_NAME, le_secp256k1_ctx, -1)) == NULL) {
         RETURN_FALSE;
     }
 
@@ -1232,7 +1202,7 @@ PHP_FUNCTION(secp256k1_schnorr_recover)
         return;
     }
 
-    if ((ctx = (secp256k1_context *)zend_fetch_resource2(Z_RES_P(zCtx), SECP256K1_CTX_RES_NAME, le_secp256k1_ctx, -1)) == NULL) {
+    if ((ctx = (secp256k1_context *)zend_fetch_resource2_ex(zCtx, SECP256K1_CTX_RES_NAME, le_secp256k1_ctx, -1)) == NULL) {
         RETURN_FALSE;
     }
 
@@ -1259,7 +1229,7 @@ PHP_FUNCTION(secp256k1_schnorr_generate_nonce_pair)
         return;
     }
 
-    if ((ctx = (secp256k1_context *)zend_fetch_resource2(Z_RES_P(zCtx), SECP256K1_CTX_RES_NAME, le_secp256k1_ctx, -1)) == NULL) {
+    if ((ctx = (secp256k1_context *)zend_fetch_resource2_ex(zCtx, SECP256K1_CTX_RES_NAME, le_secp256k1_ctx, -1)) == NULL) {
         RETURN_FALSE;
     }
 
@@ -1295,11 +1265,11 @@ PHP_FUNCTION(secp256k1_schnorr_partial_sign)
         return;
     }
 
-    if ((ctx = (secp256k1_context *)zend_fetch_resource2(Z_RES_P(zCtx), SECP256K1_CTX_RES_NAME, le_secp256k1_ctx, -1)) == NULL) {
+    if ((ctx = (secp256k1_context *)zend_fetch_resource2_ex(zCtx, SECP256K1_CTX_RES_NAME, le_secp256k1_ctx, -1)) == NULL) {
         RETURN_FALSE;
     }
 
-    if ((pubnonce_others = (secp256k1_pubkey *)zend_fetch_resource2(Z_RES_P(zPubNonceOthers), SECP256K1_PUBKEY_RES_NAME, le_secp256k1_pubkey, -1)) == NULL) {
+    if ((pubnonce_others = (secp256k1_pubkey *)zend_fetch_resource2_ex(zPubNonceOthers, SECP256K1_PUBKEY_RES_NAME, le_secp256k1_pubkey, -1)) == NULL) {
         RETURN_FALSE;
     }
 
@@ -1379,20 +1349,20 @@ PHP_FUNCTION(secp256k1_ec_pubkey_combine)
         return;
     }
 
-    if ((ctx = (secp256k1_context *)zend_fetch_resource2(Z_RES_P(zCtx), SECP256K1_CTX_RES_NAME, le_secp256k1_ctx, -1)) == NULL) {
+    if ((ctx = (secp256k1_context *)zend_fetch_resource2_ex(zCtx, SECP256K1_CTX_RES_NAME, le_secp256k1_ctx, -1)) == NULL) {
         RETURN_FALSE;
     }
 
     arr_hash = Z_ARRVAL_P(arr);
     array_count = (size_t) zend_hash_num_elements(arr_hash);
-    const secp256k1_pubkey *  pubkeys[array_count];
+    const secp256k1_pubkey * pubkeys[array_count];
     secp256k1_pubkey * ptr;
     int i = 0;
 
     zend_string *key;
     zval *val;
     ZEND_HASH_FOREACH_KEY_VAL(arr_hash, i, key, val) {
-        if ((ptr = (secp256k1_pubkey *)zend_fetch_resource2(Z_RES_P(val), SECP256K1_PUBKEY_RES_NAME, le_secp256k1_pubkey, -1)) == NULL) {
+        if ((ptr = (secp256k1_pubkey *)zend_fetch_resource2_ex(val, SECP256K1_PUBKEY_RES_NAME, le_secp256k1_pubkey, -1)) == NULL) {
             RETURN_FALSE;
         }
 
