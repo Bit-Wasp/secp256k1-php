@@ -56,15 +56,15 @@ class Secp256k1EcdsaRecoverCompactTest extends TestCase
             array($context, $msg32, $resource),
             array($context, $msg32, $class),
         );
-    }/**/
+    }
 
     /**
      * @dataProvider getErroneousTypeVectors
      * @expectedException \PHPUnit_Framework_Error_Warning
-     *
+     */
     public function testErroneousTypes($context, $msg32, $sig)
     {
         $publicKey = '';
         \secp256k1_ecdsa_recover($context, $publicKey, $sig, $msg32);
-    }/**/
+    }
 }

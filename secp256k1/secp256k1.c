@@ -1354,7 +1354,7 @@ PHP_FUNCTION(secp256k1_ec_pubkey_combine)
 
     arr_hash = Z_ARRVAL_P(arr);
     array_count = (size_t) zend_hash_num_elements(arr_hash);
-    const secp256k1_pubkey *  pubkeys[array_count];
+    const secp256k1_pubkey * pubkeys[array_count];
     secp256k1_pubkey * ptr;
     int i = 0;
 
