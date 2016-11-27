@@ -2,7 +2,6 @@
 #include <secp256k1.h>
 #include <secp256k1_ecdh.h>
 #include <secp256k1_recovery.h>
-#include <secp256k1_schnorr.h>
 
 #ifndef PHP_SECP256K1_H
 #define PHP_SECP256K1_H
@@ -61,14 +60,5 @@ PHP_FUNCTION(secp256k1_ecdsa_recoverable_signature_parse_compact);
 
 /* ECDH module */
 PHP_FUNCTION(secp256k1_ecdh);
-
-/* Schnorr module */
-PHP_FUNCTION(secp256k1_schnorr_verify);
-PHP_FUNCTION(secp256k1_schnorr_sign);
-PHP_FUNCTION(secp256k1_schnorr_recover);
-PHP_FUNCTION(secp256k1_schnorr_generate_nonce_pair);
-PHP_FUNCTION(secp256k1_schnorr_partial_sign);
-PHP_FUNCTION(secp256k1_schnorr_partial_combine);
-
 
 #endif	/* PHP_SECP256K1_H */
