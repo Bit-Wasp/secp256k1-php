@@ -1,15 +1,14 @@
 # secp256k1-php
 
 [![Build Status](https://travis-ci.org/Bit-Wasp/secp256k1-php.svg?branch=master)](https://travis-ci.org/Bit-Wasp/secp256k1-php)
-[![Join the chat at https://gitter.im/Bit-Wasp/secp256k1-php](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/Bit-Wasp/secp256k1-php?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-PHP bindings for https://github.com/bitcoin/secp256k1
+PHP bindings for https://github.com/bitcoin-core/secp256k1
 
-Please note that the upstream library, [[libsecp256k1](https://github.com/bitcoin/secp256k1)] is considered 
+Please note that the upstream library, [[libsecp256k1](https://github.com/bitcoin-core/secp256k1)] is considered 
 experimental by it's authors, and has not yet been formally released. For this reason, it's use should be 
 discouraged. For consensus systems this warning is critical.
 
-The library supports the EcDH, Schnorr, and signature recovery modules - these libraries are required for installation.
+The library supports the EcDH, and signature recovery modules - these libraries are required for installation.
 
 ### Requirements
 PHP 5.* versions are supported in the v0.0.x release.
@@ -25,9 +24,9 @@ PHP 7 is supported in the v0.1.x series.
 ### To Install:
 ```
     git clone git@github.com:Bit-Wasp/secp256k1-php
-    git clone git@github.com:bitcoin/secp256k1
+    git clone git@github.com:bitcoin-core/secp256k1
     cd secp256k1
-    ./autogen.sh && ./configure --enable-experimental --enable-module-{schnorr,ecdh,recovery} && make && sudo make install
+    ./autogen.sh && ./configure --enable-experimental --enable-module-{ecdh,recovery} && make && sudo make install
     cd ../secp256k1-php/secp256k1
     phpize && ./configure --with-secp256k1 && make && sudo make install
 ```
