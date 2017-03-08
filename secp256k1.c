@@ -8,6 +8,7 @@
 #include "php_ini.h"
 #include "ext/standard/info.h"
 #include "php_secp256k1.h"
+#include "zend_exceptions.h"
 
 static zend_class_entry *spl_ce_InvalidArgumentException;
 
