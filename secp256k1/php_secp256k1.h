@@ -37,6 +37,7 @@ PHP_FUNCTION(secp256k1_context_randomize);
 PHP_FUNCTION(secp256k1_ecdsa_verify);
 PHP_FUNCTION(secp256k1_ecdsa_sign);
 PHP_FUNCTION(secp256k1_ecdsa_signature_parse_der);
+PHP_FUNCTION(ecdsa_signature_parse_der_lax);
 PHP_FUNCTION(secp256k1_ecdsa_signature_serialize_der);
 PHP_FUNCTION(secp256k1_ecdsa_signature_normalize);
 

@@ -75,6 +75,19 @@ namespace {
     }
 
     /**
+     * Parses a DER signature into a secp256k1_ecdsa_signature_t resource.
+     *
+     * @param resource $secp256k1_context
+     * @param resource $secp256k1_ecdsa_signature
+     * @param string $signatureIn
+     * @return int
+     */
+    function ecdsa_signature_parse_der_lax($secp256k1_context, $secp256k1_ecdsa_signature, $signatureIn)
+    {
+    }
+
+
+    /**
      * @param resource $secp256k1_context
      * @param resource $secp256k1_ecdsa_signature - signature resource
      * @param string $msg32 - hash of data to be verified
