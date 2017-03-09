@@ -8,6 +8,7 @@
 #include "php_ini.h"
 #include "ext/standard/info.h"
 #include "php_secp256k1.h"
+#include "lax_der.h"
 
 static zend_class_entry *spl_ce_InvalidArgumentException;
 
@@ -30,6 +31,12 @@ ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_context_randomize, 0)
 ZEND_END_ARG_INFO();
 
 ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ecdsa_signature_parse_der, 0)
+    ZEND_ARG_INFO(0, context)
+    ZEND_ARG_INFO(1, secp256k1_ecdsa_signature)
+    ZEND_ARG_INFO(0, signatureStr)
+ZEND_END_ARG_INFO();
+
+ZEND_BEGIN_ARG_INFO(arginfo_ecdsa_signature_parse_der_lax, 0)
     ZEND_ARG_INFO(0, context)
     ZEND_ARG_INFO(1, secp256k1_ecdsa_signature)
     ZEND_ARG_INFO(0, signatureStr)
@@ -106,7 +113,6 @@ ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ec_pubkey_parse, 0)
     ZEND_ARG_INFO(0, input)
 ZEND_END_ARG_INFO();
 
-
 ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ec_pubkey_combine, 0)
     ZEND_ARG_INFO(0, context)
     ZEND_ARG_INFO(1, combinedKey)
@@ -168,11 +174,12 @@ const zend_function_entry secp256k1_functions[] = {
         PHP_FE(secp256k1_context_clone,                      arginfo_secp256k1_context_clone)
         PHP_FE(secp256k1_context_randomize,                  arginfo_secp256k1_context_randomize)
 
+        PHP_FE(ecdsa_signature_parse_der_lax,                arginfo_ecdsa_signature_parse_der_lax)
+        PHP_FE(secp256k1_ecdsa_signature_normalize,          arginfo_secp256k1_ecdsa_signature_normalize)
         PHP_FE(secp256k1_ecdsa_signature_parse_der,          arginfo_secp256k1_ecdsa_signature_parse_der)
         PHP_FE(secp256k1_ecdsa_signature_serialize_der,      arginfo_secp256k1_ecdsa_signature_serialize_der)
-        PHP_FE(secp256k1_ecdsa_signature_normalize,          arginfo_secp256k1_ecdsa_signature_normalize)
-        PHP_FE(secp256k1_ecdsa_verify,                       arginfo_secp256k1_ecdsa_verify)
         PHP_FE(secp256k1_ecdsa_sign,                         arginfo_secp256k1_ecdsa_sign)
+        PHP_FE(secp256k1_ecdsa_verify,                       arginfo_secp256k1_ecdsa_verify)
 
         PHP_FE(secp256k1_ec_seckey_verify,                   arginfo_secp256k1_ec_seckey_verify)
         PHP_FE(secp256k1_ec_pubkey_create,                   arginfo_secp256k1_ec_pubkey_create)
@@ -395,6 +402,37 @@ PHP_FUNCTION(secp256k1_ecdsa_signature_serialize_der)
     RETURN_LONG(result);
 }
 /* }}} */
+
+/* Parse a DER signature into a signature resource */
+/**
+ * {{{ proto int ecdsa_signature_parse_der_lax(
+ *         resource secp256k1_context,
+ *         resource & secp256k1_ecdsa_signature_out
+ *         string $signature_in
+ *     );
+ */
+PHP_FUNCTION(ecdsa_signature_parse_der_lax)
+{
+    zval *zCtx, *zSig;
+    secp256k1_context *ctx;
+    secp256k1_ecdsa_signature *sig;
+    unsigned char *sigin;
+    int result = 0, siglen;
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rzs", &zCtx, &zSig, &sigin, &siglen) == FAILURE) {
+        RETURN_FALSE;
+    }
+
+    ZEND_FETCH_RESOURCE(ctx, secp256k1_context*, &zCtx, -1, SECP256K1_CTX_RES_NAME, le_secp256k1_ctx);
+
+    sig = emalloc(sizeof(secp256k1_ecdsa_signature));
+    result = ecdsa_signature_parse_der_lax(ctx, sig, sigin, sigin);
+    if (result) {
+        ZEND_REGISTER_RESOURCE(zSig, sig, le_secp256k1_sig);
+    }
+
+    RETURN_LONG(result);
+}
 
 /* Parse a DER signature into a signature resource */
 /**

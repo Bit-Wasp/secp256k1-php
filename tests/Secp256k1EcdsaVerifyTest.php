@@ -98,7 +98,13 @@ class Secp256k1EcdsaVerifyTest extends TestCase
         $this->assertEquals(0, \secp256k1_ecdsa_verify($context, $s, '', $public), 'msg32 as empty string');
 
         $this->assertEquals(0, \secp256k1_ecdsa_verify($context, $s, 1, $public), 'msg32 as 1');
-        
+
+        /** @var resource $lax */
+        $lax = '';
+        $this->assertEquals(1, \ecdsa_signature_parse_der_lax($context, $lax, $sig));
+        $this->assertEquals(1, \secp256k1_ecdsa_verify($context, $lax, $msg32, $public), 'initial check');
+        $this->assertEquals(0, \secp256k1_ecdsa_verify($context, $lax, '', $public), 'msg32 as empty string');
+        $this->assertEquals(0, \secp256k1_ecdsa_verify($context, $lax, 1, $public), 'msg32 as 1');
 
     }
 
@@ -121,7 +127,12 @@ class Secp256k1EcdsaVerifyTest extends TestCase
 
         /** @var resource $s */
         $s = '';
-        secp256k1_ecdsa_signature_parse_der($context, $s, $sig);
+        $this->assertEquals(1, secp256k1_ecdsa_signature_parse_der($context, $s, $sig));
         $this->assertEquals($eSigCreate, \secp256k1_ecdsa_verify($context, $s, $msg, $pubkey));
+
+        /** @var resource $lax */
+        $lax = '';
+        $this->assertEquals(1, \ecdsa_signature_parse_der_lax($context, $lax, $sig));
+        $this->assertEquals(1, \secp256k1_ecdsa_verify($context, $lax, $msg, $pubkey));
     }
 }
