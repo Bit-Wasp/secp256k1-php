@@ -46,6 +46,7 @@ class Secp256k1EcdsaVerifyTest extends TestCase
         $public = '';
         $context = TestCase::getContext();
         $this->assertEquals(1, \secp256k1_ec_pubkey_create($context, $public, $private), 'public');
+
         $msg32 = $this->pack('0af79b2b747548d59a4a765fb73a72bc4208d00b43d0606c13d332d5c284b0ef');
         $sig = $this->pack('304502206af189487988df26eb4c2b2c7d74b78e19822bbb2fc27dada0800019abd20b46022100f0e6c4dabd4970afe125f707fbd6d62e79e950bdb2b4b9700214779ae475b05d01');
 

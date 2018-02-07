@@ -2,16 +2,16 @@
 
 namespace BitWasp\Secp256k1Tests;
 
-class Secp256k1ContextTest extends TestCase
+class Secp256k1EcdhContextTest extends TestCase
 {
     public function testContext()
     {
-        $ctx = \secp256k1_context_create(SECP256K1_CONTEXT_VERIFY);
+        $ctx = \secp256k1_context_create(SECP256K1_CONTEXT_VERIFY | SECP256K1_CONTEXT_SIGN);
         $clone = \secp256k1_context_clone($ctx);
 
         // We should have two resources of type secp256k1_context_t
         $this->assertInternalType('resource', $ctx);
-        $this->assertInternalType('resource', $ctx);
+        $this->assertInternalType('resource', $clone);
         $this->assertEquals(SECP256K1_TYPE_CONTEXT, get_resource_type($ctx));
         $this->assertEquals(SECP256K1_TYPE_CONTEXT, get_resource_type($clone));
 
@@ -19,6 +19,6 @@ class Secp256k1ContextTest extends TestCase
         $this->assertTrue(\secp256k1_context_destroy($ctx));
         $this->assertEquals('Unknown', get_resource_type($ctx));
         $this->assertEquals(SECP256K1_TYPE_CONTEXT, get_resource_type($clone));
-
+        $this->assertTrue(\secp256k1_context_destroy($clone));
     }
 }
