@@ -10,8 +10,10 @@ matrix:
     allow_failures:
         - php: nightly
 
+dist: trusty
+sudo: required
+
 before_install:
-#    - sudo apt-get update -qq
     - sudo apt-get install -qq libssl-dev
 
 install:
@@ -26,14 +28,10 @@ install:
         && cd ..
     - composer update
 
-before_script:
-    - php-config || true
-    - phpenv rehash
-    - phpenv version-name
-
 script:
     - |
         cd libsecp256k1 \
         && ./tests \
         && cd ..
+    - cd secp256k1/ && make test && cd ..
     - php -dextension=secp256k1.so vendor/phpunit/phpunit/phpunit tests/
