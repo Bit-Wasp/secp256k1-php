@@ -14,7 +14,7 @@ class Secp256k1PubkeyTweakAddTest extends TestCase
     {
         $stop = 0;
         $parser = new Yaml();
-        $data = $parser->parse(__DIR__ . '/data/secp256k1_pubkey_tweak_add.yml');
+        $data = Yaml::parse(file_get_contents(__DIR__ . '/data/secp256k1_pubkey_tweak_add.yml'));
 
         $compressed = 0;
         $context = TestCase::getContext();
@@ -70,7 +70,9 @@ class Secp256k1PubkeyTweakAddTest extends TestCase
         $this->assertEquals(bin2hex($pSer), $expectedPublicKey);
     }
 
-
+    /**
+     * @return array
+     */
     public function getErroneousTypeVectors()
     {
         $context = TestCase::getContext();
@@ -90,7 +92,7 @@ class Secp256k1PubkeyTweakAddTest extends TestCase
 
     /**
      * @dataProvider getErroneousTypeVectors
-     * @expectedException \PHPUnit_Framework_Error_Warning
+     * @expectedException \PHPUnit\Framework\Error\Warning
      */
     public function testErroneousTypes($context, $pubkey, $tweak)
     {
@@ -98,7 +100,7 @@ class Secp256k1PubkeyTweakAddTest extends TestCase
     }
 
     /**
-     * @expectedException \PHPUnit_Framework_Error_Warning
+     * @expectedException \PHPUnit\Framework\Error\Warning
      */
     public function testEnforceZvalString()
     {
