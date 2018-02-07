@@ -8,8 +8,7 @@ class Secp256k1SeckeyVerifyTest extends TestCase
 {
     public function getVectors()
     {
-        $parser = new Yaml();
-        $data = $parser->parse(__DIR__ . '/data/pubkey_create.yml');
+        $data = Yaml::parse(file_get_contents(__DIR__ . '/data/pubkey_create.yml'));
 
         $context = TestCase::getContext();
         $fixtures = array();
@@ -53,7 +52,7 @@ class Secp256k1SeckeyVerifyTest extends TestCase
 
     /**
      * @dataProvider getErroneousTypeVectors
-     * @expectedException \PHPUnit_Framework_Error_Warning
+     * @expectedException \PHPUnit\Framework\Error\Warning
      */
     public function testErroneousTypes($context, $seckey)
     {

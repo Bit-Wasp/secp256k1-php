@@ -9,8 +9,7 @@ class Secp256k1PrivkeyTweakAddTest extends TestCase
 
     public function getVectors()
     {
-        $parser = new Yaml();
-        $data = $parser->parse(__DIR__ . '/data/secp256k1_privkey_tweak_add.yml');
+        $data = Yaml::parse(file_get_contents(__DIR__ . '/data/secp256k1_privkey_tweak_add.yml'));
         $fixtures = array();
         $context = TestCase::getContext();
         foreach ($data['vectors'] as $vector) {
@@ -58,7 +57,7 @@ class Secp256k1PrivkeyTweakAddTest extends TestCase
 
     /**
      * @dataProvider getErroneousTypeVectors
-     * @expectedException \PHPUnit_Framework_Error_Warning
+     * @expectedException \PHPUnit\Framework\Error\Warning
      */
     public function testErroneousTypes($context, $seckey, $tweak)
     {

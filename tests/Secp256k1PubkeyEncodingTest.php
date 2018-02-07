@@ -11,8 +11,7 @@ class Secp256k1PubkeyEncodingTest extends TestCase
      */
     public function getVectors()
     {
-        $parser = new Yaml();
-        $data = $parser->parse(__DIR__ . '/data/pubkey_create.yml');
+        $data = Yaml::parse(file_get_contents(__DIR__ . '/data/pubkey_create.yml'));
 
         $context = TestCase::getContext();
         $fixtures = array();

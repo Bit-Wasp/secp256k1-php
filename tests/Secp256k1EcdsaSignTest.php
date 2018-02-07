@@ -12,8 +12,7 @@ class Secp256k1EcdsaSignTest extends TestCase
      */
     public function getVectors()
     {
-        $parser = new Yaml();
-        $data = $parser->parse(__DIR__ . '/data/deterministicSignatures.yml');
+        $data = Yaml::parse(file_get_contents(__DIR__ . '/data/deterministicSignatures.yml'));
 
         $fixtures = array();
         $context = TestCase::getContext();
@@ -82,7 +81,7 @@ class Secp256k1EcdsaSignTest extends TestCase
 
     /**
      * @dataProvider getErroneousTypeVectors
-     * @expectedException \PHPUnit_Framework_Error_Warning
+     * @expectedException \PHPUnit\Framework\Error\Warning
      */
     public function testErroneousTypes($context, $msg32, $private)
     {

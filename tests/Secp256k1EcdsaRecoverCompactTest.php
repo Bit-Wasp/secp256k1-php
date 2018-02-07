@@ -60,7 +60,7 @@ class Secp256k1EcdsaRecoverCompactTest extends TestCase
 
     /**
      * @dataProvider getErroneousTypeVectors
-     * @expectedException \PHPUnit_Framework_Error_Warning
+     * @expectedException \PHPUnit\Framework\Error\Warning
      */
     public function testErroneousTypes($context, $msg32, $sig)
     {
