@@ -4,7 +4,7 @@ namespace BitWasp\Secp256k1Tests;
 
 class Secp256k1SignRecoverableTest extends TestCase
 {
-    public function test()
+    public function testRecoverable()
     {
         $privKey = hash('sha256', 'private key', true);
         $msg32 = hash('sha256', 'msg', true);
