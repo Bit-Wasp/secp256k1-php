@@ -23,5 +23,5 @@
         "squizlabs/php_codesniffer": "2.*",
         "symfony/yaml": "*"
     },
-    "license": "Unlicence"
+    "license": "Unlicense"
 }
