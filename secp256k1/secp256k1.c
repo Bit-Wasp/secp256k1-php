@@ -486,7 +486,7 @@ PHP_FUNCTION(ecdsa_signature_parse_der_lax)
     sig = (secp256k1_ecdsa_signature *) emalloc(sizeof(secp256k1_ecdsa_signature));
     result = ecdsa_signature_parse_der_lax(ctx, sig, sigin->val, sigin->len);
     if (result == 1) {
-        ZVAL_NULL(zSig);
+        zval_dtor(zSig);
         ZVAL_RES(zSig, zend_register_resource(sig, le_secp256k1_sig));
     } else {
         efree(sig);
