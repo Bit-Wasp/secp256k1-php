@@ -11,22 +11,13 @@ $context = secp256k1_context_create(SECP256K1_CONTEXT_SIGN | SECP256K1_CONTEXT_V
 $mainKey = "0123abcd0123abcd0123abcd0123abcd";
 $secKeyOne = str_repeat("\x00", 31) . "\x01";
 
-class StringWrapper {
-    private $string;
-    public function __construct($string) {
-        $this->string = $string;
-    }
-    public function getString() {
-        return $this->string;
-    }
-}
 class Something {
     private $key;
     public function __construct($key) {
         $this->key = $key;
     }
     public function getKey() {
-        return (new StringWrapper($this->key))->getString();
+        return $this->key;
     }
 }
 

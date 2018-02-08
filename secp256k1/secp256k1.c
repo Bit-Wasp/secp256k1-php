@@ -917,8 +917,12 @@ PHP_FUNCTION(secp256k1_ec_privkey_tweak_mul)
         return;
     }
 
-    newseckey = Z_STRVAL_P(zSecKey);
-    result = secp256k1_ec_privkey_tweak_mul(ctx, newseckey, tweak->val);
+    newseckey = (unsigned char *) emalloc(SECRETKEY_LENGTH);
+    memcpy(newseckey, Z_STRVAL_P(zSecKey), SECRETKEY_LENGTH);
+    result = secp256k1_ec_privkey_tweak_mul(ctx, newseckey, (unsigned char *) tweak->val);
+    zval_dtor(zSecKey);
+    ZVAL_STRINGL(zSecKey, newseckey, SECRETKEY_LENGTH);
+
     RETURN_LONG(result);
 }
 /* }}} */
