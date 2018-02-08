@@ -509,7 +509,7 @@ PHP_FUNCTION(secp256k1_ecdsa_signature_normalize)
     secp256k1_context *ctx;
     secp256k1_ecdsa_signature *sigout, *sigin;
     int result;
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rrr", &zCtx, &zSigOut, &zSigIn) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rz/r", &zCtx, &zSigOut, &zSigIn) == FAILURE) {
         RETURN_FALSE;
     }
 
@@ -521,13 +521,12 @@ PHP_FUNCTION(secp256k1_ecdsa_signature_normalize)
         RETURN_FALSE;
     }
 
+    zval_dtor(zSigOut);
+
     sigout = emalloc(sizeof(secp256k1_ecdsa_signature));
     result = secp256k1_ecdsa_signature_normalize(ctx, sigout, sigin);
-    if (result == 1) {
-        Z_RES_P(zSigOut)->ptr = zend_register_resource(sigout, le_secp256k1_sig);
-    } else {
-        efree(sigout);
-    }
+
+    ZVAL_RES(zSigOut, zend_register_resource(sigout, le_secp256k1_sig));
 
     RETURN_LONG(result);
 }
