@@ -54,9 +54,13 @@ class Secp256k1EcdsaSignTest extends TestCase
 
         $this->assertEquals($eSigCreate, $sign);
         $this->assertEquals(SECP256K1_TYPE_SIG, get_resource_type($signature));
-        
-        return;
 
+        $normalized = null;
+        secp256k1_ecdsa_signature_normalize($context, $normalized, $signature);
+
+        $sigSerOut = null;
+        $this->assertEquals(1, secp256k1_ecdsa_signature_serialize_der($context, $sigSerOut, $normalized));
+        $this->assertEquals($expectedSig, unpack("H*", $sigSerOut)[1]);
     }
 
     public function getErroneousTypeVectors()
