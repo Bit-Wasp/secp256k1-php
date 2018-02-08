@@ -1,5 +1,5 @@
 --TEST--
-Check for libsecp256k1 signature recoverable sign and verify functions
+Check for libsecp256k1 recovering a public key
 --SKIPIF--
 <?php
 if (!extension_loaded("secp256k1")) print "skip extension not loaded";
