@@ -1,5 +1,5 @@
 --TEST--
-Check for libsecp256k1 signature sign and verify functions
+secp256k1_ecdsa_sign and secp256k1_ecdsa_verify are consistent
 --SKIPIF--
 <?php
 if (!extension_loaded("secp256k1")) print "skip extension not loaded";

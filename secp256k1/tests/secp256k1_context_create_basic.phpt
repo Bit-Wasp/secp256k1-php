@@ -1,5 +1,5 @@
 --TEST--
-Check for libsecp256k1 context functions
+secp256k1_context_create works
 --SKIPIF--
 <?php
 if (!extension_loaded("secp256k1")) print "skip extension not loaded";

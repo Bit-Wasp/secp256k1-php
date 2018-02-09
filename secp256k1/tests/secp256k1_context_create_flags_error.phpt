@@ -1,5 +1,5 @@
 --TEST--
-Check secp256k1_context_create with invalid flags returns false
+secp256k1_context_create returns false if provided invalid flags
 --SKIPIF--
 <?php
 if (!extension_loaded("secp256k1")) print "skip extension not loaded";

@@ -1,5 +1,5 @@
 --TEST--
-Check for libsecp256k1 convert and verify a recoverable signature
+secp256k1_ecdsa_recoverable_signature_convert works
 --SKIPIF--
 <?php
 if (!extension_loaded("secp256k1")) print "skip extension not loaded";
