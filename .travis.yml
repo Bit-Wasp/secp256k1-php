@@ -6,10 +6,6 @@ php:
     - 7.2
     - nightly
 
-matrix:
-    allow_failures:
-        - php: nightly
-
 dist: trusty
 sudo: required
 
