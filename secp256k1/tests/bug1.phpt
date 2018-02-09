@@ -1,5 +1,5 @@
 --TEST--
-Check for libsecp256k1 convert and verify a recoverable signature
+Case where referenced zvals are being modified. Only the provided copy should be modified.
 --SKIPIF--
 <?php
 if (!extension_loaded("secp256k1")) print "skip extension not loaded";
