@@ -31,7 +31,7 @@ install:
 script:
     - |
         cd libsecp256k1 \
-        && ./tests \
+        && ./tests || exit 1 \
         && cd ..
-    - cd secp256k1/ && make test && cd ..
-    - php -dextension=secp256k1.so vendor/phpunit/phpunit/phpunit tests/
+    - cd secp256k1/ && REPORT_EXIT_STATUS=1 make test || exit 1 && cd ..
+    - php -dextension=secp256k1.so vendor/phpunit/phpunit/phpunit tests/ || exit 1
