@@ -313,6 +313,10 @@ PHP_FUNCTION(secp256k1_context_create)
         RETURN_FALSE;
     }
 
+    if ((flags & ~(SECP256K1_CONTEXT_SIGN | SECP256K1_CONTEXT_VERIFY)) > 0) {
+        RETURN_FALSE;
+    }
+
     ctx = secp256k1_context_create(flags);
     RETURN_RES(zend_register_resource(ctx, le_secp256k1_ctx));
 }
