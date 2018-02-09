@@ -1,5 +1,5 @@
 --TEST--
-Check for libsecp256k1 secret key field addition
+secp256k1_ec_privkey_tweak_add works
 --SKIPIF--
 <?php
 if (!extension_loaded("secp256k1")) print "skip extension not loaded";

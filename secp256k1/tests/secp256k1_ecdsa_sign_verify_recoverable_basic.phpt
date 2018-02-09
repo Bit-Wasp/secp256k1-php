@@ -1,5 +1,5 @@
 --TEST--
-Check for libsecp256k1 recovering a public key
+secp256k1_ecdsa_sign_recoverable and secp256k1_ecdsa_recover are consistent
 --SKIPIF--
 <?php
 if (!extension_loaded("secp256k1")) print "skip extension not loaded";

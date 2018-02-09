@@ -1,5 +1,5 @@
 --TEST--
-Check for libsecp256k1 signature encoding functions
+ecdsa_signature_parse_der_lax and secp256k1_ecdsa_signature_serialize_der cooperate
 --SKIPIF--
 <?php
 if (!extension_loaded("secp256k1")) print "skip extension not loaded";

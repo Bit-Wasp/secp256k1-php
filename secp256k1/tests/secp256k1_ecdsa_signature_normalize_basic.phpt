@@ -1,5 +1,5 @@
 --TEST--
-Check for libsecp256k1 signature normalizing function
+secp256k1_ecdsa_signature_normalize works
 --SKIPIF--
 <?php
 if (!extension_loaded("secp256k1")) print "skip extension not loaded";
