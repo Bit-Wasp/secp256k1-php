@@ -9,8 +9,25 @@ php:
 dist: trusty
 sudo: required
 
+env:
+  global:
+   - DOCKER_CACHE_DIR=/home/travis/docker
+
+cache:
+  directories:
+    - ${DOCKER_CACHE_DIR}
+
+matrix:
+  exclude:
+    - php: 7.0
+
+  include:
+    - php: 7.0
+      env: SECP256K1_COMMIT=cd329dbc3eaf096ae007e807b86b6f5947621ee3 COVERAGE_TARGET=60 COVERAGE=true
+
 before_install:
     - sudo apt-get install -qq libssl-dev
+    - if [ "${COVERAGE}" = "true" ]; then ./travis/docker-load-cache.sh secp256k1build || echo "failed"; fi
 
 install:
     - |
@@ -24,6 +41,13 @@ install:
         && cd ..
     - composer update
 
+before_script:
+    - |
+        if [ "${COVERAGE}" = "true" ]; then \
+            cd travis/phpqa/ && docker build -t secp256k1build . && cd ../.. && \
+            ./travis/docker-save-cache.sh secp256k1build
+        fi
+
 script:
     - |
         cd libsecp256k1 \
@@ -31,3 +55,4 @@ script:
         && cd ..
     - cd secp256k1/ && REPORT_EXIT_STATUS=1 make test || exit 1 && cd ..
     - php -dextension=secp256k1.so vendor/phpunit/phpunit/phpunit tests/ || exit 1
+    - cd travis && ./run_coverage_test.sh || exit 1 && cd ..
