@@ -558,7 +558,7 @@ PHP_FUNCTION(secp256k1_ecdsa_verify) {
     int result;
 
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rrSr", &zCtx, &zSig, &msg32, &zPubKey) == FAILURE) {
-        return;
+        RETURN_FALSE;
     }
 
     if ((ctx = (secp256k1_context *)zend_fetch_resource2_ex(zCtx, SECP256K1_CTX_RES_NAME, le_secp256k1_ctx, -1)) == NULL) {
