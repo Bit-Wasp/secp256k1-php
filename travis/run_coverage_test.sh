@@ -9,7 +9,8 @@ if [ "${COVERAGE}" = "true" ]; then
     if [ "$?" != "0" ]; then
         exitHard=true
     fi
-    docker stop s1; docker rm s1;
+    docker stop s1 > /dev/null;
+    docker rm s1 > /dev/null;
 fi
 
 if [ "${exitHard}" = "true" ]; then
