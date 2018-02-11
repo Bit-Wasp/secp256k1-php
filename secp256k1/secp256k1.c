@@ -1160,8 +1160,6 @@ PHP_FUNCTION(secp256k1_ecdh)
     if (result == 1) {
         zval_dtor(zResult);
         ZVAL_STRINGL(zResult, resultChars, 32);
-    } else {
-        efree(resultChars);
     }
 
     RETURN_LONG(result);
