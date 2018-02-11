@@ -1,5 +1,5 @@
 --TEST--
-secp256k1_ecdsa_signature_parse_der errors if context is wrong resource type
+secp256k1_ecdsa_recoverable_signature_parse_compact returns false if parameter parsing fails
 --SKIPIF--
 <?php
 if (!extension_loaded("secp256k1")) print "skip extension not loaded";
