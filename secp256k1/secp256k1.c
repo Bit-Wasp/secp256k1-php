@@ -828,16 +828,16 @@ PHP_FUNCTION(secp256k1_ec_privkey_tweak_add)
     int result;
     size_t tweaklen;
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rz/s", &zCtx, &zSecKey, &tweak, &tweaklen) == FAILURE) {
-        return;
+        RETURN_FALSE;
+    }
+
+    if ((ctx = (secp256k1_context *)zend_fetch_resource2_ex(zCtx, SECP256K1_CTX_RES_NAME, le_secp256k1_ctx, 0)) == NULL) {
+        RETURN_FALSE;
     }
 
     if (Z_TYPE_P(zSecKey) != IS_STRING) {
         zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_ec_privkey_tweak_add(): Parameter 2 should be string");
         return;
-    }
-
-    if ((ctx = (secp256k1_context *)zend_fetch_resource2_ex(zCtx, SECP256K1_CTX_RES_NAME, le_secp256k1_ctx, 0)) == NULL) {
-        RETURN_FALSE;
     }
 
     if (Z_STRLEN_P(zSecKey) != SECRETKEY_LENGTH) {
