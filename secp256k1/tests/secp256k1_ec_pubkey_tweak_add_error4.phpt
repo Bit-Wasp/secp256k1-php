@@ -19,14 +19,13 @@ $pubKey = null;
 $result = secp256k1_ec_pubkey_create($context, $pubKey, $secKeyOne);
 echo $result . PHP_EOL;
 
-$badCtx = tmpfile();
-$result = secp256k1_ec_pubkey_tweak_add($badCtx, $pubKey, $secKeyTwoBad);
-echo gettype($result) . PHP_EOL;
-echo ($result ? "true" : "false") . PHP_EOL;
+try {
+    secp256k1_ec_pubkey_tweak_add($context, $pubKey, $secKeyTwoBad);
+} catch (\Exception $e) {
+    echo $e->getMessage() . PHP_EOL;
+}
 
 ?>
 --EXPECT--
 1
-secp256k1_ec_pubkey_tweak_add(): supplied resource is not a valid secp256k1_context resource
-boolean
-false
+secp256k1_ec_pubkey_tweak_add(): Parameter 3 should be 32 bytes
