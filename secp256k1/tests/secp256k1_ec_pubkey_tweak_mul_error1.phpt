@@ -16,9 +16,6 @@ $secKeyTwo = str_repeat("\x00", 31) . "\x02";
 
 /** @var resource $pubKey */
 $pubKey = null;
-$serKey = '';
-$cmpKey = null;
-$serCmp = '';
 
 $result = secp256k1_ec_pubkey_create($context, $pubKey, $secKeyOne);
 echo $result . PHP_EOL;
