@@ -1,13 +1,12 @@
 language: php
-
-php:
-    - 7.0
-    - 7.1
-    - 7.2
-    - nightly
-
 dist: trusty
 sudo: required
+
+php:
+  - 7.0
+  - 7.1
+  - 7.2
+  - nightly
 
 env:
   global:
@@ -26,33 +25,33 @@ matrix:
       env: COVERAGE_TARGET=95 COVERAGE=true SECP256K1_COMMIT=cd329dbc3eaf096ae007e807b86b6f5947621ee3 COVERAGE_PREFIX_FUNCTIONS=zif_,zm_,secp256k1_
 
 before_install:
-    - sudo apt-get install -qq libssl-dev
-    - if [ "${COVERAGE}" = "true" ]; then ./travis/docker-load-cache.sh secp256k1build || echo "failed"; fi
+  - sudo apt-get install -qq libssl-dev
+  - if [ "${COVERAGE}" = "true" ]; then ./travis/docker-load-cache.sh secp256k1build || echo "failed"; fi
 
 install:
-    - |
-        git clone git://github.com/bitcoin/secp256k1.git libsecp256k1 \
-        && cd libsecp256k1 \
-        && ./autogen.sh && ./configure --enable-experimental --enable-module-{ecdh,recovery} && make && sudo make install \
-        && cd ..
-    - |
-        cd secp256k1 \
-        && phpize && ./configure && make && sudo make install \
-        && cd ..
-    - composer update
+  - |
+      git clone git://github.com/bitcoin/secp256k1.git libsecp256k1 \
+      && cd libsecp256k1 \
+      && ./autogen.sh && ./configure --enable-experimental --enable-module-{ecdh,recovery} && make && sudo make install \
+      && cd ..
+  - |
+      cd secp256k1 \
+      && phpize && ./configure && make && sudo make install \
+      && cd ..
+  - composer update
 
 before_script:
-    - |
-        if [ "${COVERAGE}" = "true" ]; then \
-            cd travis/phpqa/ && docker build -t secp256k1build . && cd ../.. && \
-            ./travis/docker-save-cache.sh secp256k1build
-        fi
+  - |
+      if [ "${COVERAGE}" = "true" ]; then \
+          cd travis/phpqa/ && docker build -t secp256k1build . && cd ../.. && \
+          ./travis/docker-save-cache.sh secp256k1build
+      fi
 
 script:
-    - |
-        cd libsecp256k1 \
-        && ./tests || exit 1 \
-        && cd ..
-    - cd secp256k1/ && REPORT_EXIT_STATUS=1 make test || exit 1 && cd ..
-    - php -dextension=secp256k1.so vendor/phpunit/phpunit/phpunit tests/ || exit 1
-    - cd travis && ./run_coverage_test.sh || exit 1 && cd ..
+  - |
+      cd libsecp256k1 \
+      && ./tests || exit 1 \
+      && cd ..
+  - cd secp256k1/ && REPORT_EXIT_STATUS=1 make test || exit 1 && cd ..
+  - php -dextension=secp256k1.so vendor/phpunit/phpunit/phpunit tests/ || exit 1
+  - cd travis && ./run_coverage_test.sh || exit 1 && cd ..
