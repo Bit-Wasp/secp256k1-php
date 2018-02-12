@@ -23,7 +23,7 @@ matrix:
 
   include:
     - php: 7.0
-      env: SECP256K1_COMMIT=cd329dbc3eaf096ae007e807b86b6f5947621ee3 COVERAGE_TARGET=60 COVERAGE=true
+      env: COVERAGE_TARGET=95 COVERAGE=true SECP256K1_COMMIT=cd329dbc3eaf096ae007e807b86b6f5947621ee3
 
 before_install:
     - sudo apt-get install -qq libssl-dev
