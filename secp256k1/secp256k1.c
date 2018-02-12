@@ -977,6 +977,16 @@ PHP_FUNCTION(secp256k1_ecdsa_recoverable_signature_parse_compact)
         RETURN_FALSE;
     }
 
+    if (input64->len != 64) {
+        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_ecdsa_recoverable_signature_parse_compact(): Parameter 3 should be 64 bytes");
+        return;
+    }
+
+    if (!(recid >= 0 && recid <= 3)) {
+        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_ecdsa_recoverable_signature_parse_compact(): recid should be between 0-3");
+        return;
+    }
+
     sig = emalloc(sizeof(secp256k1_ecdsa_recoverable_signature));
     result = secp256k1_ecdsa_recoverable_signature_parse_compact(ctx, sig, input64->val, recid);
     if (result == 1) {
