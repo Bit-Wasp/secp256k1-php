@@ -1177,14 +1177,13 @@ PHP_FUNCTION(secp256k1_ecdh)
 
 PHP_FUNCTION(secp256k1_ec_pubkey_combine)
 {
-    zval *arr, *zCtx, *zPubkeyCombined;
+    zval *arr, *zCtx, *zPubkeyCombined, *arrayPubKey;
     secp256k1_context *ctx;
-    secp256k1_pubkey *ptr;
-    secp256k1_pubkey *combined;
+    secp256k1_pubkey *ptr, *combined;
+    zend_string *arrayKeyStr;
     HashTable *arr_hash;
     HashPosition pointer;
-    int result;
-    int i = 0;
+    int result, i = 0;
     size_t array_count;
 
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rz/a", &zCtx, &zPubkeyCombined, &arr) == FAILURE) {
@@ -1199,10 +1198,8 @@ PHP_FUNCTION(secp256k1_ec_pubkey_combine)
     array_count = (size_t) zend_hash_num_elements(arr_hash);
     const secp256k1_pubkey * pubkeys[array_count];
 
-    zend_string *key;
-    zval *val;
-    ZEND_HASH_FOREACH_KEY_VAL(arr_hash, i, key, val) {
-        if ((ptr = (secp256k1_pubkey *)zend_fetch_resource2_ex(val, SECP256K1_PUBKEY_RES_NAME, le_secp256k1_pubkey, -1)) == NULL) {
+    ZEND_HASH_FOREACH_KEY_VAL(arr_hash, i, arrayKeyStr, arrayPubKey) {
+        if ((ptr = (secp256k1_pubkey *)zend_fetch_resource2_ex(arrayPubKey, SECP256K1_PUBKEY_RES_NAME, le_secp256k1_pubkey, -1)) == NULL) {
             RETURN_FALSE;
         }
 
