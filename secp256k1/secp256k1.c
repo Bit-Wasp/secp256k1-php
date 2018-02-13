@@ -133,6 +133,11 @@ ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ec_pubkey_create, 0)
     ZEND_ARG_INFO(0, secretKey)
 ZEND_END_ARG_INFO();
 
+ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ec_privkey_negate, 0)
+    ZEND_ARG_INFO(0, context)
+    ZEND_ARG_INFO(1, secKey)
+ZEND_END_ARG_INFO();
+
 ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ec_privkey_tweak_add, 0)
     ZEND_ARG_INFO(0, context)
     ZEND_ARG_INFO(1, seckey)
@@ -185,6 +190,7 @@ const zend_function_entry secp256k1_functions[] = {
         PHP_FE(secp256k1_ec_seckey_verify,                   arginfo_secp256k1_ec_seckey_verify)
 
         PHP_FE(secp256k1_ec_pubkey_create,                   arginfo_secp256k1_ec_pubkey_create)
+        PHP_FE(secp256k1_ec_privkey_negate,                  arginfo_secp256k1_ec_privkey_negate)
         PHP_FE(secp256k1_ec_pubkey_parse,                    arginfo_secp256k1_ec_pubkey_parse)
         PHP_FE(secp256k1_ec_pubkey_combine,                  arginfo_secp256k1_ec_pubkey_combine)
         PHP_FE(secp256k1_ec_pubkey_serialize,                arginfo_secp256k1_ec_pubkey_serialize)
@@ -746,6 +752,45 @@ PHP_FUNCTION(secp256k1_ec_pubkey_create)
     RETURN_LONG(result);
 }
 /* }}} */
+
+/** Negates a private key in place.
+ *  Returns: 1 always
+ *  Args:   ctx:        pointer to a context object
+ *  In/Out: pubkey:     pointer to the public key to be negated (cannot be NULL)
+ */
+PHP_FUNCTION(secp256k1_ec_privkey_negate)
+{
+    zval *zCtx, *zPrivKey;
+    secp256k1_context *ctx;
+    unsigned char *newseckey;
+    int result;
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rz/", &zCtx, &zPrivKey) == FAILURE) {
+        RETURN_FALSE;
+    }
+
+    if ((ctx = (secp256k1_context *)zend_fetch_resource2_ex(zCtx, SECP256K1_CTX_RES_NAME, le_secp256k1_ctx, -1)) == NULL) {
+        RETURN_FALSE;
+    }
+
+    if (Z_TYPE_P(zPrivKey) != IS_STRING) {
+        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_ec_privkey_negate(): Parameter 2 should be string");
+        return;
+    }
+
+    if (Z_STRLEN_P(zPrivKey) != SECRETKEY_LENGTH) {
+        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_ec_privkey_negate(): Parameter 2 should be 32 bytes");
+        return;
+    }
+
+    newseckey = (unsigned char *) emalloc(SECRETKEY_LENGTH);
+    memcpy(newseckey, Z_STRVAL_P(zPrivKey), SECRETKEY_LENGTH);
+    result = secp256k1_ec_privkey_negate(ctx, newseckey);
+    zval_dtor(zPrivKey);
+    ZVAL_STRINGL(zPrivKey, newseckey, SECRETKEY_LENGTH);
+
+    RETURN_LONG(result);
+}
 
 /* Parse a variable length public key into a public key resource */
 /** {{{ proto int secp256k1_ec_pubkey_parse(resource secp256k1_context, string publicKey)

@@ -42,6 +42,7 @@ PHP_FUNCTION(secp256k1_ecdsa_signature_serialize_der);
 PHP_FUNCTION(secp256k1_ecdsa_signature_normalize);
 
 PHP_FUNCTION(secp256k1_ec_seckey_verify);
+PHP_FUNCTION(secp256k1_ec_privkey_negate);
 PHP_FUNCTION(secp256k1_ec_pubkey_create);
 PHP_FUNCTION(secp256k1_ec_pubkey_combine);
 PHP_FUNCTION(secp256k1_ec_pubkey_parse);
