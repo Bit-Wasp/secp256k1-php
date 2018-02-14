@@ -512,7 +512,7 @@ PHP_FUNCTION(secp256k1_ecdsa_signature_serialize_der)
 /* }}} */
 
 /* {{{ proto int secp256k1_ecdsa_signature_parse_compact(resource context, resource &sig, string sig64, int recid)
- * Parse a compact ECDSA signature (64 bytes + recovery id). */
+ * Parse an ECDSA signature in compact (64 bytes) format. */
 PHP_FUNCTION(secp256k1_ecdsa_signature_parse_compact)
 {
     zval *zCtx, *zSig;
@@ -547,7 +547,7 @@ PHP_FUNCTION(secp256k1_ecdsa_signature_parse_compact)
 /* }}} */
 
 /* {{{ proto int secp256k1_ecdsa_signature_serialize_compact(resource context, string &sigOut, resource sig)
- * Serialize an ECDSA signature in compact format (64 bytes + recovery id). */
+ * Serialize an ECDSA signature in compact (64 byte) format. */
 PHP_FUNCTION(secp256k1_ecdsa_signature_serialize_compact)
 {
     zval *zCtx, *zSig, *zSigOut;
