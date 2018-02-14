@@ -31,6 +31,12 @@ ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_context_randomize, 0)
     ZEND_ARG_INFO(0, seed32)
 ZEND_END_ARG_INFO();
 
+ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ecdsa_signature_parse_compact, 0)
+    ZEND_ARG_INFO(0, context)
+    ZEND_ARG_INFO(1, secp256k1_ecdsa_signature)
+    ZEND_ARG_INFO(0, signatureStr)
+ZEND_END_ARG_INFO();
+
 ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ecdsa_signature_parse_der, 0)
     ZEND_ARG_INFO(0, context)
     ZEND_ARG_INFO(1, secp256k1_ecdsa_signature)
@@ -41,6 +47,12 @@ ZEND_BEGIN_ARG_INFO(arginfo_ecdsa_signature_parse_der_lax, 0)
     ZEND_ARG_INFO(0, context)
     ZEND_ARG_INFO(1, secp256k1_ecdsa_signature)
     ZEND_ARG_INFO(0, signatureStr)
+ZEND_END_ARG_INFO();
+
+ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ecdsa_signature_serialize_compact, 0)
+    ZEND_ARG_INFO(0, context)
+    ZEND_ARG_INFO(1, signatureStr)
+    ZEND_ARG_INFO(0, secp256k1_ecdsa_signature)
 ZEND_END_ARG_INFO();
 
 ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ecdsa_signature_serialize_der, 0)
@@ -188,7 +200,9 @@ const zend_function_entry secp256k1_functions[] = {
         PHP_FE(ecdsa_signature_parse_der_lax,                arginfo_ecdsa_signature_parse_der_lax)
         PHP_FE(secp256k1_ecdsa_signature_normalize,          arginfo_secp256k1_ecdsa_signature_normalize)
         PHP_FE(secp256k1_ecdsa_signature_parse_der,          arginfo_secp256k1_ecdsa_signature_parse_der)
+        PHP_FE(secp256k1_ecdsa_signature_parse_compact,      arginfo_secp256k1_ecdsa_signature_parse_compact)
         PHP_FE(secp256k1_ecdsa_signature_serialize_der,      arginfo_secp256k1_ecdsa_signature_serialize_der)
+        PHP_FE(secp256k1_ecdsa_signature_serialize_compact,  arginfo_secp256k1_ecdsa_signature_serialize_compact)
         PHP_FE(secp256k1_ecdsa_sign,                         arginfo_secp256k1_ecdsa_sign)
         PHP_FE(secp256k1_ecdsa_verify,                       arginfo_secp256k1_ecdsa_verify)
 
@@ -431,6 +445,37 @@ PHP_FUNCTION(secp256k1_context_randomize)
 }
 /* }}} */
 
+/* {{{ proto int secp256k1_ecdsa_signature_parse_der(resource ctx, resource &sig, string sigIn)
+ * Parse a DER ECDSA signature. */
+PHP_FUNCTION(secp256k1_ecdsa_signature_parse_der)
+{
+    zval *zCtx, *zSig;
+    secp256k1_context *ctx;
+    secp256k1_ecdsa_signature *sig;
+    int result = 0;
+    zend_string *sigin;
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rz/S", &zCtx, &zSig, &sigin) == FAILURE) {
+        RETURN_FALSE;
+    }
+
+    if ((ctx = php_get_secp256k1_context(zCtx)) == NULL) {
+        RETURN_FALSE;
+    }
+
+    sig = (secp256k1_ecdsa_signature *) emalloc(sizeof(secp256k1_ecdsa_signature));
+    result = secp256k1_ecdsa_signature_parse_der(ctx, sig, sigin->val, sigin->len);
+    if (result == 1) {
+        ZVAL_NULL(zSig);
+        ZVAL_RES(zSig, zend_register_resource(sig, le_secp256k1_sig));
+    } else {
+        efree(sig);
+    }
+
+    RETURN_LONG(result);
+}
+/* }}} */
+
 /* {{{ proto int secp256k1_ec_signature_serialize_der(resource context, string &sigOut, resource sig)
  * Serialize an ECDSA signature in DER format. */
 PHP_FUNCTION(secp256k1_ecdsa_signature_serialize_der)
@@ -466,17 +511,17 @@ PHP_FUNCTION(secp256k1_ecdsa_signature_serialize_der)
 }
 /* }}} */
 
-/* {{{ proto int secp256k1_ecdsa_signature_parse_der(resource ctx, resource &sig, string sigIn)
- * Parse a DER ECDSA signature. */
-PHP_FUNCTION(secp256k1_ecdsa_signature_parse_der)
+/* {{{ proto int secp256k1_ecdsa_signature_parse_compact(resource context, resource &sig, string sig64, int recid)
+ * Parse a compact ECDSA signature (64 bytes + recovery id). */
+PHP_FUNCTION(secp256k1_ecdsa_signature_parse_compact)
 {
     zval *zCtx, *zSig;
     secp256k1_context *ctx;
     secp256k1_ecdsa_signature *sig;
-    int result = 0;
-    zend_string *sigin;
+    zend_string *input64;
+    int result;
 
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rz/S", &zCtx, &zSig, &sigin) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rz/S", &zCtx, &zSig, &input64) == FAILURE) {
         RETURN_FALSE;
     }
 
@@ -484,11 +529,49 @@ PHP_FUNCTION(secp256k1_ecdsa_signature_parse_der)
         RETURN_FALSE;
     }
 
-    sig = (secp256k1_ecdsa_signature *) emalloc(sizeof(secp256k1_ecdsa_signature));
-    result = secp256k1_ecdsa_signature_parse_der(ctx, sig, sigin->val, sigin->len);
+    if (input64->len != 64) {
+        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_ecdsa_signature_parse_compact(): Parameter 3 should be 64 bytes");
+        return;
+    }
+
+    sig = emalloc(sizeof(secp256k1_ecdsa_signature));
+    result = secp256k1_ecdsa_signature_parse_compact(ctx, sig, (unsigned char*) input64->val);
     if (result == 1) {
-        ZVAL_NULL(zSig);
         ZVAL_RES(zSig, zend_register_resource(sig, le_secp256k1_sig));
+    } else {
+        efree(sig);
+    }
+
+    RETURN_LONG(result);
+}
+/* }}} */
+
+/* {{{ proto int secp256k1_ecdsa_signature_serialize_compact(resource context, string &sigOut, resource sig)
+ * Serialize an ECDSA signature in compact format (64 bytes + recovery id). */
+PHP_FUNCTION(secp256k1_ecdsa_signature_serialize_compact)
+{
+    zval *zCtx, *zSig, *zSigOut;
+    secp256k1_context *ctx;
+    secp256k1_ecdsa_signature *sig;
+    unsigned char *sigOut;
+    int result;
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rz/r", &zCtx, &zSigOut, &zSig) == FAILURE) {
+        RETURN_FALSE;
+    }
+
+    if ((ctx = php_get_secp256k1_context(zCtx)) == NULL) {
+        RETURN_FALSE;
+    }
+
+    if ((sig = php_get_secp256k1_ecdsa_signature(zSig)) == NULL) {
+        RETURN_FALSE;
+    }
+
+    sigOut = emalloc(COMPACT_SIGNATURE_LENGTH);
+    result = secp256k1_ecdsa_signature_serialize_compact(ctx, sigOut, sig);
+    if (result == 1) {
+        ZVAL_STRINGL(zSigOut, sigOut, COMPACT_SIGNATURE_LENGTH);
     } else {
         efree(sig);
     }
