@@ -342,12 +342,12 @@ PHP_FUNCTION(secp256k1_context_create)
 PHP_FUNCTION(secp256k1_context_destroy)
 {
     zval *zCtx;
+    secp256k1_context *ctx;
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &zCtx) == FAILURE) {
         RETURN_FALSE;
     }
 
-    secp256k1_context *ctx;
-    if ((ctx = (secp256k1_context *)zend_fetch_resource2_ex(zCtx, SECP256K1_CTX_RES_NAME, le_secp256k1_ctx, -1)) == NULL) {
+    if ((ctx = php_get_secp256k1_context(zCtx)) == NULL) {
         RETURN_FALSE;
     }
 
@@ -1031,7 +1031,7 @@ PHP_FUNCTION(secp256k1_ecdsa_recoverable_signature_parse_compact)
         RETURN_FALSE;
     }
 
-    if ((ctx = (secp256k1_context *)zend_fetch_resource2_ex(zCtx, SECP256K1_CTX_RES_NAME, le_secp256k1_ctx, -1)) == NULL) {
+    if ((ctx = php_get_secp256k1_context(zCtx)) == NULL) {
         RETURN_FALSE;
     }
 
@@ -1071,7 +1071,7 @@ PHP_FUNCTION(secp256k1_ecdsa_recoverable_signature_convert)
         RETURN_FALSE;
     }
 
-    if ((ctx = (secp256k1_context *)zend_fetch_resource2_ex(zCtx, SECP256K1_CTX_RES_NAME, le_secp256k1_ctx, -1)) == NULL) {
+    if ((ctx = php_get_secp256k1_context(zCtx)) == NULL) {
         RETURN_FALSE;
     }
 
@@ -1106,7 +1106,7 @@ PHP_FUNCTION(secp256k1_ecdsa_recoverable_signature_serialize_compact)
         RETURN_FALSE;
     }
 
-    if ((ctx = (secp256k1_context *)zend_fetch_resource2_ex(zCtx, SECP256K1_CTX_RES_NAME, le_secp256k1_ctx, -1)) == NULL) {
+    if ((ctx = php_get_secp256k1_context(zCtx)) == NULL) {
         RETURN_FALSE;
     }
 
@@ -1141,7 +1141,7 @@ PHP_FUNCTION(secp256k1_ecdsa_sign_recoverable)
         RETURN_FALSE;
     }
 
-    if ((ctx = (secp256k1_context *)zend_fetch_resource2_ex(zCtx, SECP256K1_CTX_RES_NAME, le_secp256k1_ctx, -1)) == NULL) {
+    if ((ctx = php_get_secp256k1_context(zCtx)) == NULL) {
         RETURN_FALSE;
     }
 
@@ -1182,7 +1182,7 @@ PHP_FUNCTION(secp256k1_ecdsa_recover)
         RETURN_FALSE;
     }
 
-    if ((ctx = (secp256k1_context *)zend_fetch_resource2_ex(zCtx, SECP256K1_CTX_RES_NAME, le_secp256k1_ctx, 0)) == NULL) {
+    if ((ctx = php_get_secp256k1_context(zCtx)) == NULL) {
         RETURN_FALSE;
     }
 
@@ -1220,7 +1220,7 @@ PHP_FUNCTION(secp256k1_ecdh)
         RETURN_FALSE;
     }
 
-    if ((ctx = (secp256k1_context *)zend_fetch_resource2_ex(zCtx, SECP256K1_CTX_RES_NAME, le_secp256k1_ctx, -1)) == NULL) {
+    if ((ctx = php_get_secp256k1_context(zCtx)) == NULL) {
         RETURN_FALSE;
     }
 
