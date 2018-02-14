@@ -256,9 +256,14 @@ static void secp256k1_recoverable_sig_dtor(zend_resource * rsrc TSRMLS_DC)
     }
 }
 
-// attempt to read a sec256k1_context* from the provided resource
+// attempt to read a sec256k1_context* from the provided resource zval
 static secp256k1_context* php_get_secp256k1_context(zval* pcontext) {
     return (secp256k1_context *)zend_fetch_resource2_ex(pcontext, SECP256K1_CTX_RES_NAME, le_secp256k1_ctx, -1);
+}
+
+// attempt to read a sec256k1_ecdsa_signature* from the provided resource zval
+static secp256k1_ecdsa_signature* php_get_secp256k1_ecdsa_signature(zval *psig) {
+    return (secp256k1_ecdsa_signature *)zend_fetch_resource2_ex(psig, SECP256K1_SIG_RES_NAME, le_secp256k1_sig, -1);
 }
 
 PHP_MINIT_FUNCTION(secp256k1) {
@@ -435,7 +440,7 @@ PHP_FUNCTION(secp256k1_ecdsa_signature_serialize_der)
         RETURN_FALSE;
     }
 
-    if ((sig = (secp256k1_ecdsa_signature *)zend_fetch_resource2_ex(zSig, SECP256K1_SIG_RES_NAME, le_secp256k1_sig, -1)) == NULL) {
+    if ((sig = php_get_secp256k1_ecdsa_signature(zSig)) == NULL) {
         RETURN_FALSE;
     }
 
@@ -529,7 +534,7 @@ PHP_FUNCTION(secp256k1_ecdsa_signature_normalize)
         RETURN_FALSE;
     }
 
-    if ((sigin = (secp256k1_ecdsa_signature *)zend_fetch_resource2_ex(zSigIn, SECP256K1_SIG_RES_NAME, le_secp256k1_sig, -1)) == NULL) {
+    if ((sigin = php_get_secp256k1_ecdsa_signature(zSigIn)) == NULL) {
         RETURN_FALSE;
     }
 
@@ -563,7 +568,7 @@ PHP_FUNCTION(secp256k1_ecdsa_verify) {
         RETURN_FALSE;
     }
 
-    if ((sig = (secp256k1_ecdsa_signature *)zend_fetch_resource2_ex(zSig, SECP256K1_SIG_RES_NAME, le_secp256k1_sig, -1)) == NULL) {
+    if ((sig = php_get_secp256k1_ecdsa_signature(zSig)) == NULL) {
         RETURN_FALSE;
     }
 
