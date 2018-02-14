@@ -313,10 +313,13 @@ zend_module_entry secp256k1_module_entry = {
 ZEND_GET_MODULE(secp256k1)
 #endif
 
-/* Create a secp256k1 context resource */
-/* {{{ proto resource secp256k1_context_create(int flags)
-   Return a secp256k1 context initialized with the desired pregenerated tables.
-   NB: This is the most expensive operation in the library */
+/** Create a secp256k1 context object.
+ *  $secp256k1Context = secp256k1_context_create(int $flags);
+ *  Returns: a newly created context object, or false if an error occurred.
+ *  In:      flags: which parts of the context to initialize.
+ *
+ *  See also secp256k1_context_randomize.
+ */
 PHP_FUNCTION(secp256k1_context_create)
 {
     long flags;
@@ -332,11 +335,12 @@ PHP_FUNCTION(secp256k1_context_create)
     ctx = secp256k1_context_create(flags);
     RETURN_RES(zend_register_resource(ctx, le_secp256k1_ctx));
 }
-/* }}} */
 
-/* Destroy a secp256k1 context resource */
-/* {{{ proto bool secp256k1_context_destroy(resource secp256k1_context)
-   Destroy the given secp256k1 context. The context may not be used afterwards. */
+/** Destroy a secp256k1 context object.
+ *  $resultFlag = secp256k1_context_destroy(resource $context);
+ *  The context pointer may not be used afterwards.
+ *  Args:   ctx: an existing context to destroy (cannot be NULL)
+ */
 PHP_FUNCTION(secp256k1_context_destroy)
 {
     zval *zCtx;
@@ -355,10 +359,11 @@ PHP_FUNCTION(secp256k1_context_destroy)
 }
 /* }}} */
 
-/* Copies a secp256k1 context resource */
-/** {{{ proto resource secp256k1_context_clone(resource secp256k1_context)
- *  In:   ctx:   an existing context to copy
- *  Out:  ctx:   a newly created context object. */
+/** Copies a secp256k1 context object.
+ *  $cloneContext = secp256k1_context_clone($context);
+ *  Returns: a newly created context object.
+ *  Args:    ctx: an existing context to copy (cannot be NULL)
+ */
 PHP_FUNCTION(secp256k1_context_clone)
 {
     zval *zCtx;
@@ -379,8 +384,8 @@ PHP_FUNCTION(secp256k1_context_clone)
 }
 /* }}} */
 
-/* Updates the context randomization */
-/** {{{ proto int secp256k1_context_random(resource secp256k1_context, seed32)
+/** Updates the context randomization
+ *  secp256k1_context_randomize(resource $context, [string $bytes32 = NULL])
  *  In:   ctx:    a context resource
  *        seed32: a random 32-byte seed (NULL resets to initial state)
  *  Out:  0:      an error occured
@@ -388,11 +393,11 @@ PHP_FUNCTION(secp256k1_context_clone)
  */
 PHP_FUNCTION(secp256k1_context_randomize)
 {
-    zval *zCtx;
+    zval *zCtx, *zSeed = NULL;
     secp256k1_context *ctx;
+    unsigned char *seed32 = NULL;
     int result;
-    zend_string* seed32;
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|S", &zCtx, &seed32) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|z", &zCtx, &zSeed) == FAILURE) {
         RETURN_FALSE;
     }
 
@@ -400,11 +405,38 @@ PHP_FUNCTION(secp256k1_context_randomize)
         RETURN_FALSE;
     }
 
-    result = secp256k1_context_randomize(ctx, seed32->val);
+    if (zSeed != NULL) {
+        if (Z_TYPE_P(zSeed) == IS_STRING) {
+            if (Z_STRLEN_P(zSeed) != 32) {
+                zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC,
+                        "secp256k1_context_randomize(): Parameter 2 should be 32 bytes");
+                return;
+            }
+            seed32 = Z_STRVAL_P(zSeed);
+        } else if (Z_TYPE_P(zSeed) != IS_NULL) {
+            zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC,
+                    "secp256k1_context_randomize(): Parameter 2 should be a 32 byte string, or null");
+            return;
+        }
+    }
+
+
+    result = secp256k1_context_randomize(ctx, seed32);
     RETURN_LONG(result);
 }
 /* }}} */
 
+/** Serialize an ECDSA signature in DER format.
+ *
+ *  Returns: 1 if enough space was available to serialize, 0 otherwise
+ *  Args:   ctx:       a secp256k1 context object
+ *  Out:    output:    a pointer to an array to store the DER serialization
+ *  In/Out: outputlen: a pointer to a length integer. Initially, this integer
+ *                     should be set to the length of output. After the call
+ *                     it will be set to the length of the serialization (even
+ *                     if 0 was returned).
+ *  In:     sig:       a pointer to an initialized signature object
+ */
 PHP_FUNCTION(secp256k1_ecdsa_signature_serialize_der)
 {
     zval *zCtx, *zSig, *zSigOut;
@@ -438,9 +470,8 @@ PHP_FUNCTION(secp256k1_ecdsa_signature_serialize_der)
 }
 /* }}} */
 
-/* Parse a DER signature into a signature resource */
-/**
- * {{{ proto int secp256k1_ecdsa_signature_parse_der(
+/** Parse a DER signature into a signature resource
+ *  {{{ proto int secp256k1_ecdsa_signature_parse_der(
  *         resource secp256k1_context,
  *         resource & secp256k1_ecdsa_signature,
  *         string serializedSignature
