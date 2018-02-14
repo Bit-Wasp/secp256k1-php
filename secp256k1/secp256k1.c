@@ -570,12 +570,8 @@ PHP_FUNCTION(secp256k1_ecdsa_signature_serialize_compact)
 
     sigOut = emalloc(COMPACT_SIGNATURE_LENGTH);
     result = secp256k1_ecdsa_signature_serialize_compact(ctx, sigOut, sig);
-    if (result == 1) {
-        ZVAL_STRINGL(zSigOut, sigOut, COMPACT_SIGNATURE_LENGTH);
-    } else {
-        efree(sig);
-    }
 
+    ZVAL_STRINGL(zSigOut, sigOut, COMPACT_SIGNATURE_LENGTH);
     RETURN_LONG(result);
 }
 /* }}} */
@@ -1219,12 +1215,9 @@ PHP_FUNCTION(secp256k1_ecdsa_recoverable_signature_serialize_compact)
 
     sig = emalloc(COMPACT_SIGNATURE_LENGTH);
     result = secp256k1_ecdsa_recoverable_signature_serialize_compact(ctx, sig, &recid, recsig);
-    if (result == 1) {
-        ZVAL_STRINGL(zSigOut, sig, COMPACT_SIGNATURE_LENGTH);
-        ZVAL_LONG(zRecId, recid);
-    } else {
-        efree(sig);
-    }
+
+    ZVAL_STRINGL(zSigOut, sig, COMPACT_SIGNATURE_LENGTH);
+    ZVAL_LONG(zRecId, recid);
 
     RETURN_LONG(result);
 }
