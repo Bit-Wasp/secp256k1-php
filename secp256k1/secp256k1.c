@@ -843,10 +843,10 @@ PHP_FUNCTION(secp256k1_ec_privkey_tweak_add)
 {
     zval *zCtx, *zSecKey;
     secp256k1_context *ctx;
+    zend_string *zTweak;
     unsigned char *newseckey, *tweak;
     int result;
-    size_t tweaklen;
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rz/s", &zCtx, &zSecKey, &tweak, &tweaklen) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rz/S", &zCtx, &zSecKey, &zTweak) == FAILURE) {
         RETURN_FALSE;
     }
 
@@ -864,14 +864,14 @@ PHP_FUNCTION(secp256k1_ec_privkey_tweak_add)
         return;
     }
 
-    if (tweaklen != SECRETKEY_LENGTH) {
+    if (zTweak->len != SECRETKEY_LENGTH) {
         zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_ec_privkey_tweak_add(): Parameter 3 should be 32 bytes");
         return;
     }
 
     newseckey = (unsigned char *) emalloc(SECRETKEY_LENGTH);
     memcpy(newseckey, Z_STRVAL_P(zSecKey), SECRETKEY_LENGTH);
-    result = secp256k1_ec_privkey_tweak_add(ctx, newseckey, tweak);
+    result = secp256k1_ec_privkey_tweak_add(ctx, newseckey, zTweak->val);
     zval_dtor(zSecKey);
     ZVAL_STRINGL(zSecKey, newseckey, SECRETKEY_LENGTH);
 
