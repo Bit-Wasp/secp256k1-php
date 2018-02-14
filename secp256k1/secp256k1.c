@@ -266,6 +266,11 @@ static secp256k1_ecdsa_signature* php_get_secp256k1_ecdsa_signature(zval *psig) 
     return (secp256k1_ecdsa_signature *)zend_fetch_resource2_ex(psig, SECP256K1_SIG_RES_NAME, le_secp256k1_sig, -1);
 }
 
+// attempt to read a sec256k1_ecdsa_recoverable_signature* from the provided resource zval
+static secp256k1_ecdsa_recoverable_signature* php_get_secp256k1_ecdsa_recoverable_signature(zval *precsig) {
+    return (secp256k1_ecdsa_recoverable_signature *)zend_fetch_resource2_ex(precsig, SECP256K1_RECOVERABLE_SIG_RES_NAME, le_secp256k1_recoverable_sig, -1);
+}
+
 PHP_MINIT_FUNCTION(secp256k1) {
     le_secp256k1_ctx = zend_register_list_destructors_ex(secp256k1_ctx_dtor, NULL, SECP256K1_CTX_RES_NAME, module_number);
     le_secp256k1_pubkey = zend_register_list_destructors_ex(secp256k1_pubkey_dtor, NULL, SECP256K1_PUBKEY_RES_NAME, module_number);
@@ -1080,7 +1085,7 @@ PHP_FUNCTION(secp256k1_ecdsa_recoverable_signature_convert)
         RETURN_FALSE;
     }
 
-    if ((rSig = (secp256k1_ecdsa_recoverable_signature *)zend_fetch_resource2_ex(zRecoverableSig, SECP256K1_RECOVERABLE_SIG_RES_NAME, le_secp256k1_recoverable_sig, -1)) == NULL) {
+    if ((rSig = php_get_secp256k1_ecdsa_recoverable_signature(zRecoverableSig)) == NULL) {
         RETURN_FALSE;
     }
 
@@ -1115,7 +1120,7 @@ PHP_FUNCTION(secp256k1_ecdsa_recoverable_signature_serialize_compact)
         RETURN_FALSE;
     }
 
-    if ((recsig = (secp256k1_ecdsa_recoverable_signature *)zend_fetch_resource2_ex(zRecSig, SECP256K1_RECOVERABLE_SIG_RES_NAME, le_secp256k1_recoverable_sig, -1)) == NULL) {
+    if ((recsig = php_get_secp256k1_ecdsa_recoverable_signature(zRecSig)) == NULL) {
         RETURN_FALSE;
     }
 
@@ -1191,7 +1196,7 @@ PHP_FUNCTION(secp256k1_ecdsa_recover)
         RETURN_FALSE;
     }
 
-    if ((sig = (secp256k1_ecdsa_recoverable_signature *)zend_fetch_resource2_ex(zSig, SECP256K1_RECOVERABLE_SIG_RES_NAME, le_secp256k1_recoverable_sig, 0)) == NULL) {
+    if ((sig = php_get_secp256k1_ecdsa_recoverable_signature(zSig)) == NULL) {
         RETURN_FALSE;
     }
 
