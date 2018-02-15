@@ -906,12 +906,8 @@ PHP_FUNCTION(secp256k1_ec_pubkey_serialize)
     size_t pubkeylen = compressed ? PUBKEY_COMPRESSED_LENGTH : PUBKEY_UNCOMPRESSED_LENGTH;
     unsigned char *pubkeyout = emalloc(pubkeylen);
     result = secp256k1_ec_pubkey_serialize(ctx, pubkeyout, &pubkeylen, pubkey, flags);
-    if (result == 1) {
-        ZVAL_STRINGL(zPubOut, pubkeyout, pubkeylen);
-    } else {
-        efree(pubkeyout);
-    }
 
+    ZVAL_STRINGL(zPubOut, pubkeyout, pubkeylen);
     RETURN_LONG(result);
 }
 /* }}} */
