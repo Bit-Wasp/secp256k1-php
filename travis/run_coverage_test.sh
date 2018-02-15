@@ -1,16 +1,17 @@
 #!/bin/bash
 
-cd ../secp256k1 ; make clean ; cd ../travis
 exitHard=false
-
 if [ "${COVERAGE}" = "true" ]; then
-    cd phpqa;
+    cd $(git rev-parse --show-toplevel)/secp256k1
+    sudo make clean
+    cd $(git rev-parse --show-toplevel)/travis
     ./container_command.sh coverage.sh
     if [ "$?" != "0" ]; then
         exitHard=true
     fi
     docker stop s1 > /dev/null;
     docker rm s1 > /dev/null;
+    echo "completed coverage command";
 fi
 
 if [ "${exitHard}" = "true" ]; then
@@ -18,5 +19,4 @@ if [ "${exitHard}" = "true" ]; then
     exit 1;
 fi
 
-echo "completed coverage command"
 exit 0;
