@@ -4,7 +4,7 @@
 
 PHP bindings for https://github.com/bitcoin-core/secp256k1
 
-Please note that the upstream library, [[libsecp256k1](https://github.com/bitcoin-core/secp256k1)] is considered 
+Please note that the upstream library, [libsecp256k1](https://github.com/bitcoin-core/secp256k1) is still considered 
 experimental by it's authors, and has not yet been formally released. For this reason, it's use should be 
 discouraged. For consensus systems this warning is critical.
 
@@ -15,7 +15,7 @@ PHP 5.* versions are supported in the v0.0.x release.
 PHP 7 is supported in the v0.1.x series. 
 
 ### About the extension
-  - Fully tests & with code coverage since v0.1.3 release.
+  - Fully unit tested, with >99 code coverage since the v0.1.3 release.
   - This extension only supports deterministic signatures at present. In fact, no RNG is utilized in this extension - private keys must be generated elsewhere. 
   - The extension exposes the same raw API of libsecp256k1. As such, you must ensure you are passing the binary representations of each value.   
   - In keeping with libsecp256k1, this extension returns certain data to the user by writing to a variable reference, and returning a code indicating the failure/success.
