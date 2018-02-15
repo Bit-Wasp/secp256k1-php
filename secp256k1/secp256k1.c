@@ -381,7 +381,6 @@ PHP_FUNCTION(secp256k1_context_destroy)
     }
 
     zend_list_close(Z_RES_P(zCtx));
-
     RETURN_TRUE;
 }
 /* }}} */
@@ -404,7 +403,6 @@ PHP_FUNCTION(secp256k1_context_clone)
 
     newCtx = secp256k1_context_clone(ctx);
     RETURN_RES(zend_register_resource(newCtx, le_secp256k1_ctx));
-
 }
 /* }}} */
 
@@ -439,7 +437,6 @@ PHP_FUNCTION(secp256k1_context_randomize)
         }
     }
 
-
     result = secp256k1_context_randomize(ctx, seed32);
     RETURN_LONG(result);
 }
@@ -466,7 +463,7 @@ PHP_FUNCTION(secp256k1_ecdsa_signature_parse_der)
     sig = (secp256k1_ecdsa_signature *) emalloc(sizeof(secp256k1_ecdsa_signature));
     result = secp256k1_ecdsa_signature_parse_der(ctx, sig, sigin->val, sigin->len);
     if (result == 1) {
-        ZVAL_NULL(zSig);
+        zval_dtor(zSig);
         ZVAL_RES(zSig, zend_register_resource(sig, le_secp256k1_sig));
     } else {
         efree(sig);
@@ -502,6 +499,7 @@ PHP_FUNCTION(secp256k1_ecdsa_signature_serialize_der)
     sigout = emalloc(sigoutlen);
     result = secp256k1_ecdsa_signature_serialize_der(ctx, sigout, &sigoutlen, sig);
     if (result == 1) {
+        zval_dtor(zSigOut);
         ZVAL_STRINGL(zSigOut, sigout, sigoutlen);
     } else {
         efree(sigout);
@@ -537,6 +535,7 @@ PHP_FUNCTION(secp256k1_ecdsa_signature_parse_compact)
     sig = emalloc(sizeof(secp256k1_ecdsa_signature));
     result = secp256k1_ecdsa_signature_parse_compact(ctx, sig, (unsigned char*) input64->val);
     if (result == 1) {
+        zval_dtor(zSig);
         ZVAL_RES(zSig, zend_register_resource(sig, le_secp256k1_sig));
     } else {
         efree(sig);
@@ -571,6 +570,7 @@ PHP_FUNCTION(secp256k1_ecdsa_signature_serialize_compact)
     sigOut = emalloc(COMPACT_SIGNATURE_LENGTH);
     result = secp256k1_ecdsa_signature_serialize_compact(ctx, sigOut, sig);
 
+    zval_dtor(zSigOut);
     ZVAL_STRINGL(zSigOut, sigOut, COMPACT_SIGNATURE_LENGTH);
     RETURN_LONG(result);
 }
@@ -627,13 +627,11 @@ PHP_FUNCTION(secp256k1_ecdsa_signature_normalize)
         RETURN_FALSE;
     }
 
-    zval_dtor(zSigOut);
-
     sigout = (secp256k1_ecdsa_signature *) emalloc(sizeof(secp256k1_ecdsa_signature));
     result = secp256k1_ecdsa_signature_normalize(ctx, sigout, sigin);
 
+    zval_dtor(zSigOut);
     ZVAL_RES(zSigOut, zend_register_resource(sigout, le_secp256k1_sig));
-
     RETURN_LONG(result);
 }
 /* }}} */
@@ -643,8 +641,7 @@ PHP_FUNCTION(secp256k1_ecdsa_signature_normalize)
 PHP_FUNCTION(secp256k1_ecdsa_verify) {
     zval *zCtx, *zSig, *zPubKey;
     secp256k1_context *ctx;
-    secp256k1_ecdsa_signature *sig;
-    secp256k1_ecdsa_signature *sigcpy;
+    secp256k1_ecdsa_signature *sig, *sigcpy;
     secp256k1_pubkey *pubkey;
     zend_string *msg32;
     int result;
@@ -707,7 +704,7 @@ PHP_FUNCTION (secp256k1_ecdsa_sign)
     newsig = (secp256k1_ecdsa_signature *) emalloc(sizeof(secp256k1_ecdsa_signature));
     result = secp256k1_ecdsa_sign(ctx, newsig, msg32->val, seckey->val, NULL, NULL);
     if (result == 1) {
-        ZVAL_NULL(zSig);
+        zval_dtor(zSig);
         ZVAL_RES(zSig, zend_register_resource(newsig, le_secp256k1_sig));
     } else {
         efree(newsig);
@@ -770,10 +767,10 @@ PHP_FUNCTION(secp256k1_ec_pubkey_create)
         return;
     }
 
-    zval_dtor(zPubKey);
     pubkey = (secp256k1_pubkey *) emalloc(sizeof(secp256k1_pubkey));
     result = secp256k1_ec_pubkey_create(ctx, pubkey, (unsigned char *)seckey->val);
     if (result == 1) {
+        zval_dtor(zPubKey);
         ZVAL_RES(zPubKey, zend_register_resource(pubkey, le_secp256k1_pubkey));
     } else {
         efree(pubkey);
@@ -813,9 +810,9 @@ PHP_FUNCTION(secp256k1_ec_privkey_negate)
     newseckey = (unsigned char *) emalloc(SECRETKEY_LENGTH);
     memcpy(newseckey, Z_STRVAL_P(zPrivKey), SECRETKEY_LENGTH);
     result = secp256k1_ec_privkey_negate(ctx, newseckey);
+
     zval_dtor(zPrivKey);
     ZVAL_STRINGL(zPrivKey, newseckey, SECRETKEY_LENGTH);
-
     RETURN_LONG(result);
 }
 /* }}} */
@@ -900,13 +897,12 @@ PHP_FUNCTION(secp256k1_ec_pubkey_serialize)
         RETURN_FALSE;
     }
 
-    ZVAL_NULL(zPubOut);
-
     flags |= compressed ? SECP256K1_EC_COMPRESSED : SECP256K1_EC_UNCOMPRESSED;
     size_t pubkeylen = compressed ? PUBKEY_COMPRESSED_LENGTH : PUBKEY_UNCOMPRESSED_LENGTH;
     unsigned char *pubkeyout = emalloc(pubkeylen);
     result = secp256k1_ec_pubkey_serialize(ctx, pubkeyout, &pubkeylen, pubkey, flags);
 
+    zval_dtor(zPubOut);
     ZVAL_STRINGL(zPubOut, pubkeyout, pubkeylen);
     RETURN_LONG(result);
 }
@@ -947,9 +943,9 @@ PHP_FUNCTION(secp256k1_ec_privkey_tweak_add)
     newseckey = (unsigned char *) emalloc(SECRETKEY_LENGTH);
     memcpy(newseckey, Z_STRVAL_P(zSecKey), SECRETKEY_LENGTH);
     result = secp256k1_ec_privkey_tweak_add(ctx, newseckey, (unsigned char*) zTweak->val);
+
     zval_dtor(zSecKey);
     ZVAL_STRINGL(zSecKey, newseckey, SECRETKEY_LENGTH);
-
     RETURN_LONG(result);
 }
 /* }}} */
@@ -1022,9 +1018,9 @@ PHP_FUNCTION(secp256k1_ec_privkey_tweak_mul)
     newseckey = (unsigned char *) emalloc(SECRETKEY_LENGTH);
     memcpy(newseckey, Z_STRVAL_P(zSecKey), SECRETKEY_LENGTH);
     result = secp256k1_ec_privkey_tweak_mul(ctx, newseckey, (unsigned char *) zTweak->val);
+
     zval_dtor(zSecKey);
     ZVAL_STRINGL(zSecKey, newseckey, SECRETKEY_LENGTH);
-
     RETURN_LONG(result);
 }
 /* }}} */
@@ -1099,7 +1095,7 @@ PHP_FUNCTION(secp256k1_ec_pubkey_combine)
     combined = (secp256k1_pubkey *) emalloc(sizeof(secp256k1_pubkey));
     result = secp256k1_ec_pubkey_combine(ctx, combined, pubkeys, array_count);
     if (result == 1) {
-        ZVAL_NULL(zPubkeyCombined);
+        zval_dtor(zPubkeyCombined);
         ZVAL_RES(zPubkeyCombined, zend_register_resource(combined, le_secp256k1_pubkey));
     } else {
         efree(combined);
@@ -1143,6 +1139,7 @@ PHP_FUNCTION(secp256k1_ecdsa_recoverable_signature_parse_compact)
     sig = emalloc(sizeof(secp256k1_ecdsa_recoverable_signature));
     result = secp256k1_ecdsa_recoverable_signature_parse_compact(ctx, sig, (unsigned char *)zSig64In->val, recid);
     if (result == 1) {
+        zval_dtor(zSig);
         ZVAL_RES(zSig, zend_register_resource(sig, le_secp256k1_recoverable_sig));
     } else {
         efree(sig);
@@ -1209,9 +1206,10 @@ PHP_FUNCTION(secp256k1_ecdsa_recoverable_signature_serialize_compact)
     sig = emalloc(COMPACT_SIGNATURE_LENGTH);
     result = secp256k1_ecdsa_recoverable_signature_serialize_compact(ctx, sig, &recid, recsig);
 
+    zval_dtor(zSigOut);
+    zval_dtor(zRecId);
     ZVAL_STRINGL(zSigOut, sig, COMPACT_SIGNATURE_LENGTH);
     ZVAL_LONG(zRecId, recid);
-
     RETURN_LONG(result);
 }
 /* }}} */
@@ -1247,6 +1245,7 @@ PHP_FUNCTION(secp256k1_ecdsa_sign_recoverable)
     newsig = emalloc(sizeof(secp256k1_ecdsa_recoverable_signature));
     result = secp256k1_ecdsa_sign_recoverable(ctx, newsig, msg32->val, seckey->val, 0, 0);
     if (result == 1) {
+        zval_dtor(zSig);
         ZVAL_RES(zSig, zend_register_resource(newsig, le_secp256k1_recoverable_sig));
     } else {
         efree(newsig);
@@ -1282,6 +1281,7 @@ PHP_FUNCTION(secp256k1_ecdsa_recover)
     pubkey = (secp256k1_pubkey *) emalloc(sizeof(secp256k1_pubkey));
     result = secp256k1_ecdsa_recover(ctx, pubkey, sig, msg32->val);
     if (result) {
+        zval_dtor(zPubKey);
         ZVAL_RES(zPubKey, zend_register_resource(pubkey, le_secp256k1_pubkey));
     } else {
         efree(pubkey);
