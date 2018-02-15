@@ -1,7 +1,5 @@
 <?php
 
-$context = secp256k1_context_create(SECP256K1_CONTEXT_VERIFY | SECP256K1_CONTEXT_SIGN);
-
 $context = secp256k1_context_create(SECP256K1_CONTEXT_SIGN | SECP256K1_CONTEXT_VERIFY);
 $msg32 = hash('sha256', 'this is a message!', true);
 
@@ -10,15 +8,22 @@ $publicKeyRaw = pack("H*", '04fae8f5e64c9997749ef65c5db9f0ec3e121dc6901096c30da0
 
 // Load up the public key from its bytes (into $publicKey):
 /** @var resource $publicKey */
-$publicKey = '';;
-secp256k1_ec_pubkey_parse($context, $publicKey, $publicKeyRaw);
+$publicKey = '';
+if (1 !== secp256k1_ec_pubkey_parse($context, $publicKey, $publicKeyRaw)) {
+    throw new \Exception("Failed to parse public key");
+}
 
 // Load up the signature from its bytes (into $signature):
 /** @var resource $signature */
 $signature = '';
-secp256k1_ecdsa_signature_parse_der($context,$signature, $signatureRaw);
+if (1 !== secp256k1_ecdsa_signature_parse_der($context,$signature, $signatureRaw)) {
+    throw new \Exception("Failed to parse DER signature");
+}
 
 // Verify:
-for($i = 0; $i < 10000; $i++) {
-  $result = secp256k1_ecdsa_verify($context, $signature, $msg32, $publicKey);
+$result = secp256k1_ecdsa_verify($context, $signature, $msg32, $publicKey);
+if ($result == 1) {
+    echo "Signature was verified\n";
+} else {
+    echo "Signature was NOT VERIFIED\n";
 }
