@@ -144,7 +144,7 @@ RUN cd /usr/src/php/scripts/dev \
 RUN cd / && git clone https://github.com/bitcoin-core/secp256k1.git \
     && cd secp256k1 && git checkout $SECP256K1_COMMIT \
     && ./autogen.sh \
-    && ./configure --enable-experimental --enable-module-ecdh --enable-module-recovery \
+    && ./configure --enable-benchmark=no --enable-tests=no --enable-experimental --enable-module-ecdh --enable-module-recovery \
     && make && make install && ldconfig
 
 ADD scripts/coverage.sh /usr/bin
