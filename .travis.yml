@@ -31,13 +31,15 @@ before_install:
 
 install:
   - |
-      git clone https://github.com/bitcoin-core/secp256k1.git libsecp256k1 \
-      && cd libsecp256k1 && git checkout $SECP256K1_COMMIT \
-      && ./autogen.sh && ./configure --enable-benchmark=no --enable-experimental --enable-module-{ecdh,recovery} && make && sudo make install \
-      && cd ..
+      git clone https://github.com/bitcoin-core/secp256k1.git libsecp256k1        \
+      && cd libsecp256k1 && git checkout $SECP256K1_COMMIT                        \
+      && ./autogen.sh                                                             \
+      && ./configure --enable-tests=no --enable-benchmark=no                      \
+             --enable-experimental --enable-module-{ecdh,recovery}                \
+      && make -j$(nproc) && sudo make install && cd ..
   - |
-      cd secp256k1 \
-      && phpize && ./configure && make && sudo make install \
+      cd secp256k1 && phpize                                                      \
+      && ./configure && make -j$(nproc) && sudo make install                      \
       && cd ..
   - composer update
 
@@ -49,10 +51,6 @@ before_script:
       fi
 
 script:
-  - |
-      cd libsecp256k1 \
-      && ./tests || exit 1 \
-      && cd ..
   - cd secp256k1/ && REPORT_EXIT_STATUS=1 make test || exit 1 && cd ..
   - php -dextension=secp256k1.so vendor/phpunit/phpunit/phpunit tests/ || exit 1
   - cd travis && ./run_coverage_test.sh || exit 1 && cd ..
