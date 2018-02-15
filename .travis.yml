@@ -10,6 +10,7 @@ php:
 
 env:
   global:
+   - SECP256K1_COMMIT=cd329dbc3eaf096ae007e807b86b6f5947621ee3
    - DOCKER_CACHE_DIR=/home/travis/docker
 
 cache:
@@ -22,7 +23,7 @@ matrix:
 
   include:
     - php: 7.0
-      env: COVERAGE_TARGET=95 COVERAGE=true SECP256K1_COMMIT=cd329dbc3eaf096ae007e807b86b6f5947621ee3 COVERAGE_PREFIX_FUNCTIONS=zif_,zm_,secp256k1_
+      env: COVERAGE_TARGET=95 COVERAGE=true COVERAGE_PREFIX_FUNCTIONS=zif_,zm_,secp256k1_
 
 before_install:
   - sudo apt-get install -qq libssl-dev
@@ -30,9 +31,9 @@ before_install:
 
 install:
   - |
-      git clone git://github.com/bitcoin/secp256k1.git libsecp256k1 \
-      && cd libsecp256k1 \
-      && ./autogen.sh && ./configure --enable-experimental --enable-module-{ecdh,recovery} && make && sudo make install \
+      git clone https://github.com/bitcoin-core/secp256k1.git libsecp256k1 \
+      && cd libsecp256k1 && git checkout $SECP256K1_COMMIT \
+      && ./autogen.sh && ./configure --enable-benchmark=no --enable-experimental --enable-module-{ecdh,recovery} && make && sudo make install \
       && cd ..
   - |
       cd secp256k1 \
