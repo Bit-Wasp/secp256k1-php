@@ -63,6 +63,30 @@ namespace {
     }
 
     /**
+     * Parses a compact signature into a secp256k1_ecdsa_signature_t resource.
+     *
+     * @param resource $secp256k1_context
+     * @param resource $secp256k1_ecdsa_signature
+     * @param string $signature64In
+     * @return int
+     */
+    function secp256k1_ecdsa_signature_parse_compact($secp256k1_context, $secp256k1_ecdsa_signature, $signature64In)
+    {
+    }
+
+    /**
+     * Serializes a secp256k1_ecdsa_signature_t resource as compact format into $signatureOut.
+     *
+     * @param resource $secp256k1_context
+     * @param string $signature64Out
+     * @param resource $secp256k1_ecdsa_signature
+     * @return int
+     */
+    function secp256k1_ecdsa_signature_serialize_compact($secp256k1_context, $signature64Out, $secp256k1_ecdsa_signature)
+    {
+    }
+
+    /**
      * Parses a DER signature into a secp256k1_ecdsa_signature_t resource.
      *
      * @param resource $secp256k1_context
@@ -170,6 +194,24 @@ namespace {
      * @return int
      */
     function secp256k1_ecdsa_recover($secp256k1_context, $secp256k1_pubkey, $secp256k1_ecdsa_recoverable_signature, $msg32)
+    {
+    }
+
+    /**
+     * @param resource $secp256k1_context
+     * @param resource $secp256k1_pubkey
+     * @return int
+     */
+    function secp256k1_ec_pubkey_negate($secp256k1_context, $secp256k1_pubkey)
+    {
+    }
+
+    /**
+     * @param resource $secp256k1_context
+     * @param string $privkey32
+     * @return int
+     */
+    function secp256k1_ec_privkey_negate($secp256k1_context, $privkey32)
     {
     }
 
