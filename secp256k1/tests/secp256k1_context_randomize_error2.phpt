@@ -9,12 +9,10 @@ if (!extension_loaded("secp256k1")) print "skip extension not loaded";
 
 set_error_handler(function($code, $str) { echo $str . PHP_EOL; });
 
-$ctx1 = secp256k1_context_randomize();
-echo gettype($ctx1) . PHP_EOL;
-echo ($ctx1 ? "true" : "false") . PHP_EOL;
+$result = secp256k1_context_randomize();
+echo $result . PHP_EOL;
 
 ?>
 --EXPECT--
 secp256k1_context_randomize() expects at least 1 parameter, 0 given
-boolean
-false
+0

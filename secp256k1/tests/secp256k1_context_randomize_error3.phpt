@@ -19,4 +19,4 @@ try {
 ?>
 --EXPECT--
 secp256k1_context
-secp256k1_context_randomize(): Parameter 2 should be a 32 byte string, or null
+secp256k1_context_randomize(): Parameter 2 should be 32 bytes
