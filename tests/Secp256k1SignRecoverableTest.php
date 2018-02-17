@@ -64,7 +64,7 @@ class Secp256k1SignRecoverableTest extends TestCase
         $t = 4 + $rl + $sl;
         $der = "\x30" . chr($t) . "\x02" . chr($rl) . $r . "\x02" . chr($sl) . $s;
 
-        $plain = '';
+        $plain = null;
         /** @var resource $plain */
 
         // Test that conversion is successful
