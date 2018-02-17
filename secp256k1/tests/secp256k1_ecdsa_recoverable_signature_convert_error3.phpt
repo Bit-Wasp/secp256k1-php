@@ -21,11 +21,8 @@ $signature = tmpfile();
 /** @var resource $convertedSig */
 $convertedSig = null;
 $result = secp256k1_ecdsa_recoverable_signature_convert($context, $convertedSig, $signature);
-echo gettype($result) . PHP_EOL;
-echo ($result ? "true" : "false") . PHP_EOL;
-
+echo $result . PHP_EOL;
 ?>
 --EXPECT--
 secp256k1_ecdsa_recoverable_signature_convert(): supplied resource is not a valid secp256k1_ecdsa_recoverable_signature resource
-boolean
-false
+0

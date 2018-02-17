@@ -27,12 +27,10 @@ $badCtx = tmpfile();
 /** @var resource $convertedSig */
 $convertedSig = null;
 $result = secp256k1_ecdsa_recoverable_signature_convert($badCtx, $convertedSig, $signature);
-echo gettype($result) . PHP_EOL;
-echo ($result ? "true" : "false") . PHP_EOL;
+echo $result . PHP_EOL;
 
 ?>
 --EXPECT--
 1
 secp256k1_ecdsa_recoverable_signature_convert(): supplied resource is not a valid secp256k1_context resource
-boolean
-false
+0
