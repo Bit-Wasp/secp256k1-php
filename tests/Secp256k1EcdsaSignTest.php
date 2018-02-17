@@ -49,7 +49,7 @@ class Secp256k1EcdsaSignTest extends TestCase
         $msg = $this->toBinary32($msg);
 
         /** @var resource $signature */
-        $signature = '';
+        $signature = null;
         $sign = secp256k1_ecdsa_sign($context, $signature, $msg, $privkey);
 
         $this->assertEquals($eSigCreate, $sign);
@@ -62,35 +62,4 @@ class Secp256k1EcdsaSignTest extends TestCase
         $this->assertEquals(1, secp256k1_ecdsa_signature_serialize_der($context, $sigSerOut, $normalized));
         $this->assertEquals($expectedSig, unpack("H*", $sigSerOut)[1]);
     }
-
-    public function getErroneousTypeVectors()
-    {
-        $private = $this->pack('17a2209250b59f07a25b560aa09cb395a183eb260797c0396b82904f918518d5');
-        $msg32 = $this->pack('0af79b2b747548d59a4a765fb73a72bc4208d00b43d0606c13d332d5c284b0ef');
-        $context = TestCase::getContext();
-
-        $array = array();
-        $class = new Secp256k1EcdsaSignTest;
-        $resource = openssl_pkey_new();
-
-        return array(
-            array($context, $array, $private),
-            array($context, $msg32, $array),
-            array($context, $resource, $private),
-            array($context, $msg32, $resource),
-            array($context, $class, $private),
-            array($context, $msg32, $class)
-        );
-    }
-
-    /**
-     * @dataProvider getErroneousTypeVectors
-     * @expectedException \PHPUnit\Framework\Error\Warning
-     */
-    public function testErroneousTypes($context, $msg32, $private)
-    {
-        $sig = '';
-        \secp256k1_ecdsa_sign($context, $sig, $msg32, $private);
-    }
-
 }
