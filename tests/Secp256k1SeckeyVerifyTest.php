@@ -36,26 +36,4 @@ class Secp256k1SeckeyVerifyTest extends TestCase
         $this->assertEquals($eVerify, \secp256k1_ec_seckey_verify($context, $sec));
     }
 
-    public function getErroneousTypeVectors()
-    {
-        $context = TestCase::getContext();
-        $array = array();
-        $class = new self;
-        $resource = openssl_pkey_new();
-
-        return array(
-            array($context, $array),
-            array($context, $resource),
-            array($context, $class)
-        );
-    }
-
-    /**
-     * @dataProvider getErroneousTypeVectors
-     * @expectedException \PHPUnit\Framework\Error\Warning
-     */
-    public function testErroneousTypes($context, $seckey)
-    {
-        \secp256k1_ec_seckey_verify($context, $seckey);
-    }
 }
