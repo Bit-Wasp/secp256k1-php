@@ -6,7 +6,7 @@ $context = secp256k1_context_create(SECP256K1_CONTEXT_SIGN | SECP256K1_CONTEXT_V
 $privateKey = pack("H*", "abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789");
 
 /** @var resource $publicKey */
-$publicKey = '';
+$publicKey = null;
 $result = secp256k1_ec_pubkey_create($context, $publicKey, $privateKey);
 if ($result === 1) {
     $compress = true;

@@ -46,7 +46,7 @@ class Secp256k1PubkeyCreateTest extends TestCase
         $secretKey = $this->toBinary32($hexPrivkey);
 
         /** @var resource $pubkey */
-        $pubkey = '';
+        $pubkey = null;
         $this->assertEquals($eResult, secp256k1_ec_pubkey_create($context, $pubkey, $secretKey));
         $this->assertEquals(SECP256K1_TYPE_PUBKEY, get_resource_type($pubkey));
 
@@ -55,28 +55,4 @@ class Secp256k1PubkeyCreateTest extends TestCase
         $this->assertEquals($expectedKey, bin2hex($serialized));
         $this->assertEquals(($fcompressed ? 33 : 65), strlen($serialized));
     }
-
-    public function getErroneousTypeVectors()
-    {
-        $context = TestCase::getContext();
-
-        $array = array();
-        $class = new self;
-        $resource = openssl_pkey_new();
-        return array(
-            array($context, $array),
-            array($context, $resource),
-            array($context, $class),
-        );
-    }
-    /**
-     * @dataProvider getErroneousTypeVectors
-     * @expectedException \PHPUnit\Framework\Error\Warning
-     */
-    public function testErroneousTypes($context, $seckey)
-    {
-        $pubkey = '';
-        \secp256k1_ec_pubkey_create($context, $pubkey, $seckey);
-    }
-
 }

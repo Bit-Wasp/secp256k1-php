@@ -13,11 +13,9 @@ $key = str_repeat("A", 32);
 $keyOut = null;
 $context = tmpfile();
 $result = secp256k1_ec_pubkey_create($context, $keyOut, $key);
-echo gettype($result) . PHP_EOL;
-echo ($result ? "true" : "false") . PHP_EOL;
+echo $result . PHP_EOL;
 
 ?>
 --EXPECT--
 secp256k1_ec_pubkey_create(): supplied resource is not a valid secp256k1_context resource
-boolean
-false
+0

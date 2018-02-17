@@ -16,11 +16,10 @@ class Secp256k1EcdhTest extends TestCase
         $priv2 = str_pad('', 32, "\x40");
         $expectedSecret = '238c14f420887f8e9bfa78bc9bdded1975f0bb6384e33b4ebbf7a8c776844aec';
 
-        $pub1 = '';
+        $pub1 = null;
         $this->assertEquals(1, \secp256k1_ec_pubkey_create($context, $pub1, $priv1));
 
         /**
-         * @var resource $pub2
          * @var resource $pub1
          */
         $result = '';
