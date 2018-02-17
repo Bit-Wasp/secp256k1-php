@@ -9,12 +9,10 @@ if (!extension_loaded("secp256k1")) print "skip extension not loaded";
 
 set_error_handler(function($code, $str) { echo $str . PHP_EOL; });
 
-$ctx1 = secp256k1_ecdsa_signature_normalize();
-echo gettype($ctx1) . PHP_EOL;
-echo ($ctx1 ? "true" : "false") . PHP_EOL;
+$result = secp256k1_ecdsa_signature_normalize();
+echo $result . PHP_EOL;
 
 ?>
 --EXPECT--
 secp256k1_ecdsa_signature_normalize() expects exactly 3 parameters, 0 given
-boolean
-false
+0

@@ -24,7 +24,7 @@ $result = secp256k1_ecdsa_signature_serialize_der($ctx, $sigOut, $inputSig);
 echo $result . PHP_EOL;
 echo bin2hex($sigOut) . PHP_EOL;
 
-$normalSig = "";
+$normalSig = null;
 $result = secp256k1_ecdsa_signature_normalize($ctx, $normalSig, $inputSig);
 echo $result . PHP_EOL;
 
