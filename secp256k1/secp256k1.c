@@ -426,7 +426,7 @@ PHP_FUNCTION(ecdsa_signature_parse_der_lax)
     ZEND_FETCH_RESOURCE(ctx, secp256k1_context*, &zCtx, -1, SECP256K1_CTX_RES_NAME, le_secp256k1_ctx);
 
     sig = emalloc(sizeof(secp256k1_ecdsa_signature));
-    result = ecdsa_signature_parse_der_lax(ctx, sig, sigin, sigin);
+    result = ecdsa_signature_parse_der_lax(ctx, sig, sigin, siglen);
     if (result) {
         ZEND_REGISTER_RESOURCE(zSig, sig, le_secp256k1_sig);
     }
