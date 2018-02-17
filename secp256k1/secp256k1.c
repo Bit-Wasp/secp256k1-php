@@ -151,10 +151,14 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_secp256k1_ec_seckey_verify, IS_LONG
     ZEND_ARG_TYPE_INFO(0, secretKey, IS_STRING, 0)
 ZEND_END_ARG_INFO();
 
-ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ec_pubkey_create, 0)
+#if (PHP_VERSION_ID >= 70000 && PHP_VERSION_ID <= 70200)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_secp256k1_ec_pubkey_create, IS_LONG, NULL, 0)
+#else
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_secp256k1_ec_pubkey_create, IS_LONG, 0)
+#endif
     ZEND_ARG_TYPE_INFO(0, context, IS_RESOURCE, 0)
-    ZEND_ARG_INFO(1, ecPublicKey)
-    ZEND_ARG_INFO(0, secretKey)
+    ZEND_ARG_TYPE_INFO(1, ecPublicKey, IS_RESOURCE, 1)
+    ZEND_ARG_TYPE_INFO(0, secretKey, IS_STRING, 0)
 ZEND_END_ARG_INFO();
 
 ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ec_privkey_negate, 0)
@@ -816,14 +820,14 @@ PHP_FUNCTION(secp256k1_ec_pubkey_create)
     secp256k1_pubkey *pubkey;
     zend_string *seckey;
     zend_resource *pubKeyResource;
-    int result;
+    int result = 0;
 
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rz/S", &zCtx, &zPubKey, &seckey) == FAILURE) {
-        RETURN_FALSE;
+        RETURN_LONG(result);
     }
 
     if ((ctx = php_get_secp256k1_context(zCtx)) == NULL) {
-        RETURN_FALSE;
+        RETURN_LONG(result);
     }
 
     if (seckey->len != SECRETKEY_LENGTH) {

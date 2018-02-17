@@ -8,7 +8,7 @@ class Secp256k1SignRecoverableTest extends TestCase
     {
         $privKey = hash('sha256', 'private key', true);
         $msg32 = hash('sha256', 'msg', true);
-        $pub_t = '';
+        $pub_t = null;
         /** @var resource $pub_t */
         $context = TestCase::getContext();
 
@@ -16,13 +16,13 @@ class Secp256k1SignRecoverableTest extends TestCase
         $this->assertEquals(1, secp256k1_ec_pubkey_create($context, $pub_t, $privKey));
 
         // Create recoverable signature
-        $r_sig_t = '';
+        $r_sig_t = null;
         /** @var resource $r_sig_t */
         $this->assertEquals(1, secp256k1_ecdsa_sign_recoverable($context, $r_sig_t, $msg32, $privKey));
         $this->assertEquals(SECP256K1_TYPE_RECOVERABLE_SIG, get_resource_type($r_sig_t));
 
         // Recover public key from the signature
-        $r_pubkey_t = '';
+        $r_pubkey_t = null;
         /** @var resource $r_pubkey_t */
         $this->assertEquals(1, secp256k1_ecdsa_recover($context, $r_pubkey_t, $r_sig_t, $msg32));
 
