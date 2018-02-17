@@ -17,11 +17,9 @@ $pub1 = tmpfile();
 
 $secret = '';
 $result = \secp256k1_ecdh($context, $secret, $pub1, $priv2);
-echo gettype($result).PHP_EOL;
-echo ($result ? "true" : "false") . PHP_EOL;
+echo $result . PHP_EOL;
 
 ?>
 --EXPECT--
 secp256k1_ecdh(): supplied resource is not a valid secp256k1_pubkey resource
-boolean
-false
+0
