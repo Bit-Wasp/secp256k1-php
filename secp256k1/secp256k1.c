@@ -5,6 +5,7 @@
 #endif
 
 #include "php.h"
+#include "php_version.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
 #include "php_secp256k1.h"
@@ -13,18 +14,29 @@
 static zend_class_entry *spl_ce_InvalidArgumentException;
 
 /* Function argument documentation */
-
+#if (PHP_VERSION_ID >= 70000 && PHP_VERSION_ID <= 70200)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_ecdsa_signature_parse_der_lax, IS_LONG, NULL, 1)
+#else
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_ecdsa_signature_parse_der_lax, IS_LONG, 1)
+#endif
     ZEND_ARG_TYPE_INFO(0, context, IS_RESOURCE, 0)
     ZEND_ARG_TYPE_INFO(1, ecdsaSignatureOut, IS_RESOURCE, 1)
     ZEND_ARG_TYPE_INFO(0, sigLaxDerIn, IS_STRING, 0)
 ZEND_END_ARG_INFO();
 
+#if (PHP_VERSION_ID >= 70000 && PHP_VERSION_ID <= 70200)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_secp256k1_context_create, IS_RESOURCE, NULL, 1)
+#else
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_secp256k1_context_create, IS_RESOURCE, 1)
+#endif
     ZEND_ARG_TYPE_INFO(0, context, IS_LONG, 0)
 ZEND_END_ARG_INFO();
 
-ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_context_clone, 0)
+#if (PHP_VERSION_ID >= 70000 && PHP_VERSION_ID <= 70200)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_secp256k1_context_clone, IS_RESOURCE, NULL, 1)
+#else
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_secp256k1_context_clone, IS_RESOURCE, 1)
+#endif
     ZEND_ARG_TYPE_INFO(0, context, IS_RESOURCE, 0)
 ZEND_END_ARG_INFO();
 
