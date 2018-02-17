@@ -534,7 +534,7 @@ PHP_FUNCTION(secp256k1_ecdsa_signature_parse_compact)
         RETURN_FALSE;
     }
 
-    if (input64->len != 64) {
+    if (input64->len != COMPACT_SIGNATURE_LENGTH) {
         zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_ecdsa_signature_parse_compact(): Parameter 3 should be 64 bytes");
         return;
     }

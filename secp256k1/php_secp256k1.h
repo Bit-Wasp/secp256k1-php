@@ -63,7 +63,6 @@ PHP_FUNCTION(secp256k1_ecdsa_recoverable_signature_convert);
 PHP_FUNCTION(secp256k1_ecdsa_recoverable_signature_serialize_compact);
 PHP_FUNCTION(secp256k1_ecdsa_recoverable_signature_parse_compact);
 
-
 /* ECDH module */
 PHP_FUNCTION(secp256k1_ecdh);
 
