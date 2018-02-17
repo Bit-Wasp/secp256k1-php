@@ -1,5 +1,5 @@
 --TEST--
-secp256k1_ec_pubkey_negate returns false if context is wrong resource type
+secp256k1_ec_pubkey_negate returns 0 if context is wrong resource type
 --SKIPIF--
 <?php
 if (!extension_loaded("secp256k1")) print "skip extension not loaded";
@@ -19,12 +19,10 @@ echo $result . PHP_EOL;
 
 $badCtx = tmpfile();
 $result = secp256k1_ec_pubkey_negate($badCtx, $pubKey);
-echo gettype($result) . PHP_EOL;
-echo ($result ? "true" : "false") . PHP_EOL;
+echo $result . PHP_EOL;
 
 ?>
 --EXPECT--
 1
 secp256k1_ec_pubkey_negate(): supplied resource is not a valid secp256k1_context resource
-boolean
-false
+0
