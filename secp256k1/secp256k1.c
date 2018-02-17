@@ -14,10 +14,11 @@
 static zend_class_entry *spl_ce_InvalidArgumentException;
 
 /* Function argument documentation */
+
 #if (PHP_VERSION_ID >= 70000 && PHP_VERSION_ID <= 70200)
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_ecdsa_signature_parse_der_lax, IS_LONG, NULL, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_ecdsa_signature_parse_der_lax, IS_LONG, NULL, 0)
 #else
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_ecdsa_signature_parse_der_lax, IS_LONG, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_ecdsa_signature_parse_der_lax, IS_LONG, 0)
 #endif
     ZEND_ARG_TYPE_INFO(0, context, IS_RESOURCE, 0)
     ZEND_ARG_TYPE_INFO(1, ecdsaSignatureOut, IS_RESOURCE, 1)
@@ -40,17 +41,29 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_secp256k1_context_clone, IS_RESOURC
     ZEND_ARG_TYPE_INFO(0, context, IS_RESOURCE, 0)
 ZEND_END_ARG_INFO();
 
-ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_context_destroy, 0)
+#if (PHP_VERSION_ID >= 70000 && PHP_VERSION_ID <= 70200)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_secp256k1_context_destroy, _IS_BOOL, NULL, 0)
+#else
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_secp256k1_context_destroy, _IS_BOOL, 0)
+#endif
     ZEND_ARG_TYPE_INFO(0, context, IS_RESOURCE, 0)
 ZEND_END_ARG_INFO();
 
-ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ec_pubkey_parse, 0)
+#if (PHP_VERSION_ID >= 70000 && PHP_VERSION_ID <= 70200)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_secp256k1_ec_pubkey_parse, IS_LONG, NULL, 0)
+#else
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_secp256k1_ec_pubkey_parse, IS_LONG, 0)
+#endif
     ZEND_ARG_TYPE_INFO(0, context, IS_RESOURCE, 0)
     ZEND_ARG_TYPE_INFO(1, ecPublicKey, IS_NULL, 0)
     ZEND_ARG_TYPE_INFO(0, publicKeyIn, IS_STRING, 0)
 ZEND_END_ARG_INFO();
 
-ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ec_pubkey_serialize, 0)
+#if (PHP_VERSION_ID >= 70000 && PHP_VERSION_ID <= 70200)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_secp256k1_ec_pubkey_serialize, IS_LONG, NULL, 0)
+#else
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_secp256k1_ec_pubkey_serialize, IS_LONG, 0)
+#endif
     ZEND_ARG_TYPE_INFO(0, context, IS_RESOURCE, 0)
     ZEND_ARG_INFO(1, publicKeyOut)
     ZEND_ARG_INFO(0, ecPublicKey)
@@ -366,7 +379,7 @@ zend_module_entry secp256k1_module_entry = {
 ZEND_GET_MODULE(secp256k1)
 #endif
 
-/* {{{ proto resource secp256k1_context_create(int flags)
+/* {{{ proto ?resource secp256k1_context_create(int flags)
  * Create a secp256k1 context object. */
 PHP_FUNCTION(secp256k1_context_create)
 {
@@ -385,7 +398,7 @@ PHP_FUNCTION(secp256k1_context_create)
 }
 /* }}} */
 
-/* {{{ proto secp256k1_context_destroy(resource context)
+/* {{{ proto bool secp256k1_context_destroy(resource context)
  * Destroy a secp256k1 context object. */
 PHP_FUNCTION(secp256k1_context_destroy)
 {
@@ -404,7 +417,7 @@ PHP_FUNCTION(secp256k1_context_destroy)
 }
 /* }}} */
 
-/* {{{ proto resource secp256k1_context_clone(resource context)
+/* {{{ proto ?resource secp256k1_context_clone(resource context)
  * Copies a secp256k1 context object. */
 PHP_FUNCTION(secp256k1_context_clone)
 {
@@ -413,11 +426,11 @@ PHP_FUNCTION(secp256k1_context_clone)
     secp256k1_context *newCtx;
 
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &zCtx) == FAILURE) {
-        RETURN_FALSE;
+        return;
     }
 
     if ((ctx = php_get_secp256k1_context(zCtx)) == NULL) {
-        RETURN_FALSE;
+        return;
     }
 
     newCtx = secp256k1_context_clone(ctx);
@@ -602,15 +615,15 @@ PHP_FUNCTION(ecdsa_signature_parse_der_lax)
     zval *zCtx, *zSig;
     secp256k1_context *ctx;
     secp256k1_ecdsa_signature *sig;
-    int result;
     zend_string *sigin;
+    int result = 0;
 
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rz/S", &zCtx, &zSig, &sigin) == FAILURE) {
-        return;
+        RETURN_LONG(result);
     }
 
     if ((ctx = php_get_secp256k1_context(zCtx)) == NULL) {
-        return;
+        RETURN_LONG(result);
     }
 
     sig = (secp256k1_ecdsa_signature *) emalloc(sizeof(secp256k1_ecdsa_signature));
@@ -871,14 +884,14 @@ PHP_FUNCTION(secp256k1_ec_pubkey_parse)
     secp256k1_context *ctx;
     secp256k1_pubkey *pubkey;
     zend_string *pubkeyin;
-    int result;
+    int result = 0;
 
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rz/S", &zCtx, &zPubKey, &pubkeyin) == FAILURE) {
-        RETURN_FALSE;
+        RETURN_LONG(result);
     }
 
     if ((ctx = php_get_secp256k1_context(zCtx)) == NULL) {
-        RETURN_FALSE;
+        RETURN_LONG(result);
     }
 
     pubkey = (secp256k1_pubkey *) emalloc(sizeof(secp256k1_pubkey));
@@ -901,19 +914,19 @@ PHP_FUNCTION(secp256k1_ec_pubkey_serialize)
     zval *zCtx, *zPubKey, *zPubOut;
     secp256k1_context *ctx;
     secp256k1_pubkey * pubkey;
-    int result;
+    int result = 0;
     long compressed;
     unsigned int flags = 0;
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rz/rl", &zCtx, &zPubOut, &zPubKey, &compressed) == FAILURE) {
-        RETURN_FALSE;
+        RETURN_LONG(result);
     }
 
     if ((ctx = php_get_secp256k1_context(zCtx)) == NULL) {
-        RETURN_FALSE;
+        RETURN_LONG(result);
     }
 
     if ((pubkey = php_get_secp256k1_pubkey(zPubKey)) == NULL) {
-        RETURN_FALSE;
+        RETURN_LONG(result);
     }
 
     flags |= compressed ? SECP256K1_EC_COMPRESSED : SECP256K1_EC_UNCOMPRESSED;

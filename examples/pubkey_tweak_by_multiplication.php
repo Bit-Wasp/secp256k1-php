@@ -7,7 +7,7 @@ $publicKeyBin = pack("H*", "03fae8f5e64c9997749ef65c5db9f0ec3e121dc6901096c30da0
 $tweak = pack("H*", "0000000000000000000000000000000000000000000000000000000000000002");
 
 /** @var resource $publicKey */
-$publicKey = '';
+$publicKey = null;
 if (1 !== secp256k1_ec_pubkey_parse($context, $publicKey, $publicKeyBin)) {
     throw new \Exception("Failed to parse public key");
 }

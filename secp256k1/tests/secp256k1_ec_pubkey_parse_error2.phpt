@@ -10,11 +10,8 @@ if (!extension_loaded("secp256k1")) print "skip extension not loaded";
 set_error_handler(function($code, $str) { echo $str . PHP_EOL; });
 
 $result = secp256k1_ec_pubkey_parse();
-echo gettype($result) . PHP_EOL;
-echo ($result ? "true" : "false") . PHP_EOL;
-
+echo $result . PHP_EOL;
 ?>
 --EXPECT--
 secp256k1_ec_pubkey_parse() expects exactly 3 parameters, 0 given
-boolean
-false
+0
