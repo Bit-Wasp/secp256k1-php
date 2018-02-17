@@ -90,10 +90,14 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_secp256k1_ecdsa_signature_parse_der
     ZEND_ARG_TYPE_INFO(0, sigDerIn, IS_STRING, 0)
 ZEND_END_ARG_INFO();
 
-ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ecdsa_signature_serialize_der, 0)
+#if (PHP_VERSION_ID >= 70000 && PHP_VERSION_ID <= 70200)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_secp256k1_ecdsa_signature_serialize_der, IS_LONG, NULL, 0)
+#else
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_secp256k1_ecdsa_signature_serialize_der, IS_LONG, 0)
+#endif
     ZEND_ARG_TYPE_INFO(0, context, IS_RESOURCE, 0)
-    ZEND_ARG_INFO(1, sigDerOut)
-    ZEND_ARG_INFO(0, ecdsaSignature)
+    ZEND_ARG_TYPE_INFO(1, sigDerOut, IS_STRING, 1)
+    ZEND_ARG_TYPE_INFO(0, ecdsaSignature, IS_RESOURCE, 0)
 ZEND_END_ARG_INFO();
 
 ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ecdsa_signature_serialize_compact, 0)
@@ -520,20 +524,20 @@ PHP_FUNCTION(secp256k1_ecdsa_signature_serialize_der)
     zval *zCtx, *zSig, *zSigOut;
     secp256k1_context *ctx;
     secp256k1_ecdsa_signature *sig;
-    int result;
-
-    size_t sigoutlen = MAX_SIGNATURE_LENGTH;
     unsigned char *sigout;
+    size_t sigoutlen = MAX_SIGNATURE_LENGTH;
+    int result = 0;
+
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rz/r", &zCtx, &zSigOut, &zSig) == FAILURE) {
-        RETURN_FALSE;
+        RETURN_LONG(result);
     }
 
     if ((ctx = php_get_secp256k1_context(zCtx)) == NULL) {
-        RETURN_FALSE;
+        RETURN_LONG(result);
     }
 
     if ((sig = php_get_secp256k1_ecdsa_signature(zSig)) == NULL) {
-        RETURN_FALSE;
+        RETURN_LONG(result);
     }
 
     sigout = emalloc(sigoutlen);
