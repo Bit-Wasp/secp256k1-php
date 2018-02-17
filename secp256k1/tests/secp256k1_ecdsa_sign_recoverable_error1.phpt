@@ -17,11 +17,9 @@ $ctx = tmpfile();
 
 $sig = null;
 $result = secp256k1_ecdsa_sign_recoverable($ctx, $sig, $msg32, $priv);
-echo gettype($result) . PHP_EOL;
-echo ($result ? "true" : "false") . PHP_EOL;
+echo $result . PHP_EOL;
 
 ?>
 --EXPECT--
 secp256k1_ecdsa_sign_recoverable(): supplied resource is not a valid secp256k1_context resource
-boolean
-false
+0
