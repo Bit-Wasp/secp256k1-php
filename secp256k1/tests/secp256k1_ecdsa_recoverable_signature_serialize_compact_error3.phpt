@@ -23,9 +23,9 @@ $ctxBad = tmpfile();
 $sigOut = '';
 $result = secp256k1_ecdsa_recoverable_signature_serialize_compact($ctxBad, $signature, $sigOut, $recid);
 echo $result . PHP_EOL;
-echo unpack("H*", $sigOut)[1] . PHP_EOL;
 
 ?>
 --EXPECT--
 1
 secp256k1_ecdsa_recoverable_signature_serialize_compact(): supplied resource is not a valid secp256k1_context resource
+0

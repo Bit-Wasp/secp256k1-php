@@ -259,11 +259,15 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_secp256k1_ecdsa_recoverable_signatu
     ZEND_ARG_TYPE_INFO(0, ecdsaRecoverableSignature, IS_RESOURCE, 0)
 ZEND_END_ARG_INFO();
 
-ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ecdsa_recoverable_signature_serialize_compact, 0)
+#if (PHP_VERSION_ID >= 70000 && PHP_VERSION_ID <= 70200)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_secp256k1_ecdsa_recoverable_signature_serialize_compact, IS_LONG, NULL, 0)
+#else
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_secp256k1_ecdsa_recoverable_signature_serialize_compact, IS_LONG, 0)
+#endif
     ZEND_ARG_TYPE_INFO(0, context, IS_RESOURCE, 0)
-    ZEND_ARG_INFO(0, ecdsaRecoverableSignature)
-    ZEND_ARG_INFO(1, sig64Out)
-    ZEND_ARG_INFO(1, recIdOut)
+    ZEND_ARG_TYPE_INFO(0, ecdsaRecoverableSignature, IS_RESOURCE, 0)
+    ZEND_ARG_TYPE_INFO(1, sig64Out, IS_STRING, 1)
+    ZEND_ARG_TYPE_INFO(1, recIdOut, IS_LONG, 1)
 ZEND_END_ARG_INFO();
 
 ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ecdsa_sign_recoverable, 0)
@@ -1305,15 +1309,15 @@ PHP_FUNCTION(secp256k1_ecdsa_recoverable_signature_serialize_compact)
     int result = 0, recid;
 
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rrz/z/", &zCtx, &zRecSig, &zSigOut, &zRecId) == FAILURE) {
-        RETURN_FALSE;
+        RETURN_LONG(result);
     }
 
     if ((ctx = php_get_secp256k1_context(zCtx)) == NULL) {
-        RETURN_FALSE;
+        RETURN_LONG(result);
     }
 
     if ((recsig = php_get_secp256k1_ecdsa_recoverable_signature(zRecSig)) == NULL) {
-        RETURN_FALSE;
+        RETURN_LONG(result);
     }
 
     sig = emalloc(COMPACT_SIGNATURE_LENGTH);

@@ -36,7 +36,7 @@ class Secp256k1SignRecoverableTest extends TestCase
         // Double check that serialize(sig) == serialize(parse(serialize(sig))
         $sSig = '';
         /** @var resource $sSig */
-        $recid = '';
+        $recid = 0;
         secp256k1_ecdsa_recoverable_signature_serialize_compact($context, $r_sig_t, $sSig, $recid);
 
         $parsedSig = null;
@@ -44,7 +44,7 @@ class Secp256k1SignRecoverableTest extends TestCase
         $this->assertEquals(1, secp256k1_ecdsa_recoverable_signature_parse_compact($context, $parsedSig, $sSig, $recid));
 
         $sSigAgain = '';
-        $recidAgain = '';
+        $recidAgain = 0;
         secp256k1_ecdsa_recoverable_signature_serialize_compact($context, $parsedSig, $sSigAgain, $recidAgain);
 
 
