@@ -8,14 +8,14 @@ $publicKeyRaw = pack("H*", '04fae8f5e64c9997749ef65c5db9f0ec3e121dc6901096c30da0
 
 // Load up the public key from its bytes (into $publicKey):
 /** @var resource $publicKey */
-$publicKey = '';
+$publicKey = null;
 if (1 !== secp256k1_ec_pubkey_parse($context, $publicKey, $publicKeyRaw)) {
     throw new \Exception("Failed to parse public key");
 }
 
 // Load up the signature from its bytes (into $signature):
 /** @var resource $signature */
-$signature = '';
+$signature = null;
 if (1 !== secp256k1_ecdsa_signature_parse_der($context,$signature, $signatureRaw)) {
     throw new \Exception("Failed to parse DER signature");
 }

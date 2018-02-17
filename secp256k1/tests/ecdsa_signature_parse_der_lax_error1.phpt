@@ -18,9 +18,9 @@ $sig = hex2bin("304402207a8e3bdc7c64f31b119a849e8bb39ddbdc0a64abd4cadcc5cfc15d3e
 /** @var resource $laxSig */
 $laxSig = null;
 $result = ecdsa_signature_parse_der_lax($ctx, $laxSig, $sig);
-echo gettype($result) . PHP_EOL;
+echo $result . PHP_EOL;
 
 ?>
 --EXPECT--
 ecdsa_signature_parse_der_lax(): supplied resource is not a valid secp256k1_context resource
-NULL
+0
