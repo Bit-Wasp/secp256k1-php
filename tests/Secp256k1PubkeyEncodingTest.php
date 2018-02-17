@@ -31,7 +31,7 @@ class Secp256k1PubkeyEncodingTest extends TestCase
      */
     public function testEncodingIsConsistent($context, $hexPrivKey, $expectedCompressed, $expectedPubKey)
     {
-        $pkOut = '';
+        $pkOut = null;
         $result = secp256k1_ec_pubkey_parse($context, $pkOut, hex2bin($expectedPubKey));
         $this->assertEquals(1, $result);
 
