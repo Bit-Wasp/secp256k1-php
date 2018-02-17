@@ -15,8 +15,8 @@ static zend_class_entry *spl_ce_InvalidArgumentException;
 /* Function argument documentation */
 
 ZEND_BEGIN_ARG_INFO(arginfo_ecdsa_signature_parse_der_lax, 0)
-    ZEND_ARG_INFO(0, context)
-    ZEND_ARG_INFO(1, ecdsaSignatureOut)
+    ZEND_ARG_TYPE_INFO(0, context, IS_RESOURCE, 0)
+    ZEND_ARG_TYPE_INFO(1, ecdsaSignatureOut, IS_RESOURCE, 1)
     ZEND_ARG_INFO(0, sigLaxDerIn)
 ZEND_END_ARG_INFO();
 
@@ -25,162 +25,162 @@ ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_context_create, 0)
 ZEND_END_ARG_INFO();
 
 ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_context_clone, 0)
-    ZEND_ARG_INFO(0, context)
+    ZEND_ARG_TYPE_INFO(0, context, IS_RESOURCE, 0)
 ZEND_END_ARG_INFO();
 
 ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_context_destroy, 0)
-    ZEND_ARG_INFO(0, context)
+    ZEND_ARG_TYPE_INFO(0, context, IS_RESOURCE, 0)
 ZEND_END_ARG_INFO();
 
 ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ec_pubkey_parse, 0)
-    ZEND_ARG_INFO(0, context)
+    ZEND_ARG_TYPE_INFO(0, context, IS_RESOURCE, 0)
     ZEND_ARG_INFO(1, ecPublicKey)
     ZEND_ARG_INFO(0, publicKeyIn)
 ZEND_END_ARG_INFO();
 
 ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ec_pubkey_serialize, 0)
-    ZEND_ARG_INFO(0, context)
+    ZEND_ARG_TYPE_INFO(0, context, IS_RESOURCE, 0)
     ZEND_ARG_INFO(1, publicKeyOut)
     ZEND_ARG_INFO(0, ecPublicKey)
     ZEND_ARG_INFO(0, fCompressed)
 ZEND_END_ARG_INFO();
 
 ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ecdsa_signature_parse_compact, 0)
-    ZEND_ARG_INFO(0, context)
+    ZEND_ARG_TYPE_INFO(0, context, IS_RESOURCE, 0)
     ZEND_ARG_INFO(1, ecdsaSignatureOut)
     ZEND_ARG_INFO(0, sig64In)
 ZEND_END_ARG_INFO();
 
 ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ecdsa_signature_parse_der, 0)
-    ZEND_ARG_INFO(0, context)
+    ZEND_ARG_TYPE_INFO(0, context, IS_RESOURCE, 0)
     ZEND_ARG_INFO(1, ecdsaSignatureOut)
     ZEND_ARG_INFO(0, sigDerIn)
 ZEND_END_ARG_INFO();
 
 ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ecdsa_signature_serialize_der, 0)
-    ZEND_ARG_INFO(0, context)
+    ZEND_ARG_TYPE_INFO(0, context, IS_RESOURCE, 0)
     ZEND_ARG_INFO(1, sigDerOut)
     ZEND_ARG_INFO(0, ecdsaSignature)
 ZEND_END_ARG_INFO();
 
 ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ecdsa_signature_serialize_compact, 0)
-    ZEND_ARG_INFO(0, context)
+    ZEND_ARG_TYPE_INFO(0, context, IS_RESOURCE, 0)
     ZEND_ARG_INFO(1, sig64Out)
     ZEND_ARG_INFO(0, ecdsaSignature)
 ZEND_END_ARG_INFO();
 
 ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ecdsa_verify, 0)
-    ZEND_ARG_INFO(0, context)
+    ZEND_ARG_TYPE_INFO(0, context, IS_RESOURCE, 0)
     ZEND_ARG_INFO(0, msg32)
     ZEND_ARG_INFO(0, ecdsaSignature)
     ZEND_ARG_INFO(0, ecPublicKey)
 ZEND_END_ARG_INFO();
 
 ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ecdsa_signature_normalize, 0)
-    ZEND_ARG_INFO(0, context)
+    ZEND_ARG_TYPE_INFO(0, context, IS_RESOURCE, 0)
     ZEND_ARG_INFO(1, ecdsaSignatureNormalized)
     ZEND_ARG_INFO(0, ecdsaSignature)
 ZEND_END_ARG_INFO();
 
 ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ecdsa_sign, 0)
-    ZEND_ARG_INFO(0, context)
+    ZEND_ARG_TYPE_INFO(0, context, IS_RESOURCE, 0)
     ZEND_ARG_INFO(1, ecdsaSignatureOut)
     ZEND_ARG_INFO(0, msg32)
     ZEND_ARG_INFO(0, secretKey)
 ZEND_END_ARG_INFO();
 
 ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ec_seckey_verify, 0)
-    ZEND_ARG_INFO(0, context)
+    ZEND_ARG_TYPE_INFO(0, context, IS_RESOURCE, 0)
     ZEND_ARG_INFO(0, secretKey)
 ZEND_END_ARG_INFO();
 
 ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ec_pubkey_create, 0)
-    ZEND_ARG_INFO(0, context)
+    ZEND_ARG_TYPE_INFO(0, context, IS_RESOURCE, 0)
     ZEND_ARG_INFO(1, ecPublicKey)
     ZEND_ARG_INFO(0, secretKey)
 ZEND_END_ARG_INFO();
 
 ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ec_privkey_negate, 0)
-    ZEND_ARG_INFO(0, context)
+    ZEND_ARG_TYPE_INFO(0, context, IS_RESOURCE, 0)
     ZEND_ARG_INFO(1, secKey)
 ZEND_END_ARG_INFO();
 
 ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ec_pubkey_negate, 0)
-    ZEND_ARG_INFO(0, context)
+    ZEND_ARG_TYPE_INFO(0, context, IS_RESOURCE, 0)
     ZEND_ARG_INFO(1, ecPublicKey)
 ZEND_END_ARG_INFO();
 
 ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ec_privkey_tweak_add, 0)
-    ZEND_ARG_INFO(0, context)
+    ZEND_ARG_TYPE_INFO(0, context, IS_RESOURCE, 0)
     ZEND_ARG_INFO(1, seckey)
     ZEND_ARG_INFO(0, tweak32)
 ZEND_END_ARG_INFO();
 
 ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ec_pubkey_tweak_add, 0)
-    ZEND_ARG_INFO(0, context)
+    ZEND_ARG_TYPE_INFO(0, context, IS_RESOURCE, 0)
     ZEND_ARG_INFO(1, ecPublicKey)
     ZEND_ARG_INFO(0, tweak32)
 ZEND_END_ARG_INFO();
 
 ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ec_privkey_tweak_mul, 0)
-    ZEND_ARG_INFO(0, context)
+    ZEND_ARG_TYPE_INFO(0, context, IS_RESOURCE, 0)
     ZEND_ARG_INFO(1, seckey)
     ZEND_ARG_INFO(0, tweak32)
 ZEND_END_ARG_INFO();
 
 ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ec_pubkey_tweak_mul, 0)
-    ZEND_ARG_INFO(0, context)
+    ZEND_ARG_TYPE_INFO(0, context, IS_RESOURCE, 0)
     ZEND_ARG_INFO(1, ecPublicKey)
     ZEND_ARG_INFO(0, tweak32)
 ZEND_END_ARG_INFO();
 
 ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_context_randomize, 0)
-    ZEND_ARG_INFO(0, context)
+    ZEND_ARG_TYPE_INFO(0, context, IS_RESOURCE, 0)
     ZEND_ARG_INFO(0, seed32)
 ZEND_END_ARG_INFO();
 
 ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ec_pubkey_combine, 0)
-    ZEND_ARG_INFO(0, context)
+    ZEND_ARG_TYPE_INFO(0, context, IS_RESOURCE, 0)
     ZEND_ARG_INFO(1, combinedEcPublicKey)
     ZEND_ARG_INFO(0, publicKeys)
 ZEND_END_ARG_INFO();
 
 ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ecdsa_recoverable_signature_parse_compact, 0)
-    ZEND_ARG_INFO(0, context)
+    ZEND_ARG_TYPE_INFO(0, context, IS_RESOURCE, 0)
     ZEND_ARG_INFO(1, ecdsaRecoverableSignatureOut)
     ZEND_ARG_INFO(0, sig64)
     ZEND_ARG_INFO(0, recId)
 ZEND_END_ARG_INFO();
 
 ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ecdsa_recoverable_signature_convert, 0)
-    ZEND_ARG_INFO(0, context)
+    ZEND_ARG_TYPE_INFO(0, context, IS_RESOURCE, 0)
     ZEND_ARG_INFO(1, ecdsaSignature)
     ZEND_ARG_INFO(0, ecdsaRecoverableSignature)
 ZEND_END_ARG_INFO();
 
 ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ecdsa_recoverable_signature_serialize_compact, 0)
-    ZEND_ARG_INFO(0, context)
+    ZEND_ARG_TYPE_INFO(0, context, IS_RESOURCE, 0)
     ZEND_ARG_INFO(0, ecdsaRecoverableSignature)
     ZEND_ARG_INFO(1, sig64Out)
     ZEND_ARG_INFO(1, recIdOut)
 ZEND_END_ARG_INFO();
 
 ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ecdsa_sign_recoverable, 0)
-    ZEND_ARG_INFO(0, context)
+    ZEND_ARG_TYPE_INFO(0, context, IS_RESOURCE, 0)
     ZEND_ARG_INFO(1, ecdsaRecoverableSignatureOut)
     ZEND_ARG_INFO(0, msg32)
     ZEND_ARG_INFO(0, secretKey)
 ZEND_END_ARG_INFO();
 
 ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ecdsa_recover, 0)
-    ZEND_ARG_INFO(0, context)
+    ZEND_ARG_TYPE_INFO(0, context, IS_RESOURCE, 0)
     ZEND_ARG_INFO(1, ecPublicKey)
     ZEND_ARG_INFO(0, ecdsaRecoverableSignature)
     ZEND_ARG_INFO(0, msg32)
 ZEND_END_ARG_INFO();
 
 ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ecdh, 0)
-    ZEND_ARG_INFO(0, context)
+    ZEND_ARG_TYPE_INFO(0, context, IS_RESOURCE, 0)
     ZEND_ARG_INFO(1, result)
     ZEND_ARG_INFO(0, ecPublicKey)
     ZEND_ARG_INFO(0, privkey)
