@@ -161,9 +161,13 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_secp256k1_ec_pubkey_create, IS_LONG
     ZEND_ARG_TYPE_INFO(0, secretKey, IS_STRING, 0)
 ZEND_END_ARG_INFO();
 
-ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ec_privkey_negate, 0)
+#if (PHP_VERSION_ID >= 70000 && PHP_VERSION_ID <= 70200)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_secp256k1_ec_privkey_negate, IS_LONG, NULL, 0)
+#else
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_secp256k1_ec_privkey_negate, IS_LONG, 0)
+#endif
     ZEND_ARG_TYPE_INFO(0, context, IS_RESOURCE, 0)
-    ZEND_ARG_INFO(1, secKey)
+    ZEND_ARG_TYPE_INFO(1, secKey, IS_STRING, 0)
 ZEND_END_ARG_INFO();
 
 ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ec_pubkey_negate, 0)
@@ -440,6 +444,7 @@ PHP_FUNCTION(secp256k1_context_destroy)
 {
     zval *zCtx;
     secp256k1_context *ctx;
+
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &zCtx) == FAILURE) {
         RETURN_FALSE;
     }
@@ -481,7 +486,8 @@ PHP_FUNCTION(secp256k1_context_randomize)
     zval *zCtx, *zSeed = NULL;
     secp256k1_context *ctx;
     unsigned char *seed32 = NULL;
-    int result;
+    int result = 0;
+
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|z", &zCtx, &zSeed) == FAILURE) {
         RETURN_FALSE;
     }
@@ -683,6 +689,7 @@ PHP_FUNCTION(secp256k1_ecdsa_signature_normalize)
     secp256k1_context *ctx;
     secp256k1_ecdsa_signature *sigout, *sigin;
     int result = 0;
+
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rz/r", &zCtx, &zSigOut, &zSigIn) == FAILURE) {
         RETURN_LONG(result);
     }
@@ -855,14 +862,14 @@ PHP_FUNCTION(secp256k1_ec_privkey_negate)
     zval *zCtx, *zPrivKey;
     secp256k1_context *ctx;
     unsigned char *newseckey;
-    int result;
+    int result = 0;
 
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rz/", &zCtx, &zPrivKey) == FAILURE) {
-        RETURN_FALSE;
+        RETURN_LONG(result);
     }
 
     if ((ctx = php_get_secp256k1_context(zCtx)) == NULL) {
-        RETURN_FALSE;
+        RETURN_LONG(result);
     }
 
     if (Z_TYPE_P(zPrivKey) != IS_STRING) {
