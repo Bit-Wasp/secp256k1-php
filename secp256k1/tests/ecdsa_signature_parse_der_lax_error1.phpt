@@ -1,11 +1,13 @@
 --TEST--
-ecdsa_signature_parse_der_lax errors if context is wrong resource type
+ecdsa_signature_parse_der_lax returns null if context is wrong resource type
 --SKIPIF--
 <?php
 if (!extension_loaded("secp256k1")) print "skip extension not loaded";
 ?>
 --FILE--
 <?php
+
+declare(strict_types=1);
 
 set_error_handler(function($code, $str) { echo $str . PHP_EOL; });
 
@@ -17,10 +19,8 @@ $sig = hex2bin("304402207a8e3bdc7c64f31b119a849e8bb39ddbdc0a64abd4cadcc5cfc15d3e
 $laxSig = null;
 $result = ecdsa_signature_parse_der_lax($ctx, $laxSig, $sig);
 echo gettype($result) . PHP_EOL;
-echo ($result ? "true" : "false") . PHP_EOL;
 
 ?>
 --EXPECT--
 ecdsa_signature_parse_der_lax(): supplied resource is not a valid secp256k1_context resource
-boolean
-false
+NULL

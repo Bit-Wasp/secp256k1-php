@@ -11,10 +11,8 @@ set_error_handler(function($code, $str) { echo $str . PHP_EOL; });
 
 $result = ecdsa_signature_parse_der_lax();
 echo gettype($result) . PHP_EOL;
-echo ($result ? "true" : "false") . PHP_EOL;
 
 ?>
 --EXPECT--
 ecdsa_signature_parse_der_lax() expects exactly 3 parameters, 0 given
-boolean
-false
+NULL

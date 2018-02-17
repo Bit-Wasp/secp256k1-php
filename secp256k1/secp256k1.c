@@ -14,14 +14,14 @@ static zend_class_entry *spl_ce_InvalidArgumentException;
 
 /* Function argument documentation */
 
-ZEND_BEGIN_ARG_INFO(arginfo_ecdsa_signature_parse_der_lax, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_ecdsa_signature_parse_der_lax, IS_LONG, 1)
     ZEND_ARG_TYPE_INFO(0, context, IS_RESOURCE, 0)
     ZEND_ARG_TYPE_INFO(1, ecdsaSignatureOut, IS_RESOURCE, 1)
     ZEND_ARG_TYPE_INFO(0, sigLaxDerIn, IS_STRING, 0)
 ZEND_END_ARG_INFO();
 
-ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_context_create, 0)
-    ZEND_ARG_INFO(0, flags)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_secp256k1_context_create, IS_RESOURCE, 1)
+    ZEND_ARG_TYPE_INFO(0, context, IS_LONG, 0)
 ZEND_END_ARG_INFO();
 
 ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_context_clone, 0)
@@ -361,11 +361,11 @@ PHP_FUNCTION(secp256k1_context_create)
     long flags;
     secp256k1_context * ctx;
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &flags) == FAILURE) {
-        RETURN_FALSE;
+        return;
     }
 
     if ((flags & ~(SECP256K1_CONTEXT_SIGN | SECP256K1_CONTEXT_VERIFY)) > 0) {
-        RETURN_FALSE;
+        return;
     }
 
     ctx = secp256k1_context_create(flags);
@@ -594,11 +594,11 @@ PHP_FUNCTION(ecdsa_signature_parse_der_lax)
     zend_string *sigin;
 
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rz/S", &zCtx, &zSig, &sigin) == FAILURE) {
-        RETURN_FALSE;
+        return;
     }
 
     if ((ctx = php_get_secp256k1_context(zCtx)) == NULL) {
-        RETURN_FALSE;
+        return;
     }
 
     sig = (secp256k1_ecdsa_signature *) emalloc(sizeof(secp256k1_ecdsa_signature));
