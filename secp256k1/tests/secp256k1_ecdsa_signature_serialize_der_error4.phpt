@@ -14,11 +14,9 @@ $sigIn = tmpfile();
 
 $sigOut = '';
 $result = secp256k1_ecdsa_signature_serialize_der($ctx, $sigOut, $sigIn);
-echo gettype($result) . PHP_EOL;
-echo ($result ? "true" : "false") . PHP_EOL;
+echo $result . PHP_EOL;
 
 ?>
 --EXPECT--
 secp256k1_ecdsa_signature_serialize_der(): supplied resource is not a valid secp256k1_ecdsa_signature resource
-boolean
-false
+0
