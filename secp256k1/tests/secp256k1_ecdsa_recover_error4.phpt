@@ -22,7 +22,7 @@ $s = null;
 $result = secp256k1_ecdsa_recoverable_signature_parse_compact($context, $s, $sigIn, $recid);
 echo $result . PHP_EOL;
 
-$recPubKey = '';
+$recPubKey = null;
 $result = secp256k1_ecdsa_recover($context, $recPubKey, $s, $msg);
 echo $result . PHP_EOL;
 

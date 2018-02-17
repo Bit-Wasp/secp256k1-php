@@ -19,13 +19,11 @@ $privateKey = pack("H*", 'fbb80e8a0f8af4fb52667e51963ac9860c192981f329debcc5d123
 
 $s = tmpfile();
 
-$recPubKey = '';
+$recPubKey = null;
 $result = secp256k1_ecdsa_recover($context, $recPubKey, $s, $msg);
-echo gettype($result) . PHP_EOL;
-echo ($result ? "true" : "false") . PHP_EOL;
+echo $result . PHP_EOL;
 
 ?>
 --EXPECT--
 secp256k1_ecdsa_recover(): supplied resource is not a valid secp256k1_ecdsa_recoverable_signature resource
-boolean
-false
+0

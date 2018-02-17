@@ -23,14 +23,12 @@ $result = secp256k1_ecdsa_recoverable_signature_parse_compact($context, $s, $sig
 echo $result . PHP_EOL;
 
 $badCtx = tmpfile();
-$recPubKey = '';
+$recPubKey = null;
 $result = secp256k1_ecdsa_recover($badCtx, $recPubKey, $s, $msg);
-echo gettype($result) . PHP_EOL;
-echo ($result ? "true" : "false") . PHP_EOL;
+echo $result . PHP_EOL;
 
 ?>
 --EXPECT--
 1
 secp256k1_ecdsa_recover(): supplied resource is not a valid secp256k1_context resource
-boolean
-false
+0
