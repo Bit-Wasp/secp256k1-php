@@ -22,4 +22,4 @@ try {
 
 ?>
 --EXPECT--
-secp256k1_ec_privkey_tweak_add(): Parameter 2 should be string
+secp256k1_ec_privkey_tweak_add(): Parameter 2 should be 32 bytes

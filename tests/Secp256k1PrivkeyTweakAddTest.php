@@ -37,40 +37,4 @@ class Secp256k1PrivkeyTweakAddTest extends TestCase
         $this->assertEquals($privkey, $expectedTweaked);
 
     }
-
-    public function getErroneousTypeVectors()
-    {
-        $context = TestCase::getContext();
-        $tweak = $this->pack('0af79b2b747548d59a4a765fb73a72bc4208d00b43d0606c13d332d5c284b0ef');
-        $privateKey = $this->pack('0af79b2b747548d59a4a765fb73a72bc4208d00b43d0606c13d332d5c284b0ef');
-
-        $array = array();
-        $class = new self;
-        $resource = openssl_pkey_new();
-
-        return array(
-            array($context, $privateKey, $array),
-            array($context, $privateKey, $resource),
-            array($context, $privateKey, $class)
-        );
-    }
-
-    /**
-     * @dataProvider getErroneousTypeVectors
-     * @expectedException \PHPUnit\Framework\Error\Warning
-     */
-    public function testErroneousTypes($context, $seckey, $tweak)
-    {
-        $r = \secp256k1_ec_privkey_tweak_add($context, $seckey, $tweak);
-    }/**/
-
-    /**
-     * @expectedException \Exception
-     */
-    public function testEnforceZvalString()
-    {
-        $tweak = $this->pack('0af79b2b747548d59a4a765fb73a72bc4208d00b43d0606c13d332d5c284b0ef');
-        $privateKey = array();
-        \secp256k1_ec_privkey_tweak_add(TestCase::getContext(), $privateKey, $tweak);
-    }
 }
