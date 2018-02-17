@@ -17,7 +17,7 @@ static zend_class_entry *spl_ce_InvalidArgumentException;
 ZEND_BEGIN_ARG_INFO(arginfo_ecdsa_signature_parse_der_lax, 0)
     ZEND_ARG_TYPE_INFO(0, context, IS_RESOURCE, 0)
     ZEND_ARG_TYPE_INFO(1, ecdsaSignatureOut, IS_RESOURCE, 1)
-    ZEND_ARG_INFO(0, sigLaxDerIn)
+    ZEND_ARG_TYPE_INFO(0, sigLaxDerIn, IS_STRING, 0)
 ZEND_END_ARG_INFO();
 
 ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_context_create, 0)
@@ -34,8 +34,8 @@ ZEND_END_ARG_INFO();
 
 ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ec_pubkey_parse, 0)
     ZEND_ARG_TYPE_INFO(0, context, IS_RESOURCE, 0)
-    ZEND_ARG_INFO(1, ecPublicKey)
-    ZEND_ARG_INFO(0, publicKeyIn)
+    ZEND_ARG_TYPE_INFO(1, ecPublicKey, IS_NULL, 0)
+    ZEND_ARG_TYPE_INFO(0, publicKeyIn, IS_STRING, 0)
 ZEND_END_ARG_INFO();
 
 ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ec_pubkey_serialize, 0)
