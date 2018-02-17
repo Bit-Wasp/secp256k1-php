@@ -13,10 +13,10 @@ $ctx = secp256k1_context_create(SECP256K1_CONTEXT_SIGN);
 $privKey = 1;
 try {
     secp256k1_ec_privkey_negate($ctx, $privKey);
-} catch (\Exception $e) {
+} catch (\TypeError $e) {
     echo $e->getMessage() . PHP_EOL;
 }
 
 ?>
 --EXPECT--
-secp256k1_ec_privkey_negate(): Parameter 2 should be string
+Argument 2 passed to secp256k1_ec_privkey_negate() must be of the type string, integer given
