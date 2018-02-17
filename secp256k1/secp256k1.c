@@ -228,7 +228,11 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_secp256k1_context_randomize, IS_LON
     ZEND_ARG_TYPE_INFO(0, seed32, IS_STRING, 1)
 ZEND_END_ARG_INFO();
 
-ZEND_BEGIN_ARG_INFO(arginfo_secp256k1_ec_pubkey_combine, 0)
+#if (PHP_VERSION_ID >= 70000 && PHP_VERSION_ID <= 70200)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_secp256k1_ec_pubkey_combine, IS_LONG, NULL, 0)
+#else
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_secp256k1_ec_pubkey_combine, IS_LONG, 0)
+#endif
     ZEND_ARG_TYPE_INFO(0, context, IS_RESOURCE, 0)
     ZEND_ARG_TYPE_INFO(1, combinedEcPublicKey, IS_RESOURCE, 1)
     ZEND_ARG_TYPE_INFO(0, publicKeys, IS_ARRAY, 0)
@@ -1174,11 +1178,11 @@ PHP_FUNCTION(secp256k1_ec_pubkey_combine)
     size_t array_count;
 
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rz/a", &zCtx, &zPubkeyCombined, &arr) == FAILURE) {
-        RETURN_FALSE;
+        RETURN_LONG(result);
     }
 
     if ((ctx = php_get_secp256k1_context(zCtx)) == NULL) {
-        RETURN_FALSE;
+        RETURN_LONG(result);
     }
 
     arr_hash = Z_ARRVAL_P(arr);
@@ -1187,7 +1191,7 @@ PHP_FUNCTION(secp256k1_ec_pubkey_combine)
 
     ZEND_HASH_FOREACH_KEY_VAL(arr_hash, i, arrayKeyStr, arrayPubKey) {
         if ((ptr = php_get_secp256k1_pubkey(arrayPubKey)) == NULL) {
-            RETURN_FALSE;
+            RETURN_LONG(result);
         }
 
         pubkeys[i++] = ptr;
