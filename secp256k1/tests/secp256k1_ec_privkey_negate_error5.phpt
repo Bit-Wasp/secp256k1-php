@@ -14,7 +14,12 @@ $privKey = 1;
 try {
     secp256k1_ec_privkey_negate($ctx, $privKey);
 } catch (\TypeError $e) {
-    echo $e->getMessage() . PHP_EOL;
+    if ("Argument 2 passed to secp256k1_ec_privkey_negate() must be of the type string, int given" === $e->getMessage()) {
+        $message = str_replace("int given", "integer given", $e->getMessage());
+    } else {
+        $message = $e->getMessage();
+    }
+    echo $message . PHP_EOL;
 }
 
 ?>
