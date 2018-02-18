@@ -1,0 +1,86 @@
+{
+  "ecdsa_signature_parse_der_lax": {
+   "doc": "Parse a signature in 'lax DER' format\n\nReturns: 1 when the signature could be parsed, 0 otherwise.\n"
+  },
+  "secp256k1_context_create": {
+    "doc": "Create a secp256k1 context object.\n"
+  },
+  "secp256k1_context_clone": {
+    "doc": "Copies a secp256k1 context object.\n"
+  },
+  "secp256k1_ec_pubkey_parse": {
+    "doc": "Parse a variable-length public key into the pubkey object.\n\nReturns 1 if the public key was fully valid, 0 if the public key could not be parsed or is invalid.\n"
+  },
+  "secp256k1_ec_pubkey_serialize": {
+    "doc": "Serialize a pubkey object into a serialized byte sequence.\n\nReturns 1 always.\n"
+  },
+  "secp256k1_ecdsa_signature_parse_compact": {
+    "doc": "Parse an ECDSA signature in compact (64 bytes) format.\n\nReturns: 1 when the signature could be parsed, 0 otherwise.\n"
+  },
+  "secp256k1_ecdsa_signature_parse_der": {
+    "doc": "Parse a DER ECDSA signature.\n\nReturns: 1 when the signature could be parsed, 0 otherwise.\n"
+  },
+  "secp256k1_ecdsa_signature_serialize_der": {
+    "doc": "Serialize an ECDSA signature in DER format.\n\nReturns: 1 if enough space was available to serialize, 0 otherwise\n"
+  },
+  "secp256k1_ecdsa_signature_serialize_compact": {
+    "doc": "Serialize an ECDSA signature in compact (64 byte) format.\n\nReturns: 1\n"
+  },
+  "secp256k1_ecdsa_verify": {
+    "doc": "Verify an ECDSA signature.\n\nReturns: 1: correct signature.\n         0: incorrect or unparseable signature\n"
+  },
+  "secp256k1_ecdsa_signature_normalize": {
+    "doc": "Convert a signature to a normalized lower-S form.\n\nReturns: 1 if sigin was not normalized, 0 if it already was.\n"
+  },
+  "secp256k1_ecdsa_sign": {
+    "doc": "Create an ECDSA signature.\n\nReturns: 1: signature created\n         0: the nonce generation function failed, or the private key was invalid.\n"
+  },
+  "secp256k1_ec_seckey_verify": {
+    "doc": "Verify an ECDSA secret key.\n\nReturns: 1: secret key is valid\n         0: secret key is invalid\n"
+  },
+  "secp256k1_ec_pubkey_create": {
+    "doc": "Compute the public key for a secret key.\n\nReturns: 1: secret was valid, public key stores\n         0: secret was invalid, try again\n"
+  },
+  "secp256k1_ec_privkey_negate": {
+    "doc": "Negates a private key in place.\n\nReturns: 1 always\n"
+  },
+  "secp256k1_ec_pubkey_negate": {
+    "doc": "Negates a public key in place.\n\nReturns: 1 always\n"
+  },
+  "secp256k1_ec_privkey_tweak_add": {
+    "doc": "Tweak a private key by adding tweak to it.\nReturns: 0 if the tweak was out of range (chance of around 1 in 2^128 for\n         uniformly random 32-byte arrays, or if the resulting private key\n         would be invalid (only when the tweak is the complement of the\n         private key). 1 otherwise."
+  },
+  "secp256k1_ec_pubkey_tweak_add": {
+    "doc": "Tweak a public key by adding tweak times the generator to it.\nReturns: 0 if the tweak was out of range (chance of around 1 in 2^128 for\n         uniformly random 32-byte arrays, or if the resulting public key\n         would be invalid (only when the tweak is the complement of the\n         corresponding private key). 1 otherwise.\n"
+  },
+  "secp256k1_ec_privkey_tweak_mul": {
+    "doc": "Tweak a private key by multiplying it by a tweak.\nReturns: 0 if the tweak was out of range (chance of around 1 in 2^128 for\n         uniformly random 32-byte arrays, or equal to zero. 1 otherwise.\n"
+  },
+  "secp256k1_ec_pubkey_tweak_mul": {
+    "doc": "Tweak a public key by multiplying it by a tweak value.\nReturns: 0 if the tweak was out of range (chance of around 1 in 2^128 for\n         uniformly random 32-byte arrays, or equal to zero. 1 otherwise.\n"
+  },
+  "secp256k1_context_randomize": {
+    "doc": "Updates the context randomization to protect against side-channel leakage.\n\nReturns: 1: randomization successfully updated\n         0: error\n"
+  },
+  "secp256k1_ec_pubkey_combine": {
+    "doc": "Add a number of public keys together.\n\nReturns: 1: the sum of the public keys is valid.\n         0: the sum of the public keys is not valid.\n"
+  },
+  "secp256k1_ecdh": {
+    "doc": "Compute an EC Diffie-Hellman secret in constant time\n\nReturns: 1: exponentiation was successful\n         0: scalar was invalid (zero or overflow)\n"
+  },
+  "secp256k1_ecdsa_recoverable_signature_parse_compact": {
+    "doc": "Parse a compact ECDSA signature (64 bytes + recovery id).\n\nReturns: 1 when the signature could be parsed, 0 otherwise\n"
+  },
+  "secp256k1_ecdsa_recoverable_signature_convert": {
+    "doc": "Convert a recoverable signature into a normal signature.\n\nReturns: 1\n"
+  },
+  "secp256k1_ecdsa_recoverable_signature_serialize_compact": {
+    "doc": "Serialize an ECDSA signature in compact format (64 bytes + recovery id).\n\nReturns: 1\n"
+  },
+  "secp256k1_ecdsa_sign_recoverable": {
+    "doc": "Create a recoverable ECDSA signature.\n\nReturns: 1: signature created\n         0: the nonce generation function failed, or the private key was invalid.\n"
+  },
+  "secp256k1_ecdsa_recover": {
+    "doc": "Recover an ECDSA public key from a signature.\n\nReturns: 1: public key successfully recovered (which guarantees a correct signature).\n         0: otherwise.\n"
+  }
+}
