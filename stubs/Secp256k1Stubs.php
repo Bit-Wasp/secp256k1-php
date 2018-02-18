@@ -161,7 +161,7 @@ namespace {
      * @param int $recid
      * @return int
      */
-    function secp256k1_ecdsa_recoverable_signature_serialize_compact($secp256k1_context, $secp256k1_ecdsa_recoverable_signature, $signatureOut, $recid)
+    function secp256k1_ecdsa_recoverable_signature_serialize_compact($secp256k1_context, $signatureOut, $recid, $secp256k1_ecdsa_recoverable_signature)
     {
     }
 

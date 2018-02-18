@@ -265,9 +265,9 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_secp256k1_ecdsa_recoverable_signatu
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_secp256k1_ecdsa_recoverable_signature_serialize_compact, IS_LONG, 0)
 #endif
     ZEND_ARG_TYPE_INFO(0, context, IS_RESOURCE, 0)
-    ZEND_ARG_TYPE_INFO(0, ecdsaRecoverableSignature, IS_RESOURCE, 0)
     ZEND_ARG_TYPE_INFO(1, sig64Out, IS_STRING, 1)
     ZEND_ARG_TYPE_INFO(1, recIdOut, IS_LONG, 1)
+    ZEND_ARG_TYPE_INFO(0, ecdsaRecoverableSignature, IS_RESOURCE, 0)
 ZEND_END_ARG_INFO();
 
 #if (PHP_VERSION_ID >= 70000 && PHP_VERSION_ID <= 70200)
@@ -1310,7 +1310,7 @@ PHP_FUNCTION(secp256k1_ecdsa_recoverable_signature_convert)
 }
 /* }}} */
 
-/* {{{ proto int secp256k1_ecdsa_recoverable_signature_serialize_compact(resource context, resource sig, string &sigOut, int &recid)
+/* {{{ proto int secp256k1_ecdsa_recoverable_signature_serialize_compact(resource context, string &sigOut, int &recid, resource sig)
  * Serialize an ECDSA signature in compact format (64 bytes + recovery id). */
 PHP_FUNCTION(secp256k1_ecdsa_recoverable_signature_serialize_compact)
 {
@@ -1320,8 +1320,8 @@ PHP_FUNCTION(secp256k1_ecdsa_recoverable_signature_serialize_compact)
     unsigned char *sig;
     int result = 0, recid;
 
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rrz/z/", &zCtx, &zRecSig, &zSigOut, &zRecId) == FAILURE) {
-        RETURN_LONG(result);
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rz/z/r", &zCtx, &zSigOut, &zRecId, &zRecSig) == FAILURE) {
+        RETURN_FALSE;
     }
 
     if ((ctx = php_get_secp256k1_context(zCtx)) == NULL) {
