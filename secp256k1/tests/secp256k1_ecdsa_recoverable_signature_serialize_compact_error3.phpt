@@ -21,7 +21,7 @@ echo $result . PHP_EOL;
 
 $ctxBad = tmpfile();
 $sigOut = '';
-$result = secp256k1_ecdsa_recoverable_signature_serialize_compact($ctxBad, $signature, $sigOut, $recid);
+$result = secp256k1_ecdsa_recoverable_signature_serialize_compact($ctxBad, $sigOut, $recid, $signature);
 echo $result . PHP_EOL;
 
 ?>

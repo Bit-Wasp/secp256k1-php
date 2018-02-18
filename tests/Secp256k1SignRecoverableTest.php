@@ -37,7 +37,7 @@ class Secp256k1SignRecoverableTest extends TestCase
         $sSig = '';
         /** @var resource $sSig */
         $recid = 0;
-        secp256k1_ecdsa_recoverable_signature_serialize_compact($context, $r_sig_t, $sSig, $recid);
+        secp256k1_ecdsa_recoverable_signature_serialize_compact($context, $sSig, $recid, $r_sig_t);
 
         $parsedSig = null;
         /** @var resource $parsedSig */
@@ -45,7 +45,7 @@ class Secp256k1SignRecoverableTest extends TestCase
 
         $sSigAgain = '';
         $recidAgain = 0;
-        secp256k1_ecdsa_recoverable_signature_serialize_compact($context, $parsedSig, $sSigAgain, $recidAgain);
+        secp256k1_ecdsa_recoverable_signature_serialize_compact($context, $sSigAgain, $recidAgain, $parsedSig);
 
 
         // Prepare expected DER sig
