@@ -4,11 +4,13 @@ namespace {
 
     define('SECP256K1_CONTEXT_SIGN', 513);
     define('SECP256K1_CONTEXT_VERIFY', 257);
+    define('SECP256K1_CONTEXT_NONE', 257);
     define('SECP256K1_TYPE_CONTEXT', "secp256k1_context");
     define('SECP256K1_TYPE_PUBKEY', "secp256k1_pubkey");
     define('SECP256K1_TYPE_SIG', "secp256k1_ecdsa_signature");
     define('SECP256K1_TYPE_RECOVERABLE_SIG', "secp256k1_ecdsa_recoverable_signature");
     define('SECP256K1_EC_COMPRESSED', 258);
+    define('SECP256K1_EC_UNCOMPRESSED', 258);
 
     /**
      * Create a Secp256k1 context resource
@@ -249,10 +251,10 @@ namespace {
      * @param resource $secp256k1_context
      * @param resource $secp256k1_pubkey
      * @param string $pubkeyOut
-     * @param bool $compressed
+     * @param int $flags
      * @return int
      */
-    function secp256k1_ec_pubkey_serialize($secp256k1_context, $pubkeyOut, $secp256k1_pubkey, $compressed)
+    function secp256k1_ec_pubkey_serialize($secp256k1_context, $pubkeyOut, $secp256k1_pubkey, $flags)
     {
     }
 

@@ -17,11 +17,13 @@ $result = \secp256k1_ec_pubkey_parse($context, $pub, $pubIn);
 $contextBad = \tmpfile();
 
 $pubKeyOut = '';
-$result = \secp256k1_ec_pubkey_serialize($contextBad, $pubKeyOut, $pub, 1);
+$result = \secp256k1_ec_pubkey_serialize($contextBad, $pubKeyOut, $pub, SECP256K1_EC_COMPRESSED);
+echo \gettype($result) . PHP_EOL;
 echo $result . PHP_EOL;
 
 ?>
 
 --EXPECT--
 secp256k1_ec_pubkey_serialize(): supplied resource is not a valid secp256k1_context resource
+integer
 0

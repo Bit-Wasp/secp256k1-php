@@ -33,11 +33,11 @@ echo $result . PHP_EOL;
 
 // Compare the two public keys
 $sPubkey = null;
-$result = secp256k1_ec_pubkey_serialize($context, $sPubkey, $expectedPublicKey, 1);
+$result = secp256k1_ec_pubkey_serialize($context, $sPubkey, $expectedPublicKey, SECP256K1_EC_COMPRESSED);
 echo $result . PHP_EOL;
 
 $srPubkey = null;
-$result = secp256k1_ec_pubkey_serialize($context, $srPubkey, $recoveredPublicKey, 1);
+$result = secp256k1_ec_pubkey_serialize($context, $srPubkey, $recoveredPublicKey, SECP256K1_EC_COMPRESSED);
 echo $result . PHP_EOL;
 
 echo unpack("H*", $sPubkey)[1] . PHP_EOL;

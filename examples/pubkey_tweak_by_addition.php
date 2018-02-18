@@ -12,7 +12,7 @@ $tweak = pack("H*", "00000000000000000000000000000000000000000000000000000000000
 $result = secp256k1_ec_pubkey_tweak_add($context, $publicKey, $tweak);
 if ($result == 1) {
     $pubKeyOut = '';
-    secp256k1_ec_pubkey_serialize($context, $pubKeyOut, $publicKey, 1);
+    secp256k1_ec_pubkey_serialize($context, $pubKeyOut, $publicKey, SECP256K1_EC_COMPRESSED);
     echo sprintf("Tweaked public key: %s\n", unpack("H*", $pubKeyOut)[1]);
 } else {
     throw new \Exception("Invalid public key or augend value");

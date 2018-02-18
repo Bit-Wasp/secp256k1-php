@@ -13,14 +13,14 @@ $result = secp256k1_ec_pubkey_create($ctx, $pubKey, $seckey);
 echo $result . PHP_EOL;
 
 $pubKeyCompressed1 = '';
-$result = secp256k1_ec_pubkey_serialize($ctx, $pubKeyOut, $pubKey, 1);
+$result = secp256k1_ec_pubkey_serialize($ctx, $pubKeyCompressed1, $pubKey, SECP256K1_EC_COMPRESSED);
 echo $result . PHP_EOL;
-echo unpack("H*", $pubKeyOut)[1] . PHP_EOL;
+echo unpack("H*", $pubKeyCompressed1)[1] . PHP_EOL;
 
 $pubKeyUncompressed1 = '';
-$result = secp256k1_ec_pubkey_serialize($ctx, $pubKeyOut, $pubKey, 0);
+$result = secp256k1_ec_pubkey_serialize($ctx, $pubKeyUncompressed1, $pubKey, SECP256K1_EC_UNCOMPRESSED);
 echo $result . PHP_EOL;
-echo unpack("H*", $pubKeyOut)[1] . PHP_EOL;
+echo unpack("H*", $pubKeyUncompressed1)[1] . PHP_EOL;
 
 ?>
 --EXPECT--

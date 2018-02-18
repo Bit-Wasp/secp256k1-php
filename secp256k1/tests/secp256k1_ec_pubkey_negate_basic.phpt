@@ -14,21 +14,21 @@ $pubKeyOut = '';
 $pubKey = null;
 $result = \secp256k1_ec_pubkey_parse($ctx, $pubKey, $pubKeyIn);
 
-$result = \secp256k1_ec_pubkey_serialize($ctx, $pubKeyOut, $pubKey, 1);
+$result = \secp256k1_ec_pubkey_serialize($ctx, $pubKeyOut, $pubKey, SECP256K1_EC_COMPRESSED);
 echo unpack("H*", $pubKeyOut)[1] . PHP_EOL;
 
 $result = \secp256k1_ec_pubkey_negate($ctx, $pubKey);
 echo $result . PHP_EOL;
 
 $pubKeySer = null;
-$result = \secp256k1_ec_pubkey_serialize($ctx, $pubKeySer, $pubKey, 1);
+$result = \secp256k1_ec_pubkey_serialize($ctx, $pubKeySer, $pubKey, SECP256K1_EC_COMPRESSED);
 echo $result . PHP_EOL;
 echo bin2hex($pubKeySer) . PHP_EOL;
 
 $result = \secp256k1_ec_pubkey_negate($ctx, $pubKey);
 echo $result . PHP_EOL;
 
-$result = \secp256k1_ec_pubkey_serialize($ctx, $pubKeyOut, $pubKey, 1);
+$result = \secp256k1_ec_pubkey_serialize($ctx, $pubKeyOut, $pubKey, SECP256K1_EC_COMPRESSED);
 echo $result . PHP_EOL;
 echo unpack("H*", $pubKeyOut)[1] . PHP_EOL;
 

@@ -36,12 +36,12 @@ class Secp256k1PubkeyEncodingTest extends TestCase
         $this->assertEquals(1, $result);
 
         $pkWrite = '';
-        $result = secp256k1_ec_pubkey_serialize($context, $pkWrite, $pkOut, true);
+        $result = secp256k1_ec_pubkey_serialize($context, $pkWrite, $pkOut, SECP256K1_EC_COMPRESSED);
         $this->assertEquals(1, $result);
         $this->assertEquals(hex2bin($expectedCompressed), $pkWrite);
 
         $pkWrite = '';
-        $result = secp256k1_ec_pubkey_serialize($context, $pkWrite, $pkOut, false);
+        $result = secp256k1_ec_pubkey_serialize($context, $pkWrite, $pkOut, SECP256K1_EC_UNCOMPRESSED);
         $this->assertEquals(1, $result);
         $this->assertEquals(hex2bin($expectedPubKey), $pkWrite);
     }

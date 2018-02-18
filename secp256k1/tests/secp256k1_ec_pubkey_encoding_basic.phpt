@@ -16,7 +16,7 @@ echo $result . PHP_EOL;
 echo get_resource_type($pubKey) . PHP_EOL;
 
 $pubKeySer = null;
-$result = \secp256k1_ec_pubkey_serialize($context, $pubKeySer, $pubKey, 1);
+$result = \secp256k1_ec_pubkey_serialize($context, $pubKeySer, $pubKey, SECP256K1_EC_COMPRESSED);
 echo $result . PHP_EOL;;
 echo bin2hex($pubKeySer) . PHP_EOL;
 ?>

@@ -29,8 +29,8 @@ class Secp256k1SignRecoverableTest extends TestCase
         // Compare the two public keys
         $sPubkey = '';
         $srPubkey = '';
-        $this->assertEquals(1, secp256k1_ec_pubkey_serialize($context, $sPubkey, $pub_t, 0));
-        $this->assertEquals(1, secp256k1_ec_pubkey_serialize($context, $srPubkey, $r_pubkey_t, 0));
+        $this->assertEquals(1, secp256k1_ec_pubkey_serialize($context, $sPubkey, $pub_t, SECP256K1_EC_UNCOMPRESSED));
+        $this->assertEquals(1, secp256k1_ec_pubkey_serialize($context, $srPubkey, $r_pubkey_t, SECP256K1_EC_UNCOMPRESSED));
         $this->assertEquals($sPubkey, $srPubkey);
 
         // Double check that serialize(sig) == serialize(parse(serialize(sig))

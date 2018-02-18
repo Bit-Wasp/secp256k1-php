@@ -10,7 +10,8 @@ if (1 !== secp256k1_ec_pubkey_parse($context, $publicKey, $publicKeyBin)) {
 }
 
 $decompressed = '';
-if (1 !== secp256k1_ec_pubkey_serialize($context, $decompressed, $publicKey, false /* whether to compress */)) {
+$serializeFlags = SECP256K1_EC_UNCOMPRESSED;
+if (1 !== secp256k1_ec_pubkey_serialize($context, $decompressed, $publicKey, $serializeFlags)) {
     throw new \RuntimeException("Failed to serialize key");
 }
 

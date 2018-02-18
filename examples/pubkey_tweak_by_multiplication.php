@@ -15,7 +15,8 @@ if (1 !== secp256k1_ec_pubkey_parse($context, $publicKey, $publicKeyBin)) {
 $result = secp256k1_ec_pubkey_tweak_mul($context, $publicKey, $tweak);
 if ($result == 1) {
     $serialized = '';
-    secp256k1_ec_pubkey_serialize($context, $serialized, $publicKey, $compressed);
+    $flags = $compressed ? SECP256K1_EC_COMPRESSED : SECP256K1_EC_UNCOMPRESSED;
+    secp256k1_ec_pubkey_serialize($context, $serialized, $publicKey, $flags);
     echo sprintf("Tweaked public key: %s\n", unpack("H*", $serialized)[1]);
 } else {
     throw new \Exception("Invalid public key or multiplicand value");

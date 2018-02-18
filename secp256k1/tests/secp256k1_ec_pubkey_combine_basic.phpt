@@ -16,7 +16,7 @@ $pubKeyOut2 = '';
 $result = secp256k1_ec_pubkey_create($ctx, $pubKey, $seckey);
 echo $result . PHP_EOL;
 
-$result = secp256k1_ec_pubkey_serialize($ctx, $pubKeyOut1, $pubKey, 1);
+$result = secp256k1_ec_pubkey_serialize($ctx, $pubKeyOut1, $pubKey, SECP256K1_EC_COMPRESSED);
 echo unpack("H*", $pubKeyOut1)[1] . PHP_EOL;
 
 $pubKeys = [$pubKey];
@@ -25,7 +25,7 @@ $combinedPubKey = null;
 $result = secp256k1_ec_pubkey_combine($ctx, $combinedPubKey, $pubKeys);
 echo $result . PHP_EOL;
 
-$result = secp256k1_ec_pubkey_serialize($ctx, $pubKeyOut2, $combinedPubKey, 1);
+$result = secp256k1_ec_pubkey_serialize($ctx, $pubKeyOut2, $combinedPubKey, SECP256K1_EC_COMPRESSED);
 echo unpack("H*", $pubKeyOut2)[1] . PHP_EOL;
 
 ?>

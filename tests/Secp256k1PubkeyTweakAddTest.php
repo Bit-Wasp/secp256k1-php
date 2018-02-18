@@ -65,8 +65,9 @@ class Secp256k1PubkeyTweakAddTest extends TestCase
         $result = secp256k1_ec_pubkey_tweak_add($context, $p, $tweak);
         $this->assertEquals($eAdd, $result);
 
-        $pSer = null;
-        secp256k1_ec_pubkey_serialize($context, $pSer, $p, $compressed);
+        $pSer = '';
+        $flags = $compressed ? SECP256K1_EC_COMPRESSED : SECP256K1_EC_UNCOMPRESSED;
+        secp256k1_ec_pubkey_serialize($context, $pSer, $p, $flags);
         $this->assertEquals(bin2hex($pSer), $expectedPublicKey);
     }
 }
