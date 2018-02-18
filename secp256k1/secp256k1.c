@@ -780,7 +780,7 @@ PHP_FUNCTION(secp256k1_ecdsa_signature_normalize)
 PHP_FUNCTION(secp256k1_ecdsa_verify) {
     zval *zCtx, *zSig, *zPubKey;
     secp256k1_context *ctx;
-    secp256k1_ecdsa_signature *sig, *sigcpy;
+    secp256k1_ecdsa_signature *sig;
     secp256k1_pubkey *pubkey;
     zend_string *msg32;
     int result = 0;
@@ -801,11 +801,7 @@ PHP_FUNCTION(secp256k1_ecdsa_verify) {
         RETURN_LONG(result);
     }
 
-    sigcpy = (secp256k1_ecdsa_signature *) emalloc(sizeof(secp256k1_ecdsa_signature));
-    secp256k1_ecdsa_signature_normalize(ctx, sigcpy, sig);
-    result = secp256k1_ecdsa_verify(ctx, sigcpy, msg32->val, pubkey);
-    efree(sigcpy);
-
+    result = secp256k1_ecdsa_verify(ctx, sig, msg32->val, pubkey);
     RETURN_LONG(result);
 }
 /* }}} */
