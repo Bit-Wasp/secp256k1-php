@@ -12,11 +12,13 @@ if (!extension_loaded("secp256k1")) print "skip extension not loaded";
 $context = \secp256k1_context_create(SECP256K1_CONTEXT_SIGN | SECP256K1_CONTEXT_VERIFY);
 $pubKeyOut = '';
 $pub = tmpfile();
-$result = \secp256k1_ec_pubkey_serialize($context, $pubKeyOut, $pub, 1);
+$result = \secp256k1_ec_pubkey_serialize($context, $pubKeyOut, $pub, SECP256K1_EC_COMPRESSED);
+echo \gettype($result) . PHP_EOL;
 echo $result . PHP_EOL;
 
 ?>
 
 --EXPECT--
 secp256k1_ec_pubkey_serialize(): supplied resource is not a valid secp256k1_pubkey resource
+integer
 0

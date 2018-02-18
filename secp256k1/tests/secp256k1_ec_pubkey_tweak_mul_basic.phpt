@@ -31,11 +31,11 @@ echo $result . PHP_EOL;
 $result = secp256k1_ec_pubkey_create($context, $cmpKey, $secKeyTwo);
 echo $result . PHP_EOL;
 
-$result = secp256k1_ec_pubkey_serialize($context, $serKey, $pubKey, 1);
+$result = secp256k1_ec_pubkey_serialize($context, $serKey, $pubKey, SECP256K1_EC_COMPRESSED);
 echo $result . PHP_EOL;
 echo unpack("H*", $serKey)[1] . PHP_EOL;
 
-$result = secp256k1_ec_pubkey_serialize($context, $serCmp, $cmpKey, 1);
+$result = secp256k1_ec_pubkey_serialize($context, $serCmp, $cmpKey, SECP256K1_EC_COMPRESSED);
 echo $result . PHP_EOL;
 echo unpack("H*", $serKey)[1] . PHP_EOL;
 // 2
@@ -46,11 +46,11 @@ echo $result . PHP_EOL;
 $result = secp256k1_ec_pubkey_create($context, $cmpKey, $secKeyFour);
 echo $result . PHP_EOL;
 
-$result = secp256k1_ec_pubkey_serialize($context, $serKey, $pubKey, 1);
+$result = secp256k1_ec_pubkey_serialize($context, $serKey, $pubKey, SECP256K1_EC_COMPRESSED);
 echo $result . PHP_EOL;
 echo unpack("H*", $serKey)[1] . PHP_EOL;
 
-$result = secp256k1_ec_pubkey_serialize($context, $serCmp, $cmpKey, 1);
+$result = secp256k1_ec_pubkey_serialize($context, $serCmp, $cmpKey, SECP256K1_EC_COMPRESSED);
 echo $result . PHP_EOL;
 echo unpack("H*", $serKey)[1] . PHP_EOL;
 // 4
@@ -61,11 +61,11 @@ echo $result . PHP_EOL;
 $result = secp256k1_ec_pubkey_create($context, $cmpKey, $secKeyEight);
 echo $result . PHP_EOL;
 
-$result = secp256k1_ec_pubkey_serialize($context, $serKey, $pubKey, 1);
+$result = secp256k1_ec_pubkey_serialize($context, $serKey, $pubKey, SECP256K1_EC_COMPRESSED);
 echo $result . PHP_EOL;
 echo unpack("H*", $serKey)[1] . PHP_EOL;
 
-$result = secp256k1_ec_pubkey_serialize($context, $serCmp, $cmpKey, 1);
+$result = secp256k1_ec_pubkey_serialize($context, $serCmp, $cmpKey, SECP256K1_EC_COMPRESSED);
 echo $result . PHP_EOL;
 echo unpack("H*", $serKey)[1] . PHP_EOL;
 // 8
@@ -76,11 +76,11 @@ echo $result . PHP_EOL;
 $result = secp256k1_ec_pubkey_create($context, $cmpKey, $secKeySixteen);
 echo $result . PHP_EOL;
 
-$result = secp256k1_ec_pubkey_serialize($context, $serKey, $pubKey, 1);
+$result = secp256k1_ec_pubkey_serialize($context, $serKey, $pubKey, SECP256K1_EC_COMPRESSED);
 echo $result . PHP_EOL;
 echo unpack("H*", $serKey)[1] . PHP_EOL;
 
-$result = secp256k1_ec_pubkey_serialize($context, $serCmp, $cmpKey, 1);
+$result = secp256k1_ec_pubkey_serialize($context, $serCmp, $cmpKey, SECP256K1_EC_COMPRESSED);
 echo $result . PHP_EOL;
 echo unpack("H*", $serKey)[1] . PHP_EOL;
 // 16

@@ -9,10 +9,10 @@ $privateKey = pack("H*", "abcdef0123456789abcdef0123456789abcdef0123456789abcdef
 $publicKey = null;
 $result = secp256k1_ec_pubkey_create($context, $publicKey, $privateKey);
 if ($result === 1) {
-    $compress = true;
+    $serializeFlags = SECP256K1_EC_COMPRESSED;
 
     $serialized = '';
-    if (1 !== secp256k1_ec_pubkey_serialize($context, $serialized, $publicKey, $compress)) {
+    if (1 !== secp256k1_ec_pubkey_serialize($context, $serialized, $publicKey, $serializeFlags)) {
         throw new \Exception('secp256k1_ec_pubkey_serialize: failed to serialize public key');
     }
 

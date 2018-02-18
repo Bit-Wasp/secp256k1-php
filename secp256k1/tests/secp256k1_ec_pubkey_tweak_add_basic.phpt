@@ -32,14 +32,14 @@ $result = secp256k1_ec_pubkey_tweak_add($context, $pubKey, $secKeyOne);
 echo $result . PHP_EOL;
 // 4
 
-$result = secp256k1_ec_pubkey_serialize($context, $serKey, $pubKey, 1);
+$result = secp256k1_ec_pubkey_serialize($context, $serKey, $pubKey, SECP256K1_EC_COMPRESSED);
 echo $result . PHP_EOL;
 echo unpack("H*", $serKey)[1] . PHP_EOL;
 
 $result = secp256k1_ec_pubkey_create($context, $cmpKey, $secKeyFour);
 echo $result . PHP_EOL;
 
-$result = secp256k1_ec_pubkey_serialize($context, $serCmp, $cmpKey, 1);
+$result = secp256k1_ec_pubkey_serialize($context, $serCmp, $cmpKey, SECP256K1_EC_COMPRESSED);
 echo $result . PHP_EOL;
 echo unpack("H*", $serCmp)[1] . PHP_EOL;
 ?>
