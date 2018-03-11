@@ -19,8 +19,6 @@ ENV PHPIZE_DEPS \
 		make \
 		pkg-config \
 		re2c
-ENV COVERAGE_TARGET=
-ENV COVERAGE_PREFIX_FUNCTIONS=
 ENV SECP256K1_COMMIT=cd329dbc3eaf096ae007e807b86b6f5947621ee3
 ENV PHP_INI_DIR /usr/local/etc/php
 ENV PHP_CFLAGS="-fstack-protector-strong -fpic -fpie -O2"
@@ -148,7 +146,6 @@ RUN cd / && git clone https://github.com/bitcoin-core/secp256k1.git \
     && make && make install && ldconfig
 
 ADD scripts/coverage.sh /usr/bin
-ADD scripts/parse_coverage.php /usr/src/php
 
 RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
