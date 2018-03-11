@@ -32,5 +32,4 @@ rm configure && ./buildconf --force
 && php -m \
 && ls -lsh ext/secp256k1 \
 && make lcov TESTS=ext/secp256k1/tests \
-&& gcov lcov_data/ext/secp256k1/secp256k1.c -f > coverage.output \
-&& php parse_coverage.php coverage.output
+&& gcov lcov_data/ext/secp256k1/secp256k1.c -f > coverage.output

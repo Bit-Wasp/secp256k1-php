@@ -23,7 +23,7 @@ matrix:
 
   include:
     - php: 7.0
-      env: COVERAGE_TARGET=95 COVERAGE=true COVERAGE_PREFIX_FUNCTIONS=zif_,zm_,secp256k1_
+      env: COVERAGE=true
 
 before_install:
   - sudo apt-get install -qq libssl-dev
