@@ -1,0 +1,2 @@
+ignore:
+ - secp256k1/lax_der.h
