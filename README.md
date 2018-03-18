@@ -1,6 +1,7 @@
 # secp256k1-php
 
 [![Build Status](https://travis-ci.org/Bit-Wasp/secp256k1-php.svg?branch=master)](https://travis-ci.org/Bit-Wasp/secp256k1-php)
+[![codecov](https://codecov.io/gh/Bit-Wasp/secp256k1-php/branch/master/graph/badge.svg)](https://codecov.io/gh/Bit-Wasp/secp256k1-php)
 
 PHP bindings for https://github.com/bitcoin-core/secp256k1
 
