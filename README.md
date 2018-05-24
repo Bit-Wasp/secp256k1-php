@@ -37,11 +37,11 @@ libsecp256k1:
 secp256k1-php:
 ```
     git clone git@github.com:Bit-Wasp/secp256k1-php && \
-    cd secp256k1-php &&                                \
+    cd secp256k1-php/secp256k1 &&                      \
     phpize &&                                          \ 
     ./configure --with-secp256k1 &&                    \  
     make && sudo make install &&                       \
-    cd ../
+    cd ../../
 ```
 
 ### Examples
