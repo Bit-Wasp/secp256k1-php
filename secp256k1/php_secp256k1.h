@@ -9,7 +9,7 @@
 extern zend_module_entry secp256k1_module_entry;
 #define phpext_secp256k1_ptr &secp256k1_module_entry
 
-#define PHP_SECP256K1_VERSION "0.1.0"
+#define PHP_SECP256K1_VERSION "0.1.4"
 #define SECP256K1_CTX_RES_NAME "secp256k1_context"
 #define SECP256K1_PUBKEY_RES_NAME "secp256k1_pubkey"
 #define SECP256K1_SIG_RES_NAME "secp256k1_ecdsa_signature"
