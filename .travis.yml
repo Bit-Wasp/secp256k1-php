@@ -19,10 +19,10 @@ cache:
 
 matrix:
   exclude:
-    - php: 7.0
+    - php: 7.2
 
   include:
-    - php: 7.0
+    - php: 7.2
       env: COVERAGE=true
 
 before_install:
@@ -51,10 +51,10 @@ before_script:
       fi
 
 script:
+  - travis/verify_stubs.sh
   - cd secp256k1/ && REPORT_EXIT_STATUS=1 make test || (find tests/*.log -type f -exec cat {} + ; exit 1) && cd ..
   - php -dextension=secp256k1.so vendor/phpunit/phpunit/phpunit tests/ || exit 1
   - travis/run_coverage_test.sh || exit 1
   - travis/validate_examples.sh || exit 1
-
 after_script:
     - bash <(curl -s https://codecov.io/bash)
