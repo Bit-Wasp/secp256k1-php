@@ -12,8 +12,5 @@
             "email": "afk11@users.noreply.github.com"
         }
     ],
-    "license": "Unlicense",
-    "require": {
-        "phpdocumentor/phpdocumentor": "^2.9"
-    }
+    "license": "Unlicense"
 }
