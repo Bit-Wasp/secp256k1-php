@@ -11,10 +11,10 @@ set_error_handler(function($code, $str) { echo $str . PHP_EOL; });
 
 $result = secp256k1_ecdsa_recoverable_signature_parse_compact();
 echo gettype($result) . PHP_EOL;
-echo ($result ? "true" : "false") . PHP_EOL;
+echo $result . PHP_EOL;
 
 ?>
 --EXPECT--
 secp256k1_ecdsa_recoverable_signature_parse_compact() expects exactly 4 parameters, 0 given
-boolean
-false
+integer
+0

@@ -531,11 +531,11 @@ PHP_FUNCTION(secp256k1_context_clone)
     secp256k1_context *newCtx;
 
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &zCtx) == FAILURE) {
-        return;
+        RETURN_NULL();
     }
 
     if ((ctx = php_get_secp256k1_context(zCtx)) == NULL) {
-        return;
+        RETURN_NULL();
     }
 
     newCtx = secp256k1_context_clone(ctx);
@@ -1022,7 +1022,7 @@ PHP_FUNCTION(secp256k1_ec_pubkey_serialize)
     zend_long flags;
 
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rz/rl", &zCtx, &zPubOut, &zPubKey, &flags) == FAILURE) {
-        RETURN_FALSE;
+        RETURN_LONG(result);
     }
 
     if ((ctx = php_get_secp256k1_context(zCtx)) == NULL) {
@@ -1256,11 +1256,11 @@ PHP_FUNCTION(secp256k1_ecdsa_recoverable_signature_parse_compact)
     int result = 0;
 
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rz/Sl", &zCtx, &zSig, &zSig64In, &recid) == FAILURE) {
-        RETURN_FALSE;
+        RETURN_LONG(result);
     }
 
     if ((ctx = php_get_secp256k1_context(zCtx)) == NULL) {
-        RETURN_FALSE;
+        RETURN_LONG(result);
     }
 
     if (zSig64In->len != 64) {
@@ -1329,7 +1329,7 @@ PHP_FUNCTION(secp256k1_ecdsa_recoverable_signature_serialize_compact)
     int result = 0, recid;
 
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rz/z/r", &zCtx, &zSigOut, &zRecId, &zRecSig) == FAILURE) {
-        RETURN_FALSE;
+        RETURN_LONG(result);
     }
 
     if ((ctx = php_get_secp256k1_context(zCtx)) == NULL) {
