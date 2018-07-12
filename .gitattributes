@@ -4,7 +4,6 @@
 /.travis.yml export-ignore
 /examples export-ignore
 /docs export-ignore
-/phpunit.xml export-ignore
 /readme.md export-ignore
 /composer.json
 /stubs
