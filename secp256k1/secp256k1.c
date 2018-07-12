@@ -932,11 +932,6 @@ PHP_FUNCTION(secp256k1_ec_privkey_negate)
         RETURN_LONG(result);
     }
 
-    if (Z_TYPE_P(zPrivKey) != IS_STRING) {
-        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_ec_privkey_negate(): Parameter 2 should be string");
-        return;
-    }
-
     if (Z_STRLEN_P(zPrivKey) != SECRETKEY_LENGTH) {
         zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_ec_privkey_negate(): Parameter 2 should be 32 bytes");
         return;
@@ -1062,11 +1057,6 @@ PHP_FUNCTION(secp256k1_ec_privkey_tweak_add)
         RETURN_LONG(result);
     }
 
-    if (Z_TYPE_P(zSecKey) != IS_STRING) {
-        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_ec_privkey_tweak_add(): Parameter 2 should be string");
-        return;
-    }
-
     if (Z_STRLEN_P(zSecKey) != SECRETKEY_LENGTH) {
         zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_ec_privkey_tweak_add(): Parameter 2 should be 32 bytes");
         return;
@@ -1135,11 +1125,6 @@ PHP_FUNCTION(secp256k1_ec_privkey_tweak_mul)
 
     if ((ctx = php_get_secp256k1_context(zCtx)) == NULL) {
         RETURN_LONG(result);
-    }
-
-    if (Z_TYPE_P(zSecKey) != IS_STRING) {
-        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_ec_privkey_tweak_mul(): Parameter 2 should be string");
-        return;
     }
 
     if (Z_STRLEN_P(zSecKey) != SECRETKEY_LENGTH) {
