@@ -15,10 +15,10 @@ $sig = hex2bin("7a8e3bdc7c64f31b119a849e8bb39ddbdc0a64abd4cadcc5cfc15d3ec06354ed
 $secp256k1Sig = null;
 $result = secp256k1_ecdsa_recoverable_signature_parse_compact($ctx, $secp256k1Sig, $sig, 0);
 echo gettype($result) . PHP_EOL;
-echo ($result ? "true" : "false") . PHP_EOL;
+echo $result . PHP_EOL;
 
 ?>
 --EXPECT--
 secp256k1_ecdsa_recoverable_signature_parse_compact(): supplied resource is not a valid secp256k1_context resource
-boolean
-false
+integer
+0
