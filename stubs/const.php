@@ -1,0 +1,18 @@
+<?php
+/**
+ * auto generated file by PHPExtensionStubGenerator
+ */
+const SECP256K1_TYPE_CONTEXT = "secp256k1_context";
+const SECP256K1_TYPE_PUBKEY = "secp256k1_pubkey";
+const SECP256K1_TYPE_SIG = "secp256k1_ecdsa_signature";
+const SECP256K1_TYPE_RECOVERABLE_SIG = "secp256k1_ecdsa_recoverable_signature";
+const SECP256K1_CONTEXT_VERIFY = 257;
+const SECP256K1_CONTEXT_SIGN = 513;
+const SECP256K1_CONTEXT_NONE = 1;
+const SECP256K1_EC_COMPRESSED = 258;
+const SECP256K1_EC_UNCOMPRESSED = 2;
+const SECP256K1_TAG_PUBKEY_EVEN = 2;
+const SECP256K1_TAG_PUBKEY_ODD = 3;
+const SECP256K1_TAG_PUBKEY_UNCOMPRESSED = 4;
+const SECP256K1_TAG_PUBKEY_HYBRID_EVEN = 6;
+const SECP256K1_TAG_PUBKEY_HYBRID_ODD = 7;
