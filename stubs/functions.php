@@ -29,6 +29,11 @@ function secp256k1_context_create(int $context): ?resource {}
  */
 function secp256k1_context_clone(resource $context): ?resource {}
 /**
+ * Destroy a secp256k1 context object.
+ * 
+ * The resource may not be used afterwards.
+ * Args:   ctx: an existing context to destroy (cannot be NULL).
+ * 
  * @param resource $context
  * @return bool
  */
@@ -104,7 +109,7 @@ function secp256k1_ecdsa_signature_serialize_compact(resource $context, ?string 
  * Verify an ECDSA signature.
  * 
  * Returns: 1: correct signature.
- *          0: incorrect or unparseable signature
+ *          0: incorrect or unparseable signature.
  * 
  * @param resource $context
  * @param resource $ecdsaSignature
@@ -141,7 +146,7 @@ function secp256k1_ecdsa_sign(resource $context, ?resource &$ecdsaSignatureOut, 
  * Verify an ECDSA secret key.
  * 
  * Returns: 1: secret key is valid
- *          0: secret key is invalid
+ *          0: secret key is invalid.
  * 
  * @param resource $context
  * @param string $secretKey
@@ -152,7 +157,7 @@ function secp256k1_ec_seckey_verify(resource $context, string $secretKey): int {
  * Compute the public key for a secret key.
  * 
  * Returns: 1: secret was valid, public key stores
- *          0: secret was invalid, try again
+ *          0: secret was invalid, try again.
  * 
  * @param resource $context
  * @param resource|null $ecPublicKey
@@ -163,7 +168,7 @@ function secp256k1_ec_pubkey_create(resource $context, ?resource &$ecPublicKey, 
 /**
  * Negates a private key in place.
  * 
- * Returns: 1 always
+ * Returns: 1 always.
  * 
  * @param resource $context
  * @param string $secKey
@@ -173,7 +178,7 @@ function secp256k1_ec_privkey_negate(resource $context, string &$secKey): int {}
 /**
  * Negates a public key in place.
  * 
- * Returns: 1 always
+ * Returns: 1 always.
  * 
  * @param resource $context
  * @param resource $ecPublicKey
@@ -230,8 +235,8 @@ function secp256k1_ec_pubkey_tweak_mul(resource $context, resource &$ecPublicKey
 /**
  * Updates the context randomization to protect against side-channel leakage.
  * 
- * Returns: 1: randomization successfully updated
- *          0: error
+ * Returns: 1: randomization successfully updated.
+ *          0: error.
  * 
  * @param resource $context
  * @param string|null $seed32

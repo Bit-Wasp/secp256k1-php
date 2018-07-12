@@ -8,6 +8,9 @@
   "secp256k1_context_clone": {
     "doc": "Copies a secp256k1 context object.\n"
   },
+  "secp256k1_context_destroy": {
+    "doc": "Destroy a secp256k1 context object.\n\nThe resource may not be used afterwards.\nArgs:   ctx: an existing context to destroy (cannot be NULL).\n"
+  },
   "secp256k1_ec_pubkey_parse": {
     "doc": "Parse a variable-length public key into the pubkey object.\n\nReturns 1 if the public key was fully valid, 0 if the public key could not be parsed or is invalid.\n"
   },
@@ -27,7 +30,7 @@
     "doc": "Serialize an ECDSA signature in compact (64 byte) format.\n\nReturns: 1\n"
   },
   "secp256k1_ecdsa_verify": {
-    "doc": "Verify an ECDSA signature.\n\nReturns: 1: correct signature.\n         0: incorrect or unparseable signature\n"
+    "doc": "Verify an ECDSA signature.\n\nReturns: 1: correct signature.\n         0: incorrect or unparseable signature.\n"
   },
   "secp256k1_ecdsa_signature_normalize": {
     "doc": "Convert a signature to a normalized lower-S form.\n\nReturns: 1 if sigin was not normalized, 0 if it already was.\n"
@@ -36,16 +39,16 @@
     "doc": "Create an ECDSA signature.\n\nReturns: 1: signature created\n         0: the nonce generation function failed, or the private key was invalid.\n"
   },
   "secp256k1_ec_seckey_verify": {
-    "doc": "Verify an ECDSA secret key.\n\nReturns: 1: secret key is valid\n         0: secret key is invalid\n"
+    "doc": "Verify an ECDSA secret key.\n\nReturns: 1: secret key is valid\n         0: secret key is invalid.\n"
   },
   "secp256k1_ec_pubkey_create": {
-    "doc": "Compute the public key for a secret key.\n\nReturns: 1: secret was valid, public key stores\n         0: secret was invalid, try again\n"
+    "doc": "Compute the public key for a secret key.\n\nReturns: 1: secret was valid, public key stores\n         0: secret was invalid, try again.\n"
   },
   "secp256k1_ec_privkey_negate": {
-    "doc": "Negates a private key in place.\n\nReturns: 1 always\n"
+    "doc": "Negates a private key in place.\n\nReturns: 1 always.\n"
   },
   "secp256k1_ec_pubkey_negate": {
-    "doc": "Negates a public key in place.\n\nReturns: 1 always\n"
+    "doc": "Negates a public key in place.\n\nReturns: 1 always.\n"
   },
   "secp256k1_ec_privkey_tweak_add": {
     "doc": "Tweak a private key by adding tweak to it.\nReturns: 0 if the tweak was out of range (chance of around 1 in 2^128 for\n         uniformly random 32-byte arrays, or if the resulting private key\n         would be invalid (only when the tweak is the complement of the\n         private key). 1 otherwise."
@@ -60,7 +63,7 @@
     "doc": "Tweak a public key by multiplying it by a tweak value.\nReturns: 0 if the tweak was out of range (chance of around 1 in 2^128 for\n         uniformly random 32-byte arrays, or equal to zero. 1 otherwise.\n"
   },
   "secp256k1_context_randomize": {
-    "doc": "Updates the context randomization to protect against side-channel leakage.\n\nReturns: 1: randomization successfully updated\n         0: error\n"
+    "doc": "Updates the context randomization to protect against side-channel leakage.\n\nReturns: 1: randomization successfully updated.\n         0: error.\n"
   },
   "secp256k1_ec_pubkey_combine": {
     "doc": "Add a number of public keys together.\n\nReturns: 1: the sum of the public keys is valid.\n         0: the sum of the public keys is not valid.\n"
