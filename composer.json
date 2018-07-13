@@ -12,5 +12,8 @@
             "email": "afk11@users.noreply.github.com"
         }
     ],
+    "require": {
+        "php": ">=php7.0"
+    },
     "license": "Unlicense"
 }
