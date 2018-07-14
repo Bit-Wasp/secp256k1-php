@@ -13,7 +13,7 @@
  * @param string $sigLaxDerIn
  * @return int
  */
-function ecdsa_signature_parse_der_lax(resource $context, ?resource &$ecdsaSignatureOut, string $sigLaxDerIn): int {}
+function ecdsa_signature_parse_der_lax($context, &$ecdsaSignatureOut, string $sigLaxDerIn): int {}
 /**
  * Create a secp256k1 context object.
  * 
@@ -27,7 +27,7 @@ function secp256k1_context_create(int $context): ?resource {}
  * @param resource $context
  * @return resource|null
  */
-function secp256k1_context_clone(resource $context): ?resource {}
+function secp256k1_context_clone($context): ?resource {}
 /**
  * Destroy a secp256k1 context object.
  * 
@@ -37,7 +37,7 @@ function secp256k1_context_clone(resource $context): ?resource {}
  * @param resource $context
  * @return bool
  */
-function secp256k1_context_destroy(resource $context): bool {}
+function secp256k1_context_destroy($context): bool {}
 /**
  * Parse a variable-length public key into the pubkey object.
  * 
@@ -48,7 +48,7 @@ function secp256k1_context_destroy(resource $context): bool {}
  * @param string $publicKeyIn
  * @return int
  */
-function secp256k1_ec_pubkey_parse(resource $context, ?resource &$ecPublicKey, string $publicKeyIn): int {}
+function secp256k1_ec_pubkey_parse($context, &$ecPublicKey, string $publicKeyIn): int {}
 /**
  * Serialize a pubkey object into a serialized byte sequence.
  * 
@@ -60,7 +60,7 @@ function secp256k1_ec_pubkey_parse(resource $context, ?resource &$ecPublicKey, s
  * @param int $flags
  * @return int
  */
-function secp256k1_ec_pubkey_serialize(resource $context, ?string &$publicKeyOut, resource $ecPublicKey, int $flags): int {}
+function secp256k1_ec_pubkey_serialize($context, ?string &$publicKeyOut, $ecPublicKey, int $flags): int {}
 /**
  * Parse an ECDSA signature in compact (64 bytes) format.
  * 
@@ -71,7 +71,7 @@ function secp256k1_ec_pubkey_serialize(resource $context, ?string &$publicKeyOut
  * @param string $sig64In
  * @return int
  */
-function secp256k1_ecdsa_signature_parse_compact(resource $context, ?resource &$ecdsaSignatureOut, string $sig64In): int {}
+function secp256k1_ecdsa_signature_parse_compact($context, &$ecdsaSignatureOut, string $sig64In): int {}
 /**
  * Parse a DER ECDSA signature.
  * 
@@ -82,7 +82,7 @@ function secp256k1_ecdsa_signature_parse_compact(resource $context, ?resource &$
  * @param string $sigDerIn
  * @return int
  */
-function secp256k1_ecdsa_signature_parse_der(resource $context, ?resource &$ecdsaSignatureOut, string $sigDerIn): int {}
+function secp256k1_ecdsa_signature_parse_der($context, &$ecdsaSignatureOut, string $sigDerIn): int {}
 /**
  * Serialize an ECDSA signature in DER format.
  * 
@@ -93,7 +93,7 @@ function secp256k1_ecdsa_signature_parse_der(resource $context, ?resource &$ecds
  * @param resource $ecdsaSignature
  * @return int
  */
-function secp256k1_ecdsa_signature_serialize_der(resource $context, ?string &$sigDerOut, resource $ecdsaSignature): int {}
+function secp256k1_ecdsa_signature_serialize_der($context, ?string &$sigDerOut, $ecdsaSignature): int {}
 /**
  * Serialize an ECDSA signature in compact (64 byte) format.
  * 
@@ -104,7 +104,7 @@ function secp256k1_ecdsa_signature_serialize_der(resource $context, ?string &$si
  * @param resource $ecdsaSignature
  * @return int
  */
-function secp256k1_ecdsa_signature_serialize_compact(resource $context, ?string &$sig64Out, resource $ecdsaSignature): int {}
+function secp256k1_ecdsa_signature_serialize_compact($context, ?string &$sig64Out, $ecdsaSignature): int {}
 /**
  * Verify an ECDSA signature.
  * 
@@ -117,7 +117,7 @@ function secp256k1_ecdsa_signature_serialize_compact(resource $context, ?string 
  * @param resource $ecPublicKey
  * @return int
  */
-function secp256k1_ecdsa_verify(resource $context, resource $ecdsaSignature, string $msg32, resource $ecPublicKey): int {}
+function secp256k1_ecdsa_verify($context, $ecdsaSignature, string $msg32, $ecPublicKey): int {}
 /**
  * Convert a signature to a normalized lower-S form.
  * 
@@ -128,7 +128,7 @@ function secp256k1_ecdsa_verify(resource $context, resource $ecdsaSignature, str
  * @param resource $ecdsaSignature
  * @return int
  */
-function secp256k1_ecdsa_signature_normalize(resource $context, ?resource &$ecdsaSignatureNormalized, resource $ecdsaSignature): int {}
+function secp256k1_ecdsa_signature_normalize($context, &$ecdsaSignatureNormalized, $ecdsaSignature): int {}
 /**
  * Create an ECDSA signature.
  * 
@@ -141,7 +141,7 @@ function secp256k1_ecdsa_signature_normalize(resource $context, ?resource &$ecds
  * @param string $secretKey
  * @return int
  */
-function secp256k1_ecdsa_sign(resource $context, ?resource &$ecdsaSignatureOut, string $msg32, string $secretKey): int {}
+function secp256k1_ecdsa_sign($context, &$ecdsaSignatureOut, string $msg32, string $secretKey): int {}
 /**
  * Verify an ECDSA secret key.
  * 
@@ -152,7 +152,7 @@ function secp256k1_ecdsa_sign(resource $context, ?resource &$ecdsaSignatureOut, 
  * @param string $secretKey
  * @return int
  */
-function secp256k1_ec_seckey_verify(resource $context, string $secretKey): int {}
+function secp256k1_ec_seckey_verify($context, string $secretKey): int {}
 /**
  * Compute the public key for a secret key.
  * 
@@ -164,7 +164,7 @@ function secp256k1_ec_seckey_verify(resource $context, string $secretKey): int {
  * @param string $secretKey
  * @return int
  */
-function secp256k1_ec_pubkey_create(resource $context, ?resource &$ecPublicKey, string $secretKey): int {}
+function secp256k1_ec_pubkey_create($context, &$ecPublicKey, string $secretKey): int {}
 /**
  * Negates a private key in place.
  * 
@@ -174,7 +174,7 @@ function secp256k1_ec_pubkey_create(resource $context, ?resource &$ecPublicKey, 
  * @param string $secKey
  * @return int
  */
-function secp256k1_ec_privkey_negate(resource $context, string &$secKey): int {}
+function secp256k1_ec_privkey_negate($context, string &$secKey): int {}
 /**
  * Negates a public key in place.
  * 
@@ -184,7 +184,7 @@ function secp256k1_ec_privkey_negate(resource $context, string &$secKey): int {}
  * @param resource $ecPublicKey
  * @return int
  */
-function secp256k1_ec_pubkey_negate(resource $context, resource &$ecPublicKey): int {}
+function secp256k1_ec_pubkey_negate($context, &$ecPublicKey): int {}
 /**
  * Tweak a private key by adding tweak to it.
  * Returns: 0 if the tweak was out of range (chance of around 1 in 2^128 for
@@ -196,7 +196,7 @@ function secp256k1_ec_pubkey_negate(resource $context, resource &$ecPublicKey): 
  * @param string $tweak32
  * @return int
  */
-function secp256k1_ec_privkey_tweak_add(resource $context, string &$seckey, string $tweak32): int {}
+function secp256k1_ec_privkey_tweak_add($context, string &$seckey, string $tweak32): int {}
 /**
  * Tweak a public key by adding tweak times the generator to it.
  * Returns: 0 if the tweak was out of range (chance of around 1 in 2^128 for
@@ -209,7 +209,7 @@ function secp256k1_ec_privkey_tweak_add(resource $context, string &$seckey, stri
  * @param string $tweak32
  * @return int
  */
-function secp256k1_ec_pubkey_tweak_add(resource $context, resource &$ecPublicKey, string $tweak32): int {}
+function secp256k1_ec_pubkey_tweak_add($context, &$ecPublicKey, string $tweak32): int {}
 /**
  * Tweak a private key by multiplying it by a tweak.
  * Returns: 0 if the tweak was out of range (chance of around 1 in 2^128 for
@@ -220,7 +220,7 @@ function secp256k1_ec_pubkey_tweak_add(resource $context, resource &$ecPublicKey
  * @param string $tweak32
  * @return int
  */
-function secp256k1_ec_privkey_tweak_mul(resource $context, string &$seckey, string $tweak32): int {}
+function secp256k1_ec_privkey_tweak_mul($context, string &$seckey, string $tweak32): int {}
 /**
  * Tweak a public key by multiplying it by a tweak value.
  * Returns: 0 if the tweak was out of range (chance of around 1 in 2^128 for
@@ -231,7 +231,7 @@ function secp256k1_ec_privkey_tweak_mul(resource $context, string &$seckey, stri
  * @param string $tweak32
  * @return int
  */
-function secp256k1_ec_pubkey_tweak_mul(resource $context, resource &$ecPublicKey, string $tweak32): int {}
+function secp256k1_ec_pubkey_tweak_mul($context, &$ecPublicKey, string $tweak32): int {}
 /**
  * Updates the context randomization to protect against side-channel leakage.
  * 
@@ -242,7 +242,7 @@ function secp256k1_ec_pubkey_tweak_mul(resource $context, resource &$ecPublicKey
  * @param string|null $seed32
  * @return int
  */
-function secp256k1_context_randomize(resource $context, ?string $seed32): int {}
+function secp256k1_context_randomize($context, ?string $seed32): int {}
 /**
  * Add a number of public keys together.
  * 
@@ -254,7 +254,7 @@ function secp256k1_context_randomize(resource $context, ?string $seed32): int {}
  * @param array $publicKeys
  * @return int
  */
-function secp256k1_ec_pubkey_combine(resource $context, ?resource &$combinedEcPublicKey, array $publicKeys): int {}
+function secp256k1_ec_pubkey_combine($context, &$combinedEcPublicKey, array $publicKeys): int {}
 /**
  * Parse a compact ECDSA signature (64 bytes + recovery id).
  * 
@@ -266,7 +266,7 @@ function secp256k1_ec_pubkey_combine(resource $context, ?resource &$combinedEcPu
  * @param int $recId
  * @return int
  */
-function secp256k1_ecdsa_recoverable_signature_parse_compact(resource $context, ?resource &$ecdsaRecoverableSignatureOut, string $sig64, int $recId): int {}
+function secp256k1_ecdsa_recoverable_signature_parse_compact($context, &$ecdsaRecoverableSignatureOut, string $sig64, int $recId): int {}
 /**
  * Convert a recoverable signature into a normal signature.
  * 
@@ -277,7 +277,7 @@ function secp256k1_ecdsa_recoverable_signature_parse_compact(resource $context, 
  * @param resource $ecdsaRecoverableSignature
  * @return int
  */
-function secp256k1_ecdsa_recoverable_signature_convert(resource $context, ?resource &$ecdsaSignature, resource $ecdsaRecoverableSignature): int {}
+function secp256k1_ecdsa_recoverable_signature_convert($context, &$ecdsaSignature, $ecdsaRecoverableSignature): int {}
 /**
  * Serialize an ECDSA signature in compact format (64 bytes + recovery id).
  * 
@@ -289,7 +289,7 @@ function secp256k1_ecdsa_recoverable_signature_convert(resource $context, ?resou
  * @param resource $ecdsaRecoverableSignature
  * @return int
  */
-function secp256k1_ecdsa_recoverable_signature_serialize_compact(resource $context, ?string &$sig64Out, ?int &$recIdOut, resource $ecdsaRecoverableSignature): int {}
+function secp256k1_ecdsa_recoverable_signature_serialize_compact($context, ?string &$sig64Out, ?int &$recIdOut, $ecdsaRecoverableSignature): int {}
 /**
  * Create a recoverable ECDSA signature.
  * 
@@ -302,7 +302,7 @@ function secp256k1_ecdsa_recoverable_signature_serialize_compact(resource $conte
  * @param string $secretKey
  * @return int
  */
-function secp256k1_ecdsa_sign_recoverable(resource $context, ?resource &$ecdsaRecoverableSignatureOut, string $msg32, string $secretKey): int {}
+function secp256k1_ecdsa_sign_recoverable($context, &$ecdsaRecoverableSignatureOut, string $msg32, string $secretKey): int {}
 /**
  * Recover an ECDSA public key from a signature.
  * 
@@ -315,7 +315,7 @@ function secp256k1_ecdsa_sign_recoverable(resource $context, ?resource &$ecdsaRe
  * @param string $msg32
  * @return int
  */
-function secp256k1_ecdsa_recover(resource $context, ?resource &$ecPublicKey, resource $ecdsaRecoverableSignature, string $msg32): int {}
+function secp256k1_ecdsa_recover($context, &$ecPublicKey, $ecdsaRecoverableSignature, string $msg32): int {}
 /**
  * Compute an EC Diffie-Hellman secret in constant time
  * 
@@ -328,4 +328,4 @@ function secp256k1_ecdsa_recover(resource $context, ?resource &$ecPublicKey, res
  * @param string $privKey
  * @return int
  */
-function secp256k1_ecdh(resource $context, string &$result, resource $ecPublicKey, string $privKey): int {}
+function secp256k1_ecdh($context, string &$result, $ecPublicKey, string $privKey): int {}
