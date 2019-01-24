@@ -38,10 +38,9 @@ install:
       && ./configure --enable-tests=no --enable-benchmark=no                      \
              --enable-experimental --enable-module-{ecdh,recovery}                \
       && make -j$(nproc) && sudo make install && cd ..
-  - |
-      cd secp256k1 && phpize                                                      \
-      && ./configure && make -j$(nproc) && sudo make install                      \
-      && cd ..
+  - phpize && ./configure && make
+  - ls /home/travis/build/Bit-Wasp/secp256k1-php/.libs/secp256k1.so
+  - ls /home/travis/build/Bit-Wasp/secp256k1-php/modules/secp256k1.so
   - composer update
 
 before_script:
@@ -53,8 +52,9 @@ before_script:
 
 script:
   - travis/verify_stubs.sh
-  - cd secp256k1/ && REPORT_EXIT_STATUS=1 make test || (find tests/*.log -type f -exec cat {} + ; exit 1) && cd ..
-  - travis/run_coverage_test.sh || exit 1
   - travis/validate_examples.sh || exit 1
+  - REPORT_EXIT_STATUS=1 make test || (find tests/*.log -type f -exec cat {} + ; exit 1)
+  - travis/run_coverage_test.sh || exit 1
+
 after_script:
-    - bash <(curl -s https://codecov.io/bash)
+  - bash <(curl -s https://codecov.io/bash)

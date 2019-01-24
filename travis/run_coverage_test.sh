@@ -2,7 +2,7 @@
 
 exitHard=false
 if [ "${COVERAGE}" = "true" ]; then
-    cd $(git rev-parse --show-toplevel)/secp256k1
+    cd $(git rev-parse --show-toplevel)/
     sudo make clean
     cd $(git rev-parse --show-toplevel)/travis/phpqa
     ./container_command.sh coverage.sh

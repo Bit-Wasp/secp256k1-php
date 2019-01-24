@@ -9,7 +9,12 @@
 #include "php_ini.h"
 #include "ext/standard/info.h"
 #include "php_secp256k1.h"
+#if defined(HAVE_LIBSECP256K1)
 #include "lax_der.h"
+#else
+#include "secp256k1/contrib/lax_der.h"
+#endif
+#include "zend_exceptions.h"
 
 static zend_class_entry *spl_ce_InvalidArgumentException;
 
