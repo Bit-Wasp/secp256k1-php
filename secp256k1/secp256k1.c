@@ -604,6 +604,7 @@ PHP_FUNCTION(secp256k1_ecdsa_signature_parse_der)
         zval_dtor(zSig);
         ZVAL_RES(zSig, zend_register_resource(sig, le_secp256k1_sig));
     } else {
+        // only free when operation fails, won't return this resource
         efree(sig);
     }
 
@@ -639,9 +640,9 @@ PHP_FUNCTION(secp256k1_ecdsa_signature_serialize_der)
     if (result == 1) {
         zval_dtor(zSigOut);
         ZVAL_STRINGL(zSigOut, sigout, sigoutlen);
-    } else {
-        efree(sigout);
     }
+    // free since ZVAL_STRINGL copies bytes
+    efree(sigout);
 
     RETURN_LONG(result);
 }
@@ -676,7 +677,8 @@ PHP_FUNCTION(secp256k1_ecdsa_signature_parse_compact)
         zval_dtor(zSig);
         ZVAL_RES(zSig, zend_register_resource(sig, le_secp256k1_sig));
     } else {
-        efree(sig);
+	// only free when operation fails, won't return this resource
+	efree(sig);
     }
 
     RETURN_LONG(result);
@@ -710,6 +712,9 @@ PHP_FUNCTION(secp256k1_ecdsa_signature_serialize_compact)
 
     zval_dtor(zSigOut);
     ZVAL_STRINGL(zSigOut, sigOut, COMPACT_SIGNATURE_LENGTH);
+    // free since ZVAL_STRINGL copies bytes
+    efree(sigOut);
+
     RETURN_LONG(result);
 }
 /* }}} */
@@ -738,6 +743,7 @@ PHP_FUNCTION(ecdsa_signature_parse_der_lax)
         zval_dtor(zSig);
         ZVAL_RES(zSig, zend_register_resource(sig, le_secp256k1_sig));
     } else {
+        // only free when operation fails, won't return this resource
         efree(sig);
     }
 
@@ -842,6 +848,7 @@ PHP_FUNCTION (secp256k1_ecdsa_sign)
         zval_dtor(zSig);
         ZVAL_RES(zSig, zend_register_resource(newsig, le_secp256k1_sig));
     } else {
+        // only free when operation fails, won't return this resource
         efree(newsig);
     }
 
@@ -908,6 +915,7 @@ PHP_FUNCTION(secp256k1_ec_pubkey_create)
         zval_dtor(zPubKey);
         ZVAL_RES(zPubKey, zend_register_resource(pubkey, le_secp256k1_pubkey));
     } else {
+        // only free when operation fails, won't return this resource
         efree(pubkey);
     }
 
@@ -943,6 +951,9 @@ PHP_FUNCTION(secp256k1_ec_privkey_negate)
 
     zval_dtor(zPrivKey);
     ZVAL_STRINGL(zPrivKey, newseckey, SECRETKEY_LENGTH);
+    // free since ZVAL_STRINGL copies bytes
+    efree(newseckey);
+
     RETURN_LONG(result);
 }
 /* }}} */
@@ -998,6 +1009,7 @@ PHP_FUNCTION(secp256k1_ec_pubkey_parse)
         zval_dtor(zPubKey);
         ZVAL_RES(zPubKey, zend_register_resource(pubkey, le_secp256k1_pubkey));
     } else {
+        // only free when operation fails, won't return this resource
         efree(pubkey);
     }
 
@@ -1035,6 +1047,9 @@ PHP_FUNCTION(secp256k1_ec_pubkey_serialize)
 
     zval_dtor(zPubOut);
     ZVAL_STRINGL(zPubOut, pubkeyout, pubkeylen);
+    // free since ZVAL_STRINGL copies bytes
+    efree(pubkeyout);
+
     RETURN_LONG(result);
 }
 /* }}} */
@@ -1073,6 +1088,9 @@ PHP_FUNCTION(secp256k1_ec_privkey_tweak_add)
 
     zval_dtor(zSecKey);
     ZVAL_STRINGL(zSecKey, newseckey, SECRETKEY_LENGTH);
+    // free since ZVAL_STRINGL copies bytes
+    efree(newseckey);
+
     RETURN_LONG(result);
 }
 /* }}} */
@@ -1105,6 +1123,7 @@ PHP_FUNCTION(secp256k1_ec_pubkey_tweak_add)
     }
 
     result = secp256k1_ec_pubkey_tweak_add(ctx, pubkey, (unsigned char *)zTweak->val);
+
     RETURN_LONG(result);
 }
 /* }}} */
@@ -1143,6 +1162,9 @@ PHP_FUNCTION(secp256k1_ec_privkey_tweak_mul)
 
     zval_dtor(zSecKey);
     ZVAL_STRINGL(zSecKey, newseckey, SECRETKEY_LENGTH);
+    // free since ZVAL_STRINGL copies bytes
+    efree(newseckey);
+
     RETURN_LONG(result);
 }
 /* }}} */
@@ -1177,6 +1199,7 @@ PHP_FUNCTION(secp256k1_ec_pubkey_tweak_mul)
     }
 
     result = secp256k1_ec_pubkey_tweak_mul(ctx, pubkey, (unsigned char *) zTweak->val);
+
     RETURN_LONG(result);
 }
 /* }}} */
@@ -1220,6 +1243,7 @@ PHP_FUNCTION(secp256k1_ec_pubkey_combine)
         zval_dtor(zPubkeyCombined);
         ZVAL_RES(zPubkeyCombined, zend_register_resource(combined, le_secp256k1_pubkey));
     } else {
+        // free when operation fails, won't return this resource
         efree(combined);
     }
 
@@ -1264,6 +1288,7 @@ PHP_FUNCTION(secp256k1_ecdsa_recoverable_signature_parse_compact)
         zval_dtor(zSig);
         ZVAL_RES(zSig, zend_register_resource(sig, le_secp256k1_recoverable_sig));
     } else {
+        // free when operation fails, won't return this resource
         efree(sig);
     }
 
@@ -1298,6 +1323,7 @@ PHP_FUNCTION(secp256k1_ecdsa_recoverable_signature_convert)
 
     zval_dtor(zNormalSig);
     ZVAL_RES(zNormalSig, zend_register_resource(nSig, le_secp256k1_sig));
+    // convert() can't fail, so we'll always return the resource here
 
     RETURN_LONG(result);
 }
@@ -1329,9 +1355,13 @@ PHP_FUNCTION(secp256k1_ecdsa_recoverable_signature_serialize_compact)
     result = secp256k1_ecdsa_recoverable_signature_serialize_compact(ctx, sig, &recid, recsig);
 
     zval_dtor(zSigOut);
-    zval_dtor(zRecId);
     ZVAL_STRINGL(zSigOut, sig, COMPACT_SIGNATURE_LENGTH);
+    // free since ZVAL_STRINGL copies bytes
+    efree(sig);
+
+    zval_dtor(zRecId);
     ZVAL_LONG(zRecId, recid);
+
     RETURN_LONG(result);
 }
 /* }}} */
@@ -1370,6 +1400,7 @@ PHP_FUNCTION(secp256k1_ecdsa_sign_recoverable)
         zval_dtor(zSig);
         ZVAL_RES(zSig, zend_register_resource(newsig, le_secp256k1_recoverable_sig));
     } else {
+        // free when operation fails, won't return this resource
         efree(newsig);
     }
 
@@ -1406,6 +1437,7 @@ PHP_FUNCTION(secp256k1_ecdsa_recover)
         zval_dtor(zPubKey);
         ZVAL_RES(zPubKey, zend_register_resource(pubkey, le_secp256k1_pubkey));
     } else {
+        // free when operation fails, won't return this resource
         efree(pubkey);
     }
 
