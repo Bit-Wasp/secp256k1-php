@@ -301,6 +301,9 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_secp256k1_ecdh, IS_LONG, 0)
     ZEND_ARG_TYPE_INFO(1, result, IS_STRING, 0)
     ZEND_ARG_TYPE_INFO(0, ecPublicKey, IS_RESOURCE, 0)
     ZEND_ARG_TYPE_INFO(0, privKey, IS_STRING, 0)
+    ZEND_ARG_CALLABLE_INFO(0, hashfxn, 1)
+    ZEND_ARG_TYPE_INFO(0, outputLen, IS_LONG, 1)
+    ZEND_ARG_INFO(0, data)
 ZEND_END_ARG_INFO();
 
 /* {{{ resource_functions[]
@@ -1424,6 +1427,70 @@ PHP_FUNCTION(secp256k1_ecdsa_recover)
 
 /* Begin EcDH module functions */
 
+typedef struct php_callback {
+    zend_fcall_info* fci;
+    zend_fcall_info_cache* fcc;
+    long output_len;
+    zval* data;
+} php_callback;
+
+static int trigger_callback(unsigned char* output, const unsigned char *x,
+                            const unsigned char* y, void *data) {
+    php_callback* callback;
+    zend_string* output_str;
+    zval retval, zvalout;
+    zval args[4];
+    int result, i;
+
+    callback = (php_callback*) data;
+    callback->fci->size = sizeof(*(callback->fci));
+    callback->fci->object = NULL;
+    callback->fci->retval = &retval;
+    callback->fci->param_count = 4;
+    callback->fci->params = args;
+
+    ZVAL_NEW_STR(&zvalout, zend_string_init("", 0, 0));
+    ZVAL_NEW_REF(&args[0], &zvalout);
+    ZVAL_STR(&args[1], zend_string_init(x, 32, 0));
+    ZVAL_STR(&args[2], zend_string_init(y, 32, 0));
+    args[3] = *callback->data;
+
+    result = zend_call_function(callback->fci, callback->fcc) == SUCCESS;
+
+    // check function invocation result
+    if (result) {
+        // now respect return value
+        if (Z_TYPE(retval) == IS_FALSE) {
+            result = 0;
+        } else if (Z_TYPE(retval) == IS_TRUE) {
+            result = 1;
+        } else if (Z_TYPE(retval) == IS_LONG) {
+            result = Z_LVAL(retval);
+        }
+    }
+
+    // there's more! what if the length doesn't match? avoid.
+    if (result) {
+        output_str = Z_STR_P(Z_REFVAL(args[0]));
+        if (output_str->len != callback->output_len) {
+            result = 0;
+        }
+    }
+
+    // callback OK & length correct
+    if (result) {
+        for (i = 0; i < output_str->len; i++) {
+            output[i] = (unsigned char)output_str->val[i];
+        }
+    }
+
+    zval_dtor(&args[0]);
+    zval_dtor(&args[1]);
+    zval_dtor(&args[2]);
+
+    return result;
+}
+
 /* {{{ proto int secp256k1_ecdh(resource context, string &result, resource pubKey, string key32)
  * Compute an EC Diffie-Hellman secret in constant time. */
 PHP_FUNCTION(secp256k1_ecdh)
@@ -1432,10 +1499,20 @@ PHP_FUNCTION(secp256k1_ecdh)
     secp256k1_context *ctx;
     secp256k1_pubkey *pubkey;
     zend_string *privKey;
+    zval* data;
+    long output_len = 32;
+    zend_fcall_info fci;
+    zend_fcall_info_cache fcc;
+    php_callback fci_info;
     int result = 0;
-
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rz/rS", &zCtx, &zResult, &zPubKey, &privKey) == FAILURE) {
-        RETURN_LONG(result);
+    if (ZEND_NUM_ARGS() > 4) {
+        if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rz/rS|flz", &zCtx, &zResult, &zPubKey, &privKey, &fci, &fcc, &output_len, &data) == FAILURE) {
+            RETURN_LONG(result);
+        }
+    } else {
+        if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rz/rS", &zCtx, &zResult, &zPubKey, &privKey) == FAILURE) {
+            RETURN_LONG(result);
+        }
     }
 
     if ((ctx = php_get_secp256k1_context(zCtx)) == NULL) {
@@ -1446,12 +1523,25 @@ PHP_FUNCTION(secp256k1_ecdh)
         RETURN_LONG(result);
     }
 
-    unsigned char resultChars[32];
-    memset(resultChars, 0, 32);
-    result = secp256k1_ecdh(ctx, resultChars, pubkey, privKey->val);
+    if (ZEND_NUM_ARGS() < 5) {
+        output_len = 32;
+    }
+
+    unsigned char resultChars[output_len];
+    //unsigned char resultChars[32];
+    memset(resultChars, 0, output_len);
+    if (ZEND_NUM_ARGS() > 4) {
+        fci_info.fci = &fci;
+        fci_info.fcc = &fcc;
+        fci_info.output_len = output_len;
+        fci_info.data = data;
+        result = secp256k1_ecdh(ctx, resultChars, pubkey, privKey->val, trigger_callback, (void*) &fci_info);
+    } else {
+        result = secp256k1_ecdh(ctx, resultChars, pubkey, privKey->val, NULL, NULL);
+    }
     if (result == 1) {
         zval_dtor(zResult);
-        ZVAL_STRINGL(zResult, resultChars, 32);
+        ZVAL_STRINGL(zResult, resultChars, output_len);
     }
 
     RETURN_LONG(result);
