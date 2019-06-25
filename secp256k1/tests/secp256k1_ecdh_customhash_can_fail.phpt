@@ -31,12 +31,12 @@ $cbZero = function (&$output, $x, $y) {
 };
 echo "return 0\n";
 $secret = '';
-$result = \secp256k1_ecdh($context, $secret, $pub1, $priv2, $cbZero, NULL);
+$result = \secp256k1_ecdh($context, $secret, $pub1, $priv2, $cbZero, 32, NULL);
 echo $result . PHP_EOL;
 
 echo "return false\n";
 $secret = '';
-$result = \secp256k1_ecdh($context, $secret, $pub1, $priv2, $cbFalse, NULL);
+$result = \secp256k1_ecdh($context, $secret, $pub1, $priv2, $cbFalse, 32, NULL);
 echo $result . PHP_EOL;
 
 ?>
