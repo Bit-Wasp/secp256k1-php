@@ -10,7 +10,7 @@ php:
 
 env:
   global:
-   - SECP256K1_COMMIT=b19c000063be11018b4d1a6b0a85871ab9d0bdcf
+   - SECP256K1_COMMIT=fa3301713549d118e57ebe6551d062903ddd6b63
    - DOCKER_CACHE_DIR=/home/travis/docker
 
 cache:
