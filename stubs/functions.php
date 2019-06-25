@@ -326,6 +326,9 @@ function secp256k1_ecdsa_recover($context, &$ecPublicKey, $ecdsaRecoverableSigna
  * @param string $result
  * @param resource $ecPublicKey
  * @param string $privKey
+ * @param callable|null $hashfxn
+ * @param int|null $outputLen
+ * @param  $data
  * @return int
  */
-function secp256k1_ecdh($context, string &$result, $ecPublicKey, string $privKey): int {}
+function secp256k1_ecdh($context, string &$result, $ecPublicKey, string $privKey, ?callable $hashfxn, ?int $outputLen, $data): int {}
