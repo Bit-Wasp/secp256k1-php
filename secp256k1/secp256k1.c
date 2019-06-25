@@ -1437,12 +1437,17 @@ typedef struct php_callback {
 static int trigger_callback(unsigned char* output, const unsigned char *x,
                             const unsigned char* y, void *data) {
     php_callback* callback;
+    int arg_count = 3;
+    callback = (php_callback*) data;
+    if (callback->data != NULL) {
+        arg_count = 4;
+    }
+
     zend_string* output_str;
     zval retval, zvalout;
-    zval args[4];
-    int result, i;
+    zval args[arg_count];
 
-    callback = (php_callback*) data;
+    int result, i;
     callback->fci->size = sizeof(*(callback->fci));
     callback->fci->object = NULL;
     callback->fci->retval = &retval;
@@ -1450,10 +1455,14 @@ static int trigger_callback(unsigned char* output, const unsigned char *x,
     callback->fci->params = args;
 
     ZVAL_NEW_STR(&zvalout, zend_string_init("", 0, 0));
+
     ZVAL_NEW_REF(&args[0], &zvalout);
     ZVAL_STR(&args[1], zend_string_init(x, 32, 0));
     ZVAL_STR(&args[2], zend_string_init(y, 32, 0));
-    args[3] = *callback->data;
+    if (callback->data != NULL) {
+        zval* data = callback->data;
+        args[3] = *data;
+    }
 
     result = zend_call_function(callback->fci, callback->fcc) == SUCCESS;
 
@@ -1528,7 +1537,6 @@ PHP_FUNCTION(secp256k1_ecdh)
     }
 
     unsigned char resultChars[output_len];
-    //unsigned char resultChars[32];
     memset(resultChars, 0, output_len);
     if (ZEND_NUM_ARGS() > 4) {
         fci_info.fci = &fci;
