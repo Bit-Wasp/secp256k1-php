@@ -19,7 +19,7 @@ ENV PHPIZE_DEPS \
 		make \
 		pkg-config \
 		re2c
-ENV SECP256K1_COMMIT=cd329dbc3eaf096ae007e807b86b6f5947621ee3
+ENV SECP256K1_COMMIT=fa3301713549d118e57ebe6551d062903ddd6b63
 ENV PHP_INI_DIR /usr/local/etc/php
 ENV PHP_CFLAGS="-fstack-protector-strong -fpic -fpie -O2"
 ENV PHP_CPPFLAGS="$PHP_CFLAGS"
