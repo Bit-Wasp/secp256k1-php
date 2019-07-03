@@ -1,2 +1,5 @@
 ignore:
  - secp256k1/lax_der.h
+
+fixes:
+ - "/usr/src/php/ext/secp256k1::secp256k1"
