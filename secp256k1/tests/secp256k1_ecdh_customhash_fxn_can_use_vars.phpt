@@ -30,7 +30,7 @@ $hashFxn = function (&$output, $x, $y, $data) use ($dataLen) {
 };
 
 $secret = '';
-$result = \secp256k1_ecdh($context, $secret, $pub1, $priv2, $hashFxn, );
+$result = \secp256k1_ecdh($context, $secret, $pub1, $priv2, $hashFxn);
 echo $result . PHP_EOL;
 echo unpack("H*", $secret)[1].PHP_EOL;
 
