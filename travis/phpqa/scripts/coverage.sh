@@ -35,4 +35,5 @@ rm configure && ./buildconf --force
 && gcov lcov_data/ext/secp256k1/secp256k1.c -f > coverage.output
 
 echo $PWD
-cp coverage.output ext/secp256k1/
+cp -v coverage.output ext/secp256k1/
+cp -v secp256k1.c.gcov ext/secp256k1/
