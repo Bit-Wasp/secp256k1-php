@@ -69,7 +69,7 @@
     "doc": "Add a number of public keys together.\n\nReturns: 1: the sum of the public keys is valid.\n         0: the sum of the public keys is not valid.\n"
   },
   "secp256k1_ecdh": {
-    "doc": "Compute an EC Diffie-Hellman secret in constant time\n\nReturns: 1: exponentiation was successful\n         0: scalar was invalid (zero or overflow)\n"
+    "doc": "Compute an EC Diffie-Hellman secret in constant time.\nA custom hash function may be provided as the 5th\nargument, once the length of data to be written is\npassed as the 6th argument.\nOptional additional data may be provided to the callback\nvia the 7th argument.\nThe default hash function is essentially the following:\nfunction (&$output, $x, $y, $data) {\n    $version = 0x02 | (unpack(\"C\", $y[31])[1] & 0x01);\n    $ctx = hash_init('sha256', 0);\n    hash_update($ctx, pack(\"C\", $version));\n    hash_update($ctx, $x);\n    $output = hash_final($ctx, true);\n    return 1;\n};\n\nReturns: 1: exponentiation was successful\n         0: scalar was invalid (zero or overflow)\n"
   },
   "secp256k1_ecdsa_recoverable_signature_parse_compact": {
     "doc": "Parse a compact ECDSA signature (64 bytes + recovery id).\n\nReturns: 1 when the signature could be parsed, 0 otherwise\n"
