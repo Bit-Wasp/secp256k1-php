@@ -23,15 +23,15 @@ matrix:
 
   include:
     - php: 7.2
-      env: COVERAGE=true
+      env: COVERAGE=true PHPQA_PHP_VERSION=7.2.20
 
     - php: 7.2
-      env: VALGRIND=true
+      env: VALGRIND=true PHPQA_PHP_VERSION=7.2.20
 
 before_install:
   - sudo apt-get install -qq libssl-dev
-  - if [ "${COVERAGE}" = "true" ]; then ./travis/docker-load-cache.sh secp256k1build || echo "failed"; fi
-  - if [ "${VALGRIND}" = "true" ]; then ./travis/docker-load-cache.sh secp256k1build || echo "failed"; fi
+  - if [ "${COVERAGE}" = "true" ]; then ./travis/docker-load-cache.sh secp256k1-${PHPQA_PHP_VERSION} || echo "failed"; fi
+  - if [ "${VALGRIND}" = "true" ]; then ./travis/docker-load-cache.sh secp256k1-${PHPQA_PHP_VERSION} || echo "failed"; fi
 
 install:
   - |
@@ -50,8 +50,8 @@ install:
 before_script:
   - |
       if [ "${COVERAGE}" = "true" ]; then \
-          cd travis/phpqa/ && docker build -t secp256k1build . && cd ../.. && \
-          ./travis/docker-save-cache.sh secp256k1build
+          cd travis/phpqa/ && ./build_container.sh && cd ../.. && \
+          ./travis/docker-save-cache.sh secp256k1-{$PHPQA_PHP_VERSION}
       fi
 
 script:
@@ -60,5 +60,6 @@ script:
   - travis/run_coverage_test.sh || exit 1
   - travis/run_valgrind_test.sh || exit 1
   - travis/validate_examples.sh || exit 1
+
 after_script:
     - bash <(curl -s https://codecov.io/bash)
