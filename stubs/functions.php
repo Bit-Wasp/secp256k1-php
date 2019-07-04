@@ -317,7 +317,21 @@ function secp256k1_ecdsa_sign_recoverable($context, &$ecdsaRecoverableSignatureO
  */
 function secp256k1_ecdsa_recover($context, &$ecPublicKey, $ecdsaRecoverableSignature, string $msg32): int {}
 /**
- * Compute an EC Diffie-Hellman secret in constant time
+ * Compute an EC Diffie-Hellman secret in constant time.
+ * A custom hash function may be provided as the 5th
+ * argument, once the length of data to be written is
+ * passed as the 6th argument.
+ * Optional additional data may be provided to the callback
+ * via the 7th argument.
+ * The default hash function is essentially the following:
+ * function (&$output, $x, $y, $data) {
+ *     $version = 0x02 | (unpack("C", $y[31])[1] & 0x01);
+ *     $ctx = hash_init('sha256', 0);
+ *     hash_update($ctx, pack("C", $version));
+ *     hash_update($ctx, $x);
+ *     $output = hash_final($ctx, true);
+ *     return 1;
+ * };
  * 
  * Returns: 1: exponentiation was successful
  *          0: scalar was invalid (zero or overflow)
