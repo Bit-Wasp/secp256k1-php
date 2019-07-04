@@ -64,8 +64,3 @@ Basic tests:
 
     cd secp256k1-php/secp256k1 && make test
 
-Data fixture tests (requires composer install):
-
-    cd secp256k1-php && \
-    composer install && \ # required the first time only
-    php -dextension=secp256k1.so vendor/bin/phpunit tests/
