@@ -1437,18 +1437,15 @@ typedef struct php_callback {
 static int trigger_callback(unsigned char* output, const unsigned char *x,
                             const unsigned char* y, void *data) {
     php_callback* callback;
-
-    callback = (php_callback*) data;
     zend_string* output_str;
     zval retval, zvalout;
     zval args[4];
     int result, i;
-    int arg_count = (callback->data != NULL) ? 4 : 3;
 
+    callback = (php_callback*) data;
     callback->fci->size = sizeof(*(callback->fci));
     callback->fci->object = NULL;
     callback->fci->retval = &retval;
-    callback->fci->param_count = arg_count;
     callback->fci->params = args;
 
     ZVAL_NEW_STR(&zvalout, zend_string_init("", 0, 0));
@@ -1456,9 +1453,12 @@ static int trigger_callback(unsigned char* output, const unsigned char *x,
     ZVAL_NEW_REF(&args[0], &zvalout);
     ZVAL_STR(&args[1], zend_string_init(x, 32, 0));
     ZVAL_STR(&args[2], zend_string_init(y, 32, 0));
-    if (arg_count == 4) {
+    if (callback->data != NULL) {
+        callback->fci->param_count = 4;
         zval* data = callback->data;
         args[3] = *data;
+    } else {
+        callback->fci->param_count = 3;
     }
 
     result = zend_call_function(callback->fci, callback->fcc) == SUCCESS;
