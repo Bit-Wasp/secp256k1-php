@@ -1208,10 +1208,12 @@ PHP_FUNCTION(secp256k1_ec_pubkey_combine)
 
     arr_hash = Z_ARRVAL_P(arr);
     array_count = (size_t) zend_hash_num_elements(arr_hash);
-    const secp256k1_pubkey * pubkeys[array_count];
+    // emalloc terminates the request if memory can't be allocated.
+    const secp256k1_pubkey ** pubkeys = emalloc(sizeof(secp256k1_pubkey *) * array_count);
 
     ZEND_HASH_FOREACH_KEY_VAL(arr_hash, i, arrayKeyStr, arrayPubKey) {
         if ((ptr = php_get_secp256k1_pubkey(arrayPubKey)) == NULL) {
+            efree(pubkeys);
             RETURN_LONG(result);
         }
 
@@ -1227,6 +1229,7 @@ PHP_FUNCTION(secp256k1_ec_pubkey_combine)
         // free when operation fails, won't return this resource
         efree(combined);
     }
+    efree(pubkeys);
 
     RETURN_LONG(result);
 }
