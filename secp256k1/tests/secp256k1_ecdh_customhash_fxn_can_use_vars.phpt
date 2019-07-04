@@ -20,17 +20,17 @@ echo $result . PHP_EOL;
 $dataLen = 256/8;
 
 // Function we suppose is equivalent to upstreams default hash fxn
-$hashFxn = function (&$output, $x, $y, $data) use ($dataLen) {
+$hashFxn = function (&$output, $x, $y) {
     $version = 0x02 | (unpack("C", $y[31])[1] & 0x01);
     $ctx = hash_init('sha256', 0);
     hash_update($ctx, pack("C", $version));
     hash_update($ctx, $x);
     $output = hash_final($ctx, true);
-    return $dataLen == strlen($output);
+    return 1;
 };
 
 $secret = '';
-$result = \secp256k1_ecdh($context, $secret, $pub1, $priv2, $hashFxn);
+$result = \secp256k1_ecdh($context, $secret, $pub1, $priv2, $hashFxn, $dataLen);
 echo $result . PHP_EOL;
 echo unpack("H*", $secret)[1].PHP_EOL;
 
