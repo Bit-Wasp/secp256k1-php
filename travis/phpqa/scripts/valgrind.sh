@@ -30,9 +30,4 @@ rm configure && ./buildconf --force
 && make -j "$(nproc)" \
 && make install \
 && php -m \
-&& ls -lsh ext/secp256k1 \
-&& make lcov TESTS=ext/secp256k1/tests \
-&& gcov lcov_data/ext/secp256k1/secp256k1.c -f > coverage.output
-
-cp -v coverage.output ext/secp256k1/
-cp -v secp256k1.c.gcov ext/secp256k1/
+&& make test TESTS="ext/secp256k1/tests -m"
