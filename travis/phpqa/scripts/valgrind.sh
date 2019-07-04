@@ -17,7 +17,6 @@ rm configure && ./buildconf --force
     --with-zlib \
     --enable-zip \
     --with-curl \
-    --enable-gcov \
     --with-libedit \
     --with-openssl \
     --with-gd \
