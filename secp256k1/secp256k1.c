@@ -1511,13 +1511,9 @@ PHP_FUNCTION(secp256k1_ecdh)
     zend_fcall_info_cache fcc;
     php_callback callback;
     int result = 0;
-    if (ZEND_NUM_ARGS() == 7) {
+    if (ZEND_NUM_ARGS() == 6 || ZEND_NUM_ARGS() == 7) {
         if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rz/rS|flz",
             &zCtx, &zResult, &zPubKey, &privKey, &fci, &fcc, &output_len, &data) == FAILURE) {
-            RETURN_LONG(result);
-        }
-    } else if (ZEND_NUM_ARGS() == 6) {
-        if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rz/rS|fl", &zCtx, &zResult, &zPubKey, &privKey, &fci, &fcc, &output_len) == FAILURE) {
             RETURN_LONG(result);
         }
     } else {
