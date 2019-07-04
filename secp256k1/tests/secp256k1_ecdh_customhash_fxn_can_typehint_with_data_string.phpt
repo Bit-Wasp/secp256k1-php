@@ -1,5 +1,5 @@
 --TEST--
-secp256k1_ecdh - custom hash function can typehint X / Y as string, and data can be int
+secp256k1_ecdh - custom hash function can typehint X / Y as string, and data can be string
 --SKIPIF--
 <?php
 if (!extension_loaded("secp256k1")) print "skip extension not loaded";
