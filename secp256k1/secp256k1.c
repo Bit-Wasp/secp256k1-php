@@ -1506,7 +1506,7 @@ PHP_FUNCTION(secp256k1_ecdh)
     secp256k1_pubkey *pubkey;
     zend_string *privKey;
     zval* data = NULL;
-    long output_len = 32;
+    long output_len;
     zend_fcall_info fci;
     zend_fcall_info_cache fcc;
     php_callback callback;
@@ -1520,6 +1520,7 @@ PHP_FUNCTION(secp256k1_ecdh)
         if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rz/rS", &zCtx, &zResult, &zPubKey, &privKey) == FAILURE) {
             RETURN_LONG(result);
         }
+        output_len = 32;
     }
 
     if ((ctx = php_get_secp256k1_context(zCtx)) == NULL) {
@@ -1528,10 +1529,6 @@ PHP_FUNCTION(secp256k1_ecdh)
 
     if ((pubkey = php_get_secp256k1_pubkey(zPubKey)) == NULL) {
         RETURN_LONG(result);
-    }
-
-    if (ZEND_NUM_ARGS() < 5) {
-        output_len = 32;
     }
 
     unsigned char resultChars[output_len];
