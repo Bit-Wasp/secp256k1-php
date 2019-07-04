@@ -623,7 +623,7 @@ PHP_FUNCTION(secp256k1_ecdsa_signature_serialize_der)
     secp256k1_context *ctx;
     secp256k1_ecdsa_signature *sig;
     size_t sigoutlen = MAX_SIGNATURE_LENGTH;
-    unsigned char sigout[sigoutlen];
+    unsigned char sigout[MAX_SIGNATURE_LENGTH];
     int result = 0;
 
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rz/r", &zCtx, &zSigOut, &zSig) == FAILURE) {
