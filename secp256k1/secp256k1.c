@@ -1450,18 +1450,19 @@ static int trigger_callback(unsigned char* output, const unsigned char *x,
     callback->fci->object = NULL;
     callback->fci->retval = &retval;
     callback->fci->params = args;
-
+    callback->fci->param_count = 3;
     ZVAL_NEW_STR(&zvalout, zend_string_init("", 0, 0));
 
+    // wrt ownership, args 0, 1, & 2 are managed by us in order to
+    // receive the result, and pass in the x & y parameters.
+    // arg 3 is owned by the caller of secp256k1_ecdh.
     ZVAL_NEW_REF(&args[0], &zvalout);
     ZVAL_STR(&args[1], zend_string_init(x, 32, 0));
     ZVAL_STR(&args[2], zend_string_init(y, 32, 0));
     if (callback->data != NULL) {
-        callback->fci->param_count = 4;
+        callback->fci->param_count++;
         zval* data = callback->data;
         args[3] = *data;
-    } else {
-        callback->fci->param_count = 3;
     }
 
     result = zend_call_function(callback->fci, callback->fcc) == SUCCESS;
@@ -1493,7 +1494,8 @@ static int trigger_callback(unsigned char* output, const unsigned char *x,
         }
     }
 
-    for (i = 0; i < callback->fci->param_count; i++) {
+    // zval_dtor on our args. arg 3 is managed elsewhere.
+    for (i = 0; i < 3; i++) {
         zval_dtor(&args[i]);
     }
 
