@@ -1437,21 +1437,18 @@ typedef struct php_callback {
 static int trigger_callback(unsigned char* output, const unsigned char *x,
                             const unsigned char* y, void *data) {
     php_callback* callback;
-    int arg_count = 3;
-    callback = (php_callback*) data;
-    if (callback->data != NULL) {
-        arg_count = 4;
-    }
 
+    callback = (php_callback*) data;
     zend_string* output_str;
     zval retval, zvalout;
-    zval args[arg_count];
-
+    zval args[4];
     int result, i;
+    int arg_count = (callback->data != NULL) ? 4 : 3;
+
     callback->fci->size = sizeof(*(callback->fci));
     callback->fci->object = NULL;
     callback->fci->retval = &retval;
-    callback->fci->param_count = 4;
+    callback->fci->param_count = arg_count;
     callback->fci->params = args;
 
     ZVAL_NEW_STR(&zvalout, zend_string_init("", 0, 0));
@@ -1459,7 +1456,7 @@ static int trigger_callback(unsigned char* output, const unsigned char *x,
     ZVAL_NEW_REF(&args[0], &zvalout);
     ZVAL_STR(&args[1], zend_string_init(x, 32, 0));
     ZVAL_STR(&args[2], zend_string_init(y, 32, 0));
-    if (callback->data != NULL) {
+    if (arg_count == 4) {
         zval* data = callback->data;
         args[3] = *data;
     }
@@ -1508,14 +1505,19 @@ PHP_FUNCTION(secp256k1_ecdh)
     secp256k1_context *ctx;
     secp256k1_pubkey *pubkey;
     zend_string *privKey;
-    zval* data;
+    zval* data = NULL;
     long output_len = 32;
     zend_fcall_info fci;
     zend_fcall_info_cache fcc;
-    php_callback fci_info;
+    php_callback callback;
     int result = 0;
-    if (ZEND_NUM_ARGS() > 4) {
-        if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rz/rS|flz", &zCtx, &zResult, &zPubKey, &privKey, &fci, &fcc, &output_len, &data) == FAILURE) {
+    if (ZEND_NUM_ARGS() == 7) {
+        if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rz/rS|flz",
+            &zCtx, &zResult, &zPubKey, &privKey, &fci, &fcc, &output_len, &data) == FAILURE) {
+            RETURN_LONG(result);
+        }
+    } else if (ZEND_NUM_ARGS() == 6) {
+        if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rz/rS|fl", &zCtx, &zResult, &zPubKey, &privKey, &fci, &fcc, &output_len) == FAILURE) {
             RETURN_LONG(result);
         }
     } else {
@@ -1539,11 +1541,11 @@ PHP_FUNCTION(secp256k1_ecdh)
     unsigned char resultChars[output_len];
     memset(resultChars, 0, output_len);
     if (ZEND_NUM_ARGS() > 4) {
-        fci_info.fci = &fci;
-        fci_info.fcc = &fcc;
-        fci_info.output_len = output_len;
-        fci_info.data = data;
-        result = secp256k1_ecdh(ctx, resultChars, pubkey, privKey->val, trigger_callback, (void*) &fci_info);
+        callback.fci = &fci;
+        callback.fcc = &fcc;
+        callback.output_len = output_len;
+        callback.data = data;
+        result = secp256k1_ecdh(ctx, resultChars, pubkey, privKey->val, trigger_callback, (void*) &callback);
     } else {
         result = secp256k1_ecdh(ctx, resultChars, pubkey, privKey->val, NULL, NULL);
     }
