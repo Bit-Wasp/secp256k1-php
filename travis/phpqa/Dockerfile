@@ -117,7 +117,6 @@ RUN docker-php-source extract \
 		--enable-mysqlnd \
 		--enable-zip \
 		--with-curl \
-		--enable-gcov \
 		--with-libedit \
 		--with-openssl \
 		--with-zlib \
