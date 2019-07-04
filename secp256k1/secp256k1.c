@@ -1490,9 +1490,9 @@ static int trigger_callback(unsigned char* output, const unsigned char *x,
         }
     }
 
-    zval_dtor(&args[0]);
-    zval_dtor(&args[1]);
-    zval_dtor(&args[2]);
+    for (i = 0; i < callback->fci->param_count; i++) {
+        zval_dtor(&args[i]);
+    }
 
     return result;
 }
