@@ -18,7 +18,7 @@ $result = \secp256k1_ec_pubkey_create($context, $pub1, $priv1);
 echo $result . PHP_EOL;
 
 // Function we suppose is equivalent to upstreams default hash fxn
-$hashFxn = function (&$output, $x, $y, $data) {
+$hashFxn = function (&$output, $x, $y) {
     $version = 0x02 | (unpack("C", $y[31])[1] & 0x01);
     $ctx = hash_init('sha256', 0);
     hash_update($ctx, pack("C", $version));
