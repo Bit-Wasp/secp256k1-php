@@ -134,10 +134,10 @@ RUN docker-php-source extract \
 	&& rm -rf /tmp/pear ~/.pearrc \
 	&& apt-get purge -y --auto-remove $fetchDeps
 
-RUN cd /usr/src/php/scripts/dev \
-    && rm generate-phpt.phar \
-    && php -d phar.readonly=0 generate-phpt/gtPackage.php \
-    && cd /
+#RUN cd /usr/src/php/scripts/dev \
+#    && rm generate-phpt.phar \
+#    && php -d phar.readonly=0 generate-phpt/gtPackage.php \
+#    && cd /
 
 RUN cd / && git clone https://github.com/bitcoin-core/secp256k1.git \
     && cd secp256k1 && git checkout $SECP256K1_COMMIT \
