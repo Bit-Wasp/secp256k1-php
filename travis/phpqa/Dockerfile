@@ -38,6 +38,7 @@ RUN apt-get update && apt-get install -y \
 		ca-certificates \
 		curl \
 		git \
+		valgrind \
 		libedit2 \
 		libsqlite3-0 \
 		libxml2 \
@@ -123,7 +124,7 @@ RUN docker-php-source extract \
 		--with-gd \
         --with-jpeg-dir \
         --with-png-dir \
-		--with-pcre-regex \
+        --with-pcre-regex \
 		--with-libdir="lib/$debMultiarch" \
 		$PHP_EXTRA_CONFIGURE_ARGS \
 	&& make -j "$(nproc)" \
@@ -146,6 +147,7 @@ RUN cd / && git clone https://github.com/bitcoin-core/secp256k1.git \
     && make && make install && ldconfig
 
 ADD scripts/coverage.sh /usr/bin
+ADD scripts/valgrind.sh /usr/bin
 
 RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
