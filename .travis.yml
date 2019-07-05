@@ -7,6 +7,7 @@ env:
    - SECP256K1_COMMIT=fa3301713549d118e57ebe6551d062903ddd6b63
    - DOCKER_CACHE_DIR=/home/travis/docker
    - CC_FOR_BUILD=gcc
+   - LEAKTEST=true
 
 cache:
   directories:
@@ -19,7 +20,7 @@ matrix:
       before_script: cd travis/phpqa/ && ./build_container.sh && cd ../.. && \
                      ./travis/docker-save-cache.sh secp256k1-{$PHPQA_PHP_VERSION}
     - php: 7.3
-      env: CC_FOR_BUILD=clang
+      env: CC_FOR_BUILD=clang LEAKTEST=
     - php: 7.2
     - php: 7.1
     - php: 7.0
@@ -46,7 +47,9 @@ install:
 
 script:
   - travis/verify_stubs.sh
-  - cd secp256k1/ && REPORT_EXIT_STATUS=1 make test TESTS="-m" || (find tests/*.log -type f -exec cat {} + ; exit 1) && cd ..
+  - export PHP_TESTS=""
+  - if [ "${LEAKTEST}" = "true" ]; then export PHP_TESTS="-m $PHP_TESTS"; fi
+  - cd secp256k1/ && REPORT_EXIT_STATUS=1 make test TESTS="${PHP_TESTS}" || (find tests/*.log -type f -exec cat {} + ; exit 1) && cd ..
   - travis/run_coverage_test.sh || exit 1
   - travis/validate_examples.sh || exit 1
 
