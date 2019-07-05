@@ -15,17 +15,15 @@ matrix:
   include:
     - php: 7.3
       env: COVERAGE=true PHPQA_PHP_VERSION=7.3.7
-    - php: 7.0
-      env: VALGRIND=true PHPQA_PHP_VERSION=7.0.33
-    - php: 7.1
-      env: VALGRIND=true PHPQA_PHP_VERSION=7.1.7
+      before_script: cd travis/phpqa/ && ./build_container.sh && cd ../.. && \
+                     ./travis/docker-save-cache.sh secp256k1-{$PHPQA_PHP_VERSION}
     - php: 7.2
-      env: VALGRIND=true PHPQA_PHP_VERSION=7.2.20
+    - php: 7.1
+    - php: 7.0
 
 before_install:
   - sudo apt-get install -qq libssl-dev
   - if [ "${COVERAGE}" = "true" ]; then ./travis/docker-load-cache.sh secp256k1-${PHPQA_PHP_VERSION} || echo "failed"; fi
-  - if [ "${VALGRIND}" = "true" ]; then ./travis/docker-load-cache.sh secp256k1-${PHPQA_PHP_VERSION} || echo "failed"; fi
 
 install:
   - |
@@ -41,18 +39,10 @@ install:
       && cd ..
   - composer update
 
-before_script:
-  - |
-      if [ "${COVERAGE}" = "true" ]; then \
-          cd travis/phpqa/ && ./build_container.sh && cd ../.. && \
-          ./travis/docker-save-cache.sh secp256k1-{$PHPQA_PHP_VERSION}
-      fi
-
 script:
   - travis/verify_stubs.sh
-  - cd secp256k1/ && REPORT_EXIT_STATUS=1 make test || (find tests/*.log -type f -exec cat {} + ; exit 1) && cd ..
+  - cd secp256k1/ && REPORT_EXIT_STATUS=1 make test TESTS="-m" || (find tests/*.log -type f -exec cat {} + ; exit 1) && cd ..
   - travis/run_coverage_test.sh || exit 1
-  - travis/run_valgrind_test.sh || exit 1
   - travis/validate_examples.sh || exit 1
 
 after_script:
