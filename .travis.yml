@@ -6,6 +6,7 @@ env:
   global:
    - SECP256K1_COMMIT=fa3301713549d118e57ebe6551d062903ddd6b63
    - DOCKER_CACHE_DIR=/home/travis/docker
+   - CC_FOR_BUILD=gcc
 
 cache:
   directories:
@@ -17,6 +18,8 @@ matrix:
       env: COVERAGE=true PHPQA_PHP_VERSION=7.3.7
       before_script: cd travis/phpqa/ && ./build_container.sh && cd ../.. && \
                      ./travis/docker-save-cache.sh secp256k1-{$PHPQA_PHP_VERSION}
+    - php: 7.3
+      env: CC_FOR_BUILD=clang
     - php: 7.2
     - php: 7.1
     - php: 7.0
@@ -32,10 +35,12 @@ install:
       && ./autogen.sh                                                             \
       && ./configure --enable-tests=no --enable-benchmark=no                      \
              --enable-experimental --enable-module-{ecdh,recovery}                \
+             CC=${CC_FOR_BUILD}                                                   \
       && make -j$(nproc) && sudo make install && cd ..
   - |
       cd secp256k1 && phpize                                                      \
-      && ./configure && make -j$(nproc) && sudo make install                      \
+      && ./configure CC=${CC_FOR_BUILD}                                           \
+      && make -j$(nproc) && sudo make install                                     \
       && cd ..
   - composer update
 
