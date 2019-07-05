@@ -571,7 +571,7 @@ PHP_FUNCTION(secp256k1_context_randomize)
                         "secp256k1_context_randomize(): Parameter 2 should be 32 bytes");
                 return;
             }
-            seed32 = Z_STRVAL_P(zSeed);
+            seed32 = (unsigned char *) Z_STRVAL_P(zSeed);
         } else if (Z_TYPE_P(zSeed) != IS_NULL) {
             zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC,
                     "secp256k1_context_randomize(): Parameter 2 should be a 32 byte string, or null");
