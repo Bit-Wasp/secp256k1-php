@@ -10,6 +10,7 @@
 #include "ext/standard/info.h"
 #include "php_secp256k1.h"
 #include "lax_der.h"
+#include "zend_exceptions.h"
 
 static zend_class_entry *spl_ce_InvalidArgumentException;
 
