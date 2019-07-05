@@ -1034,7 +1034,8 @@ PHP_FUNCTION(secp256k1_ec_pubkey_serialize)
         RETURN_LONG(result);
     }
 
-    pubkeylen = (flags & SECP256K1_EC_COMPRESSED != 0) ? PUBKEY_COMPRESSED_LENGTH : PUBKEY_UNCOMPRESSED_LENGTH;
+    pubkeylen = (flags == SECP256K1_EC_COMPRESSED) ? PUBKEY_COMPRESSED_LENGTH : PUBKEY_UNCOMPRESSED_LENGTH;
+
     unsigned char pubkeyout[PUBKEY_UNCOMPRESSED_LENGTH];
     result = secp256k1_ec_pubkey_serialize(ctx, pubkeyout, &pubkeylen, pubkey, flags);
 
