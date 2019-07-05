@@ -7,7 +7,7 @@ env:
    - SECP256K1_COMMIT=fa3301713549d118e57ebe6551d062903ddd6b63
    - DOCKER_CACHE_DIR=/home/travis/docker
    - CC_FOR_BUILD=gcc
-   - LEAKTEST=true
+   -
 
 cache:
   directories:
@@ -20,13 +20,18 @@ matrix:
       before_script: cd travis/phpqa/ && ./build_container.sh && cd ../.. && \
                      ./travis/docker-save-cache.sh secp256k1-{$PHPQA_PHP_VERSION}
     - php: 7.3
-      env: CC_FOR_BUILD=clang LEAKTEST=
+      env: CC_FOR_BUILD=clang
+    - php: 7.3
+      env: CC_FOR_BUILD=clang
     - php: 7.2
+      env: LEAKTEST=true
     - php: 7.1
+      env: LEAKTEST=true
     - php: 7.0
+      env: LEAKTEST=true
 
 before_install:
-  - sudo apt-get install -qq libssl-dev
+  - sudo apt-get install -qq libssl-dev valgrind
   - if [ "${COVERAGE}" = "true" ]; then ./travis/docker-load-cache.sh secp256k1-${PHPQA_PHP_VERSION} || echo "failed"; fi
 
 install:
