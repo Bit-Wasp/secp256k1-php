@@ -15,12 +15,11 @@ matrix:
   include:
     - php: 7.3
       env: COVERAGE=true PHPQA_PHP_VERSION=7.3.7
-    - php: 7.0
-      env: VALGRIND=true PHPQA_PHP_VERSION=7.0.33
-    - php: 7.1
-      env: VALGRIND=true PHPQA_PHP_VERSION=7.1.7
+    - php: 7.3
+      env: VALGRIND=true PHPQA_PHP_VERSION=7.3.7
     - php: 7.2
-      env: VALGRIND=true PHPQA_PHP_VERSION=7.2.20
+    - php: 7.1
+    - php: 7.0
 
 before_install:
   - sudo apt-get install -qq libssl-dev
