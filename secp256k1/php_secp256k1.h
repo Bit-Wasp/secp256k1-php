@@ -2,6 +2,7 @@
 #include <secp256k1.h>
 #include <secp256k1_ecdh.h>
 #include <secp256k1_recovery.h>
+#include <secp256k1_schnorrsig.h>
 
 #ifndef PHP_SECP256K1_H
 #define PHP_SECP256K1_H
@@ -13,6 +14,8 @@ extern zend_module_entry secp256k1_module_entry;
 #define SECP256K1_CTX_RES_NAME "secp256k1_context"
 #define SECP256K1_PUBKEY_RES_NAME "secp256k1_pubkey"
 #define SECP256K1_SIG_RES_NAME "secp256k1_ecdsa_signature"
+#define SECP256K1_SCRATCH_SPACE_RES_NAME "secp256k1_scratch_space"
+#define SECP256K1_SCHNORRSIG_RES_NAME "secp256k1_schnorrsig"
 #define SECP256K1_RECOVERABLE_SIG_RES_NAME "secp256k1_ecdsa_recoverable_signature"
 
 #ifdef ZTS
@@ -47,7 +50,6 @@ PHP_FUNCTION(secp256k1_ec_seckey_verify);
 PHP_FUNCTION(secp256k1_ec_privkey_negate);
 PHP_FUNCTION(secp256k1_ec_pubkey_negate);
 PHP_FUNCTION(secp256k1_ec_pubkey_create);
-PHP_FUNCTION(secp256k1_ec_pubkey_combine);
 PHP_FUNCTION(secp256k1_ec_pubkey_parse);
 PHP_FUNCTION(secp256k1_ec_pubkey_serialize);
 
@@ -55,6 +57,11 @@ PHP_FUNCTION(secp256k1_ec_privkey_tweak_add);
 PHP_FUNCTION(secp256k1_ec_privkey_tweak_mul);
 PHP_FUNCTION(secp256k1_ec_pubkey_tweak_add);
 PHP_FUNCTION(secp256k1_ec_pubkey_tweak_mul);
+
+PHP_FUNCTION(secp256k1_ec_pubkey_combine);
+
+PHP_FUNCTION(secp256k1_scratch_space_create);
+PHP_FUNCTION(secp256k1_scratch_space_destroy);
 
 /* Recovery module */
 PHP_FUNCTION(secp256k1_ecdsa_sign_recoverable);
@@ -65,5 +72,12 @@ PHP_FUNCTION(secp256k1_ecdsa_recoverable_signature_parse_compact);
 
 /* ECDH module */
 PHP_FUNCTION(secp256k1_ecdh);
+
+/* schnorr module */
+PHP_FUNCTION(secp256k1_schnorrsig_serialize);
+PHP_FUNCTION(secp256k1_schnorrsig_parse);
+PHP_FUNCTION(secp256k1_schnorrsig_sign);
+PHP_FUNCTION(secp256k1_schnorrsig_verify);
+PHP_FUNCTION(secp256k1_schnorrsig_verify_batch);
 
 #endif	/* PHP_SECP256K1_H */
