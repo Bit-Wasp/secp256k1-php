@@ -13,7 +13,9 @@ $sig = hex2bin("7a8e3bdc7c64f31b119a849e8bb39ddbdc0a64abd4cadcc5cfc15d3ec06354ed
 $schnorrsig = null;
 $result = secp256k1_schnorrsig_parse($ctx, $schnorrsig, $sig);
 echo $result . PHP_EOL;
+echo get_resource_type($schnorrsig) . PHP_EOL;
 
 ?>
 --EXPECT--
 1
+secp256k1_schnorrsig
