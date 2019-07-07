@@ -1,5 +1,5 @@
 --TEST--
-secp256k1_ecdsa_sign errors if msg parameter is not 32 bytes
+secp256k1_schnorrsig_sign errors if msg parameter is not 32 bytes
 --SKIPIF--
 <?php
 if (!extension_loaded("secp256k1")) print "skip extension not loaded";
@@ -18,11 +18,11 @@ $ctx = secp256k1_context_create(SECP256K1_CONTEXT_SIGN | SECP256K1_CONTEXT_VERIF
 
 $sig = null;
 try {
-    secp256k1_ecdsa_sign($ctx, $sig, $msg32, $priv);
+    secp256k1_schnorrsig_sign($ctx, $sig, $msg32, $priv);
 } catch (\Exception $e) {
     echo $e->getMessage() . PHP_EOL;
 }
 
 ?>
 --EXPECT--
-secp256k1_ecdsa_sign(): Parameter 3 should be 32 bytes
+secp256k1_schnorrsig_sign(): Parameter 3 should be 32 bytes
