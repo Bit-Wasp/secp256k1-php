@@ -1,5 +1,5 @@
 --TEST--
-secp256k1_ecdsa_sign errors if provided an invalid resource as a context
+secp256k1_ecdsa_sign errors if key parameter is not 32 bytes
 --SKIPIF--
 <?php
 if (!extension_loaded("secp256k1")) print "skip extension not loaded";

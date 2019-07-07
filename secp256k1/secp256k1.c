@@ -1482,8 +1482,7 @@ PHP_FUNCTION(secp256k1_scratch_space_create)
     }
 
     if ((ctx = php_get_secp256k1_context(zCtx)) == NULL) {
-        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0
-            TSRMLS_CC, "secp256k1_scratch_space_create(): Parameter 1 should be a context resource");
+        return;
     }
 
     scratch = secp256k1_scratch_space_create(ctx, (size_t) size);
@@ -1898,6 +1897,11 @@ PHP_FUNCTION(secp256k1_schnorrsig_parse)
         RETURN_LONG(result);
     }
 
+    if (sigin->len != COMPACT_SIGNATURE_LENGTH) {
+        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_schnorrsig_parse(): Parameter 3 should be 64 bytes");
+        return;
+    }
+
     sig = (secp256k1_schnorrsig *) emalloc(sizeof(secp256k1_schnorrsig));
     result = secp256k1_schnorrsig_parse(ctx, sig, (const unsigned char *) sigin->val);
     if (result == 1) {
@@ -1995,6 +1999,12 @@ PHP_FUNCTION(secp256k1_schnorrsig_verify) {
 
     if ((sig = php_get_secp256k1_schnorr_signature(zSchnorrSig)) == NULL) {
         RETURN_LONG(result);
+    }
+
+    if (msg32->len != HASH_LENGTH) {
+        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0
+        TSRMLS_CC, "secp256k1_schnorrsig_verify(): Parameter 3 should be 32 bytes");
+        return;
     }
 
     if ((pubkey = php_get_secp256k1_pubkey(zPubKey)) == NULL) {
