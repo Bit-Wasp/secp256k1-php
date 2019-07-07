@@ -1,5 +1,5 @@
 --TEST--
-secp256k1_ecdsa_sign returns int 0 if parameter parsing fails
+secp256k1_schnorrsig_sign returns int 0 if parameter parsing fails
 --SKIPIF--
 <?php
 if (!extension_loaded("secp256k1")) print "skip extension not loaded";
@@ -9,10 +9,10 @@ if (!extension_loaded("secp256k1")) print "skip extension not loaded";
 
 set_error_handler(function($code, $str) { echo $str . PHP_EOL; });
 
-$result = secp256k1_ecdsa_sign();
+$result = secp256k1_schnorrsig_sign();
 echo $result . PHP_EOL;
 
 ?>
 --EXPECT--
-secp256k1_ecdsa_sign() expects at least 4 parameters, 0 given
+secp256k1_schnorrsig_sign() expects at least 4 parameters, 0 given
 0

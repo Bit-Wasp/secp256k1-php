@@ -1,5 +1,5 @@
 --TEST--
-secp256k1_ecdsa_sign returns int 0 if parameter parsing fails
+secp256k1_scratch_space_destroy errors if parameter parsing fails
 --SKIPIF--
 <?php
 if (!extension_loaded("secp256k1")) print "skip extension not loaded";
@@ -9,10 +9,8 @@ if (!extension_loaded("secp256k1")) print "skip extension not loaded";
 
 set_error_handler(function($code, $str) { echo $str . PHP_EOL; });
 
-$result = secp256k1_ecdsa_sign();
-echo $result . PHP_EOL;
-
+var_dump(secp256k1_scratch_space_destroy());
 ?>
 --EXPECT--
-secp256k1_ecdsa_sign() expects at least 4 parameters, 0 given
-0
+secp256k1_scratch_space_destroy() expects exactly 2 parameters, 0 given
+bool(false)
