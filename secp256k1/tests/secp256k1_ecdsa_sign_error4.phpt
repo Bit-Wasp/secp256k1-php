@@ -14,5 +14,5 @@ echo $result . PHP_EOL;
 
 ?>
 --EXPECT--
-secp256k1_ecdsa_sign() expects exactly 4 parameters, 0 given
+secp256k1_ecdsa_sign() expects at least 4 parameters, 0 given
 0
