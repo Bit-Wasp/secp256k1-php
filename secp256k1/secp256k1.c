@@ -25,7 +25,7 @@ typedef struct php_secp256k1_nonce_function_data {
     zval* data;
 } php_secp256k1_nonce_function_data;
 
-static int call_nonce_function(unsigned char *nonce32, const unsigned char *msg32,
+static int php_secp256k1_nonce_function_callback(unsigned char *nonce32, const unsigned char *msg32,
                                const unsigned char *key32, const unsigned char *algo16,
                                void *data, unsigned int attempt) {
     php_secp256k1_nonce_function_data* callback;
@@ -231,6 +231,8 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_secp256k1_ecdsa_sign, IS_LONG, 0)
     ZEND_ARG_TYPE_INFO(1, ecdsaSignatureOut, IS_RESOURCE, 1)
     ZEND_ARG_TYPE_INFO(0, msg32, IS_STRING, 0)
     ZEND_ARG_TYPE_INFO(0, secretKey, IS_STRING, 0)
+    ZEND_ARG_CALLABLE_INFO(0, noncefp, 1)
+    ZEND_ARG_INFO(0, ndata)
 ZEND_END_ARG_INFO();
 
 #if (PHP_VERSION_ID >= 70000 && PHP_VERSION_ID <= 70200)
@@ -1025,13 +1027,19 @@ PHP_FUNCTION(secp256k1_ecdsa_verify) {
  * Create an ECDSA signature. */
 PHP_FUNCTION (secp256k1_ecdsa_sign)
 {
-    zval *zCtx, *zSig;
+    zval *zCtx, *zSig, *zData = NULL;
     secp256k1_context *ctx;
     secp256k1_ecdsa_signature *newsig;
     zend_string *msg32, *seckey;
+    secp256k1_nonce_function noncefp;
+    zend_fcall_info fci;
+    zend_fcall_info_cache fcc;
+    php_secp256k1_nonce_function_data calldata;
+    void* ndata;
     int result = 0;
 
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rz/SS", &zCtx, &zSig, &msg32, &seckey) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rz/SS|fz",
+        &zCtx, &zSig, &msg32, &seckey, &fci, &fcc, &zData) == FAILURE) {
         RETURN_LONG(result);
     }
 
@@ -1051,8 +1059,19 @@ PHP_FUNCTION (secp256k1_ecdsa_sign)
         return;
     }
 
+    if (ZEND_NUM_ARGS() > 4) {
+        noncefp = php_secp256k1_nonce_function_callback;
+        calldata.fci = &fci;
+        calldata.fcc = &fcc;
+        calldata.data = zData;
+        ndata = (void *) &calldata;
+    } else {
+        noncefp = secp256k1_nonce_function_default;
+        ndata = NULL;
+    }
+
     newsig = (secp256k1_ecdsa_signature *) emalloc(sizeof(secp256k1_ecdsa_signature));
-    result = secp256k1_ecdsa_sign(ctx, newsig, (unsigned char *) msg32->val, (unsigned char *) seckey->val, NULL, NULL);
+    result = secp256k1_ecdsa_sign(ctx, newsig, (unsigned char *) msg32->val, (unsigned char *) seckey->val, noncefp, ndata);
     if (result == 1) {
         zval_dtor(zSig);
         ZVAL_RES(zSig, zend_register_resource(newsig, le_secp256k1_sig));
@@ -1931,7 +1950,7 @@ PHP_FUNCTION (secp256k1_schnorrsig_sign)
     }
 
     if (ZEND_NUM_ARGS() > 4) {
-        noncefp = call_nonce_function;
+        noncefp = php_secp256k1_nonce_function_callback;
         calldata.fci = &fci;
         calldata.fcc = &fcc;
         calldata.data = zNData;
