@@ -231,7 +231,8 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_secp256k1_ecdsa_sign, IS_LONG, 0)
     ZEND_ARG_TYPE_INFO(1, ecdsaSignatureOut, IS_RESOURCE, 1)
     ZEND_ARG_TYPE_INFO(0, msg32, IS_STRING, 0)
     ZEND_ARG_TYPE_INFO(0, secretKey, IS_STRING, 0)
-    ZEND_ARG_CALLABLE_INFO(0, noncefp, 1)
+    //ZEND_ARG_CALLABLE_INFO(0, noncefp, 1)
+    ZEND_ARG_INFO(0, noncefp)
     ZEND_ARG_INFO(0, ndata)
 ZEND_END_ARG_INFO();
 
@@ -1028,8 +1029,8 @@ PHP_FUNCTION (secp256k1_ecdsa_sign)
     secp256k1_ecdsa_signature *newsig;
     zend_string *msg32, *seckey;
     secp256k1_nonce_function noncefp;
-    zend_fcall_info fci;
-    zend_fcall_info_cache fcc;
+    zend_fcall_info fci = empty_fcall_info;
+    zend_fcall_info_cache fcc = empty_fcall_info_cache;
     php_secp256k1_nonce_function_data calldata;
     void* ndata;
     int result = 0;
@@ -1060,6 +1061,22 @@ PHP_FUNCTION (secp256k1_ecdsa_sign)
         calldata.fci = &fci;
         calldata.fcc = &fcc;
         calldata.data = zData;
+//        if (zData != NULL) {
+//            if (Z_TYPE_P(zData) == IS_STRING) {
+//                if (Z_STRLEN_P(zData) != 32) {
+//                    zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0
+//                    TSRMLS_CC, "secp256k1_ecdsa_sign(): Parameter 6 should be 32 bytes when using default nonce function");
+//                    return;
+//                }
+//                ndata = (void *) Z_STRVAL_P(zData);
+//            } else {
+//                zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0
+//                TSRMLS_CC, "secp256k1_ecdsa_sign(): Parameter 4 should be 32 bytes");
+//                return;
+//            }
+//        } else {
+//            ndata = NULL;
+//        }
         ndata = (void *) &calldata;
     } else {
         noncefp = secp256k1_nonce_function_default;
