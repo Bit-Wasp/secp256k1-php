@@ -2061,6 +2061,11 @@ PHP_FUNCTION(secp256k1_schnorrsig_verify_batch)
     msg32s = emalloc(sizeof(unsigned char *) * numsigs);
     arr_hash = Z_ARRVAL_P(zMsg32Array);
     ZEND_HASH_FOREACH_KEY_VAL(arr_hash, i, arrayKeyStr, arrayZval) {
+        if (Z_TYPE_P(arrayZval) != IS_STRING || Z_STRLEN_P(arrayZval) != 32) {
+            efree(sigs);
+            efree(msg32s);
+            RETURN_LONG(result);
+        }
         if ((msg32 = (unsigned char *) Z_STRVAL_P(arrayZval)) == NULL) {
             efree(sigs);
             efree(msg32s);
