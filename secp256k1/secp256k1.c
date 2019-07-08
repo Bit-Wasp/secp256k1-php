@@ -2066,12 +2066,7 @@ PHP_FUNCTION(secp256k1_schnorrsig_verify_batch)
             efree(msg32s);
             RETURN_LONG(result);
         }
-        if ((msg32 = (unsigned char *) Z_STRVAL_P(arrayZval)) == NULL) {
-            efree(sigs);
-            efree(msg32s);
-            RETURN_LONG(result);
-        }
-        msg32s[i++] = msg32;
+        msg32s[i++] = (unsigned char *) Z_STRVAL_P(arrayZval);
     } ZEND_HASH_FOREACH_END();
 
     pubkeys = emalloc(sizeof(secp256k1_pubkey *) * numsigs);
