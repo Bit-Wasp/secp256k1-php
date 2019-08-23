@@ -3,6 +3,7 @@ secp256k1_ecdh - a custom hash function can cause operation to fail
 --SKIPIF--
 <?php
 if (!extension_loaded("secp256k1")) print "skip extension not loaded";
+if (!function_exists("secp256k1_ecdh")) print "skip no ecdh support";
 ?>
 --FILE--
 <?php
