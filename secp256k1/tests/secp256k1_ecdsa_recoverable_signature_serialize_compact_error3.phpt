@@ -3,6 +3,7 @@ secp256k1_ecdsa_recoverable_signature_serialize_compact returns false when conte
 --SKIPIF--
 <?php
 if (!extension_loaded("secp256k1")) print "skip extension not loaded";
+if (!function_exists("secp256k1_ecdsa_recover")) print "skip no recovery support";
 ?>
 --FILE--
 <?php
