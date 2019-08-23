@@ -3,6 +3,7 @@ secp256k1_schnorrsig_sign works a user provided nonce function, no additional da
 --SKIPIF--
 <?php
 if (!extension_loaded("secp256k1")) print "skip extension not loaded";
+if (!function_exists("secp256k1_schnorrsig_verify")) print "skip no schnorrsig support";
 ?>
 --FILE--
 <?php

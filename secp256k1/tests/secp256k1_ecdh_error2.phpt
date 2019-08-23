@@ -3,6 +3,8 @@ secp256k1_ecdh errors with 0 key
 --SKIPIF--
 <?php
 if (!extension_loaded("secp256k1")) print "skip extension not loaded";
+if (!function_exists("secp256k1_ecdh")) print "skip no ecdh support";
+
 ?>
 --FILE--
 <?php
