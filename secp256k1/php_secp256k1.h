@@ -63,6 +63,9 @@ PHP_FUNCTION(secp256k1_ec_pubkey_combine);
 PHP_FUNCTION(secp256k1_scratch_space_create);
 PHP_FUNCTION(secp256k1_scratch_space_destroy);
 
+PHP_FUNCTION(secp256k1_nonce_function_default);
+PHP_FUNCTION(secp256k1_nonce_function_rfc6979);
+
 /* Recovery module */
 PHP_FUNCTION(secp256k1_ecdsa_sign_recoverable);
 PHP_FUNCTION(secp256k1_ecdsa_recover);
@@ -79,5 +82,5 @@ PHP_FUNCTION(secp256k1_schnorrsig_parse);
 PHP_FUNCTION(secp256k1_schnorrsig_sign);
 PHP_FUNCTION(secp256k1_schnorrsig_verify);
 PHP_FUNCTION(secp256k1_schnorrsig_verify_batch);
-
+PHP_FUNCTION(secp256k1_nonce_function_bipschnorr);
 #endif	/* PHP_SECP256K1_H */
