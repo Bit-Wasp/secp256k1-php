@@ -378,6 +378,8 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_secp256k1_scratch_space_destroy, IS
 ZEND_END_ARG_INFO();
 
 //recovery
+#ifdef SECP256K1_MODULE_RECOVERY
+
 #if (PHP_VERSION_ID >= 70000 && PHP_VERSION_ID <= 70200)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_secp256k1_ecdsa_recoverable_signature_parse_compact, IS_LONG, NULL, 0)
 #else
@@ -432,7 +434,10 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_secp256k1_ecdsa_recover, IS_LONG, 0
     ZEND_ARG_TYPE_INFO(0, msg32, IS_STRING, 0)
 ZEND_END_ARG_INFO();
 
+#endif
+
 //ecdh
+#ifdef SECP256K1_MODULE_ECDH
 #if (PHP_VERSION_ID >= 70000 && PHP_VERSION_ID <= 70200)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_secp256k1_ecdh, IS_LONG, NULL, 0)
 #else
@@ -447,7 +452,9 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_secp256k1_ecdh, IS_LONG, 0)
     ZEND_ARG_INFO(0, data)
 ZEND_END_ARG_INFO();
 
+#endif
 //schnorrsig
+#ifdef SECP256K1_MODULE_SCHNORRSIG
 #if (PHP_VERSION_ID >= 70000 && PHP_VERSION_ID <= 70200)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_secp256k1_schnorrsig_serialize, IS_LONG, NULL, 0)
 #else
@@ -519,6 +526,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_secp256k1_nonce_function_bipschnorr
     ZEND_ARG_TYPE_INFO(0, attempt, IS_LONG, 0)
 ZEND_END_ARG_INFO();
 
+#endif
 /* {{{ resource_functions[]
  *
  * Every user visible function must have an entry in resource_functions[].
@@ -564,22 +572,28 @@ const zend_function_entry secp256k1_functions[] = {
         PHP_FE(secp256k1_nonce_function_rfc6979,             arginfo_secp256k1_nonce_function_rfc6979)
 
         // secp256k1_recovery.h
+#ifdef SECP256K1_MODULE_RECOVERY
         PHP_FE(secp256k1_ecdsa_recoverable_signature_parse_compact, arginfo_secp256k1_ecdsa_recoverable_signature_parse_compact)
         PHP_FE(secp256k1_ecdsa_recoverable_signature_convert, arginfo_secp256k1_ecdsa_recoverable_signature_convert)
         PHP_FE(secp256k1_ecdsa_recoverable_signature_serialize_compact, arginfo_secp256k1_ecdsa_recoverable_signature_serialize_compact)
         PHP_FE(secp256k1_ecdsa_sign_recoverable,             arginfo_secp256k1_ecdsa_sign_recoverable)
         PHP_FE(secp256k1_ecdsa_recover,                      arginfo_secp256k1_ecdsa_recover)
+#endif
 
         // secp256k1_ecdh.h
+#ifdef SECP256K1_MODULE_ECDH
         PHP_FE(secp256k1_ecdh,                               arginfo_secp256k1_ecdh)
+#endif
 
         // secp256k1_schnorr.h
+#ifdef SECP256K1_MODULE_SCHNORRSIG
         PHP_FE(secp256k1_schnorrsig_serialize,               arginfo_secp256k1_schnorrsig_serialize)
         PHP_FE(secp256k1_schnorrsig_parse,                   arginfo_secp256k1_schnorrsig_parse)
         PHP_FE(secp256k1_schnorrsig_sign,                    arginfo_secp256k1_schnorrsig_sign)
         PHP_FE(secp256k1_schnorrsig_verify,                  arginfo_secp256k1_schnorrsig_verify)
         PHP_FE(secp256k1_schnorrsig_verify_batch,            arginfo_secp256k1_schnorrsig_verify_batch)
         PHP_FE(secp256k1_nonce_function_bipschnorr,          arginfo_secp256k1_nonce_function_bipschnorr)
+#endif
 
         PHP_FE_END	/* Must be the last line in resource_functions[] */
 };
@@ -618,14 +632,6 @@ static void secp256k1_sig_dtor(zend_resource * rsrc TSRMLS_DC)
     }
 }
 
-static void secp256k1_recoverable_sig_dtor(zend_resource * rsrc TSRMLS_DC)
-{
-    secp256k1_ecdsa_recoverable_signature *sig = (secp256k1_ecdsa_recoverable_signature*) rsrc->ptr;
-    if (sig) {
-        efree(sig);
-    }
-}
-
 static void secp256k1_scratch_space_dtor(zend_resource * rsrc TSRMLS_DC)
 {
     secp256k1_scratch_space_wrapper *scratch_wrap = (secp256k1_scratch_space_wrapper *) rsrc->ptr;
@@ -635,6 +641,17 @@ static void secp256k1_scratch_space_dtor(zend_resource * rsrc TSRMLS_DC)
     }
 }
 
+#ifdef SECP256K1_MODULE_RECOVERY
+static void secp256k1_recoverable_sig_dtor(zend_resource * rsrc TSRMLS_DC)
+{
+    secp256k1_ecdsa_recoverable_signature *sig = (secp256k1_ecdsa_recoverable_signature*) rsrc->ptr;
+    if (sig) {
+        efree(sig);
+    }
+}
+#endif
+
+#ifdef SECP256K1_MODULE_SCHNORRSIG
 static void secp256k1_schnorrsig_dtor(zend_resource * rsrc TSRMLS_DC)
 {
     secp256k1_schnorrsig *sig = (secp256k1_schnorrsig*) rsrc->ptr;
@@ -642,7 +659,7 @@ static void secp256k1_schnorrsig_dtor(zend_resource * rsrc TSRMLS_DC)
         efree(sig);
     }
 }
-
+#endif
 // attempt to read a sec256k1_context* from the provided resource zval
 static secp256k1_context* php_get_secp256k1_context(zval* pcontext) {
     return (secp256k1_context *)zend_fetch_resource2_ex(pcontext, SECP256K1_CTX_RES_NAME, le_secp256k1_ctx, -1);
@@ -653,19 +670,9 @@ static secp256k1_ecdsa_signature* php_get_secp256k1_ecdsa_signature(zval *psig) 
     return (secp256k1_ecdsa_signature *)zend_fetch_resource2_ex(psig, SECP256K1_SIG_RES_NAME, le_secp256k1_sig, -1);
 }
 
-// attempt to read a sec256k1_ecdsa_recoverable_signature* from the provided resource zval
-static secp256k1_ecdsa_recoverable_signature* php_get_secp256k1_ecdsa_recoverable_signature(zval *precsig) {
-    return (secp256k1_ecdsa_recoverable_signature *)zend_fetch_resource2_ex(precsig, SECP256K1_RECOVERABLE_SIG_RES_NAME, le_secp256k1_recoverable_sig, -1);
-}
-
 // attempt to read a sec256k1_pubkey* from the provided resource zval
 static secp256k1_pubkey* php_get_secp256k1_pubkey(zval *pkey) {
     return (secp256k1_pubkey *)zend_fetch_resource2_ex(pkey, SECP256K1_PUBKEY_RES_NAME, le_secp256k1_pubkey, -1);
-}
-
-// attempt to read a sec256k1_schnorrsig* from the provided resource zval
-static secp256k1_schnorrsig* php_get_secp256k1_schnorr_signature(zval *psig) {
-    return (secp256k1_schnorrsig *)zend_fetch_resource2_ex(psig, SECP256K1_SCHNORRSIG_RES_NAME, le_secp256k1_schnorrsig, -1);
 }
 
 // attempt to read a sec256k1_scratch_space * from the provided resource zval
@@ -673,20 +680,28 @@ static secp256k1_scratch_space_wrapper * php_get_secp256k1_scratch_space(zval *p
     return (secp256k1_scratch_space_wrapper *)zend_fetch_resource2_ex(psig, SECP256K1_SCRATCH_SPACE_RES_NAME, le_secp256k1_scratch_space, -1);
 }
 
+#ifdef SECP256K1_MODULE_RECOVERY
+// attempt to read a sec256k1_ecdsa_recoverable_signature* from the provided resource zval
+static secp256k1_ecdsa_recoverable_signature* php_get_secp256k1_ecdsa_recoverable_signature(zval *precsig) {
+    return (secp256k1_ecdsa_recoverable_signature *)zend_fetch_resource2_ex(precsig, SECP256K1_RECOVERABLE_SIG_RES_NAME, le_secp256k1_recoverable_sig, -1);
+}
+#endif
+
+#ifdef SECP256K1_MODULE_SCHNORRSIG
+// attempt to read a sec256k1_schnorrsig* from the provided resource zval
+static secp256k1_schnorrsig* php_get_secp256k1_schnorr_signature(zval *psig) {
+    return (secp256k1_schnorrsig *)zend_fetch_resource2_ex(psig, SECP256K1_SCHNORRSIG_RES_NAME, le_secp256k1_schnorrsig, -1);
+}
+#endif
+
 PHP_MINIT_FUNCTION(secp256k1) {
-    le_secp256k1_ctx = zend_register_list_destructors_ex(secp256k1_ctx_dtor, NULL, SECP256K1_CTX_RES_NAME, module_number);
-    le_secp256k1_pubkey = zend_register_list_destructors_ex(secp256k1_pubkey_dtor, NULL, SECP256K1_PUBKEY_RES_NAME, module_number);
-    le_secp256k1_sig = zend_register_list_destructors_ex(secp256k1_sig_dtor, NULL, SECP256K1_SIG_RES_NAME, module_number);
-    le_secp256k1_scratch_space = zend_register_list_destructors_ex(secp256k1_scratch_space_dtor, NULL, SECP256K1_SCRATCH_SPACE_RES_NAME, module_number);
-    le_secp256k1_schnorrsig = zend_register_list_destructors_ex(secp256k1_schnorrsig_dtor, NULL, SECP256K1_SCHNORRSIG_RES_NAME, module_number);
-    le_secp256k1_recoverable_sig = zend_register_list_destructors_ex(secp256k1_recoverable_sig_dtor, NULL, SECP256K1_RECOVERABLE_SIG_RES_NAME, module_number);
+
 
     REGISTER_STRING_CONSTANT("SECP256K1_TYPE_CONTEXT", SECP256K1_CTX_RES_NAME, CONST_CS | CONST_PERSISTENT);
     REGISTER_STRING_CONSTANT("SECP256K1_TYPE_PUBKEY", SECP256K1_PUBKEY_RES_NAME, CONST_CS | CONST_PERSISTENT);
     REGISTER_STRING_CONSTANT("SECP256K1_TYPE_SIG", SECP256K1_SIG_RES_NAME, CONST_CS | CONST_PERSISTENT);
-    REGISTER_STRING_CONSTANT("SECP256K1_TYPE_SCHNORRSIG", SECP256K1_SCHNORRSIG_RES_NAME, CONST_CS | CONST_PERSISTENT);
+
     REGISTER_STRING_CONSTANT("SECP256K1_TYPE_SCRATCH_SPACE", SECP256K1_SCRATCH_SPACE_RES_NAME, CONST_CS | CONST_PERSISTENT);
-    REGISTER_STRING_CONSTANT("SECP256K1_TYPE_RECOVERABLE_SIG", SECP256K1_RECOVERABLE_SIG_RES_NAME, CONST_CS | CONST_PERSISTENT);
 
     /** Flags to pass to secp256k1_context_create */
     REGISTER_LONG_CONSTANT("SECP256K1_CONTEXT_VERIFY", SECP256K1_CONTEXT_VERIFY, CONST_CS | CONST_PERSISTENT);
@@ -703,9 +718,21 @@ PHP_MINIT_FUNCTION(secp256k1) {
     REGISTER_LONG_CONSTANT("SECP256K1_TAG_PUBKEY_UNCOMPRESSED", SECP256K1_TAG_PUBKEY_UNCOMPRESSED, CONST_CS | CONST_PERSISTENT);
     REGISTER_LONG_CONSTANT("SECP256K1_TAG_PUBKEY_HYBRID_EVEN", SECP256K1_TAG_PUBKEY_HYBRID_EVEN, CONST_CS | CONST_PERSISTENT);
     REGISTER_LONG_CONSTANT("SECP256K1_TAG_PUBKEY_HYBRID_ODD", SECP256K1_TAG_PUBKEY_HYBRID_ODD, CONST_CS | CONST_PERSISTENT);
-    /*
-    ZEND_INIT_MODULE_GLOBALS(secp256k1, php_secp256k1_init_globals, NULL);
-     */
+    le_secp256k1_ctx = zend_register_list_destructors_ex(secp256k1_ctx_dtor, NULL, SECP256K1_CTX_RES_NAME, module_number);
+    le_secp256k1_pubkey = zend_register_list_destructors_ex(secp256k1_pubkey_dtor, NULL, SECP256K1_PUBKEY_RES_NAME, module_number);
+    le_secp256k1_sig = zend_register_list_destructors_ex(secp256k1_sig_dtor, NULL, SECP256K1_SIG_RES_NAME, module_number);
+    le_secp256k1_scratch_space = zend_register_list_destructors_ex(secp256k1_scratch_space_dtor, NULL, SECP256K1_SCRATCH_SPACE_RES_NAME, module_number);
+
+#ifdef SECP256K1_MODULE_RECOVERY
+    REGISTER_STRING_CONSTANT("SECP256K1_TYPE_RECOVERABLE_SIG", SECP256K1_RECOVERABLE_SIG_RES_NAME, CONST_CS | CONST_PERSISTENT);
+    le_secp256k1_recoverable_sig = zend_register_list_destructors_ex(secp256k1_recoverable_sig_dtor, NULL, SECP256K1_RECOVERABLE_SIG_RES_NAME, module_number);
+#endif
+
+#ifdef SECP256K1_MODULE_SCHNORRSIG
+    REGISTER_STRING_CONSTANT("SECP256K1_TYPE_SCHNORRSIG", SECP256K1_SCHNORRSIG_RES_NAME, CONST_CS | CONST_PERSISTENT);
+    le_secp256k1_schnorrsig = zend_register_list_destructors_ex(secp256k1_schnorrsig_dtor, NULL, SECP256K1_SCHNORRSIG_RES_NAME, module_number);
+#endif
+
     return SUCCESS;
 }
 
@@ -1640,6 +1667,7 @@ PHP_FUNCTION(secp256k1_nonce_function_default)
 /* }}} */
 
 /* Begin recovery module functions */
+#ifdef SECP256K1_MODULE_RECOVERY
 
 /* {{{ proto int secp256k1_ecdsa_recoverable_signature_parse_compact(resource context, resource &sig, string sig64, int recid)
  * Parse a compact ECDSA signature (64 bytes + recovery id). */
@@ -1830,9 +1858,11 @@ PHP_FUNCTION(secp256k1_ecdsa_recover)
 }
 /* }}} */
 
+#endif
 /* End recovery module functions */
 
 /* Begin EcDH module functions */
+#ifdef SECP256K1_MODULE_ECDH
 
 typedef struct php_callback {
     zend_fcall_info* fci;
@@ -1955,9 +1985,11 @@ PHP_FUNCTION(secp256k1_ecdh)
 }
 /* }}} */
 
+#endif
 /* End EcDH module functions */
 
 /* Begin schnorr module functions */
+#ifdef SECP256K1_MODULE_SCHNORRSIG
 
 /* {{{ proto int secp256k1_schnorrsig_serialize(resource context, string &result, resource schnorrsig)
  * Serialize a Schnorr signature. */
@@ -2266,6 +2298,7 @@ PHP_FUNCTION(secp256k1_nonce_function_bipschnorr)
 }
 /* }}} */
 
+#endif
 /* End schnorr module functions */
 
 /*
