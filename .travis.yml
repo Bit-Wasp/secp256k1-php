@@ -4,7 +4,9 @@ sudo: required
 
 env:
   global:
-   - SECP256K1_COMMIT=fa3301713549d118e57ebe6551d062903ddd6b63
+   - SECP256K1_REMOTE=https://github.com/jonasnick/secp256k1.git
+#   - SECP256K1_COMMIT=fa3301713549d118e57ebe6551d062903ddd6b63
+   - SECP256K1_COMMIT=a228e2f54d64692230ccb2937b12dd746c5157ed
    - DOCKER_CACHE_DIR=/home/travis/docker
 
 cache:
@@ -28,11 +30,11 @@ before_install:
 
 install:
   - |
-      git clone https://github.com/bitcoin-core/secp256k1.git libsecp256k1        \
+      git clone $SECP256K1_REMOTE libsecp256k1        \
       && cd libsecp256k1 && git checkout $SECP256K1_COMMIT                        \
       && ./autogen.sh                                                             \
       && ./configure --enable-tests=no --enable-benchmark=no                      \
-             --enable-experimental --enable-module-{ecdh,recovery}                \
+             --enable-experimental --enable-module-{ecdh,recovery,schnorrsig}     \
       && make -j$(nproc) && sudo make install && cd ..
   - |
       cd secp256k1 && phpize                                                      \
