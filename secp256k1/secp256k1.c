@@ -46,6 +46,7 @@ static int php_secp256k1_nonce_function_callback(unsigned char *nonce32, const u
     // receive the result, and pass in the x & y parameters.
     // arg 3 is owned by the caller of secp256k1_ecdh.
     ZVAL_NEW_REF(&args[0], &zvalout);
+
     ZVAL_STR(&args[1], zend_string_init((const char *) msg32, 32, 0));
     ZVAL_STR(&args[2], zend_string_init((const char *) key32, 32, 0));
     if (algo16 == NULL) {
@@ -333,6 +334,32 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_secp256k1_ec_pubkey_combine, IS_LON
 ZEND_END_ARG_INFO();
 
 #if (PHP_VERSION_ID >= 70000 && PHP_VERSION_ID <= 70200)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_secp256k1_nonce_function_default, IS_LONG, NULL, 0)
+#else
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_secp256k1_nonce_function_default, IS_LONG, 0)
+#endif
+    ZEND_ARG_TYPE_INFO(1, data, IS_STRING, 1)
+    ZEND_ARG_TYPE_INFO(0, msg32, IS_STRING, 0)
+    ZEND_ARG_TYPE_INFO(0, key32, IS_STRING, 0)
+    ZEND_ARG_TYPE_INFO(0, algo16, IS_STRING, 1)
+    ZEND_ARG_INFO(0, data)
+    ZEND_ARG_TYPE_INFO(0, attempt, IS_LONG, 0)
+ZEND_END_ARG_INFO();
+
+#if (PHP_VERSION_ID >= 70000 && PHP_VERSION_ID <= 70200)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_secp256k1_nonce_function_rfc6979, IS_LONG, NULL, 0)
+#else
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_secp256k1_nonce_function_rfc6979, IS_LONG, 0)
+#endif
+    ZEND_ARG_TYPE_INFO(1, nonce32, IS_STRING, 1)
+    ZEND_ARG_TYPE_INFO(0, msg32, IS_STRING, 0)
+    ZEND_ARG_TYPE_INFO(0, key32, IS_STRING, 0)
+    ZEND_ARG_TYPE_INFO(0, algo16, IS_STRING, 1)
+    ZEND_ARG_INFO(0, data)
+    ZEND_ARG_TYPE_INFO(0, attempt, IS_LONG, 0)
+ZEND_END_ARG_INFO();
+
+#if (PHP_VERSION_ID >= 70000 && PHP_VERSION_ID <= 70200)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_secp256k1_scratch_space_create, IS_RESOURCE, NULL, 0)
 #else
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_secp256k1_scratch_space_create, IS_RESOURCE, 0)
@@ -479,6 +506,19 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_secp256k1_schnorrsig_verify_batch, 
     ZEND_ARG_TYPE_INFO(0, numsigs, IS_LONG, 0)
 ZEND_END_ARG_INFO();
 
+#if (PHP_VERSION_ID >= 70000 && PHP_VERSION_ID <= 70200)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_secp256k1_nonce_function_bipschnorr, IS_LONG, NULL, 0)
+#else
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_secp256k1_nonce_function_bipschnorr, IS_LONG, 0)
+#endif
+    ZEND_ARG_TYPE_INFO(1, nonce32, IS_STRING, 1)
+    ZEND_ARG_TYPE_INFO(0, msg32, IS_STRING, 0)
+    ZEND_ARG_TYPE_INFO(0, key32, IS_STRING, 0)
+    ZEND_ARG_TYPE_INFO(0, algo16, IS_STRING, 1)
+    ZEND_ARG_INFO(0, data)
+    ZEND_ARG_TYPE_INFO(0, attempt, IS_LONG, 0)
+ZEND_END_ARG_INFO();
+
 /* {{{ resource_functions[]
  *
  * Every user visible function must have an entry in resource_functions[].
@@ -520,6 +560,9 @@ const zend_function_entry secp256k1_functions[] = {
         PHP_FE(secp256k1_scratch_space_create,               arginfo_secp256k1_scratch_space_create)
         PHP_FE(secp256k1_scratch_space_destroy,              arginfo_secp256k1_scratch_space_destroy)
 
+        PHP_FE(secp256k1_nonce_function_default,             arginfo_secp256k1_nonce_function_default)
+        PHP_FE(secp256k1_nonce_function_rfc6979,             arginfo_secp256k1_nonce_function_rfc6979)
+
         // secp256k1_recovery.h
         PHP_FE(secp256k1_ecdsa_recoverable_signature_parse_compact, arginfo_secp256k1_ecdsa_recoverable_signature_parse_compact)
         PHP_FE(secp256k1_ecdsa_recoverable_signature_convert, arginfo_secp256k1_ecdsa_recoverable_signature_convert)
@@ -536,6 +579,7 @@ const zend_function_entry secp256k1_functions[] = {
         PHP_FE(secp256k1_schnorrsig_sign,                    arginfo_secp256k1_schnorrsig_sign)
         PHP_FE(secp256k1_schnorrsig_verify,                  arginfo_secp256k1_schnorrsig_verify)
         PHP_FE(secp256k1_schnorrsig_verify_batch,            arginfo_secp256k1_schnorrsig_verify_batch)
+        PHP_FE(secp256k1_nonce_function_bipschnorr,          arginfo_secp256k1_nonce_function_bipschnorr)
 
         PHP_FE_END	/* Must be the last line in resource_functions[] */
 };
@@ -1060,23 +1104,11 @@ PHP_FUNCTION (secp256k1_ecdsa_sign)
         noncefp = php_secp256k1_nonce_function_callback;
         calldata.fci = &fci;
         calldata.fcc = &fcc;
-        calldata.data = zData;
-//        if (zData != NULL) {
-//            if (Z_TYPE_P(zData) == IS_STRING) {
-//                if (Z_STRLEN_P(zData) != 32) {
-//                    zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0
-//                    TSRMLS_CC, "secp256k1_ecdsa_sign(): Parameter 6 should be 32 bytes when using default nonce function");
-//                    return;
-//                }
-//                ndata = (void *) Z_STRVAL_P(zData);
-//            } else {
-//                zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0
-//                TSRMLS_CC, "secp256k1_ecdsa_sign(): Parameter 4 should be 32 bytes");
-//                return;
-//            }
-//        } else {
-//            ndata = NULL;
-//        }
+        if (zData == NULL) {
+            calldata.data = NULL;
+        } else {
+            calldata.data = zData;
+        }
         ndata = (void *) &calldata;
     } else {
         noncefp = secp256k1_nonce_function_default;
@@ -1531,6 +1563,79 @@ PHP_FUNCTION(secp256k1_scratch_space_destroy)
 
     zend_list_close(Z_RES_P(zScratch));
     RETURN_TRUE;
+}
+/* }}} */
+
+// php_nonce_function_rfc6979 provides a PHP-typed analog for secp256k1_nonce_function_rfc6979.
+static int php_nonce_function_rfc6979(zval *zNonce32, zend_string *zMsg32, zend_string *zKey32, zval *zAlgo16, zval *zData, unsigned int attempt)
+{
+    unsigned char *nonce32 = emalloc(32);
+    unsigned char *data = NULL;
+    unsigned char *algo16 = NULL;
+    int result = 0;
+
+    // read arbitrary data pointer. enforce expectations of rfc6979.
+    if (zData != NULL && Z_TYPE_P(zData) != IS_NULL) {
+        if (Z_TYPE_P(zData) == IS_STRING && Z_STRLEN_P(zData) == 32) {
+            data = (unsigned char *) Z_STRVAL_P(zData);
+        } else {
+            return result;
+        }
+    }
+
+    if (Z_TYPE_P(zAlgo16) == IS_STRING) {
+        algo16 = (unsigned char *)Z_STRVAL_P(zAlgo16);
+    }
+
+    result = secp256k1_nonce_function_rfc6979(nonce32, (unsigned char *)zMsg32->val,
+                                              (unsigned char *)zKey32->val, algo16, data, attempt);
+    if (result) {
+        zval_dtor(zNonce32);
+        ZVAL_STRINGL(zNonce32, (const char *) nonce32, 32);
+    } else {
+        efree(nonce32);
+    }
+    return result;
+}
+
+/* {{{ proto long secp256k1_nonce_function_rfc6979(string &nonce32, string msg32, string key32, string algo16, data, long attempt)
+ * An implementation of RFC6979 (using HMAC-SHA256) as nonce generation function.
+ * If a data pointer is passed, it is assumed to be a pointer to 32 bytes of
+ * extra entropy. */
+PHP_FUNCTION(secp256k1_nonce_function_rfc6979)
+{
+    zval *zNonce32;
+    zend_string *zMsg32, *zKey32;
+    zval *zAlgo16 = NULL, *zData = NULL;
+    long attempt;
+    int result = 0;
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z/SSzzl", &zNonce32, &zMsg32, &zKey32, &zAlgo16, &zData, &attempt) == FAILURE) {
+        RETURN_LONG(result);
+    }
+
+    result = php_nonce_function_rfc6979(zNonce32, zMsg32, zKey32, zAlgo16, zData, (unsigned int) attempt);
+    RETURN_LONG(result);
+}
+/* }}} */
+
+/* {{{ proto long secp256k1_nonce_function_default(string &nonce32, string msg32, string key32, string algo16, data, long attempt)
+ * A default safe nonce generation function (currently equal to secp256k1_nonce_function_rfc6979). */
+PHP_FUNCTION(secp256k1_nonce_function_default)
+{
+    int result;
+    zval *zNonce32;
+    zend_string *zMsg32, *zKey32;
+    zval *zAlgo16 = NULL, *zData = NULL;
+    long attempt;
+
+    result = 0;
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z/SSzzl", &zNonce32, &zMsg32, &zKey32, &zAlgo16, &zData, &attempt) == FAILURE) {
+        RETURN_LONG(result);
+    }
+
+    result = php_nonce_function_rfc6979(zNonce32, zMsg32, zKey32, zAlgo16, zData, (unsigned int) attempt);
+    RETURN_LONG(result);
 }
 /* }}} */
 
@@ -2102,6 +2207,60 @@ PHP_FUNCTION(secp256k1_schnorrsig_verify_batch)
 }
 /* }}} */
 
+// php_nonce_function_rfc6979 provides a PHP-typed analog for secp256k1_nonce_function_rfc6979.
+static int php_nonce_function_bipschnorr(zval *zNonce32, zend_string *zMsg32, zend_string *zKey32, zval *zAlgo16, zval *zData, unsigned int attempt)
+{
+    unsigned char *nonce32 = emalloc(32);
+    unsigned char *data = NULL;
+    unsigned char *algo16 = NULL;
+    int result = 0;
+
+    // read arbitrary data pointer. enforce expectations of rfc6979.
+    if (zData != NULL && Z_TYPE_P(zData) != IS_NULL) {
+        if (Z_TYPE_P(zData) == IS_STRING && Z_STRLEN_P(zData) == 32) {
+            data = (unsigned char *) Z_STRVAL_P(zData);
+        } else {
+            // todo: research warnings/error callbacks
+            return result;
+        }
+    }
+
+    if (Z_TYPE_P(zAlgo16) == IS_STRING) {
+        algo16 = (unsigned char *)Z_STRVAL_P(zAlgo16);
+    }
+
+    result = secp256k1_nonce_function_bipschnorr(nonce32, (unsigned char *)zMsg32->val,
+                                              (unsigned char *)zKey32->val, algo16, data, attempt);
+    if (result) {
+        zval_dtor(zNonce32);
+        ZVAL_STRINGL(zNonce32, (const char *) nonce32, 32);
+    } else {
+        efree(nonce32);
+    }
+    return result;
+}
+
+/* {{{ proto long secp256k1_nonce_function_bipschnorr(string &nonce32, string msg32, string key32, string algo16, data, long attempt)
+ * An implementation of the nonce generation function as defined in BIP-schnorr.
+ * If a data pointer is passed, it is assumed to be a pointer to 32 bytes of
+ * extra entropy. */
+PHP_FUNCTION(secp256k1_nonce_function_bipschnorr)
+{
+    int result;
+    zval *zNonce32;
+    zend_string *zMsg32, *zKey32;
+    zval *zAlgo16 = NULL, *zData = NULL;
+    long attempt;
+
+    result = 0;
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z/SSzzl", &zNonce32, &zMsg32, &zKey32, &zAlgo16, &zData, &attempt) == FAILURE) {
+        RETURN_LONG(result);
+    }
+
+    result = php_nonce_function_bipschnorr(zNonce32, zMsg32, zKey32, zAlgo16, zData, (unsigned int) attempt);
+    RETURN_LONG(result);
+}
+/* }}} */
 
 /* End schnorr module functions */
 
