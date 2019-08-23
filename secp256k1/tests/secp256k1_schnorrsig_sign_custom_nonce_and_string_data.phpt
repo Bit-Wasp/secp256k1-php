@@ -12,7 +12,7 @@ $privKey = str_repeat("\x90", 32);
 //0262cd4a67842524034e9b3f313feab032bdb4858588c193bc26ce9f380321ef79
 
 $hashFxn = function (&$nonce, string $msg,
-    string $key32, ?string $algo16, string $data, int $attempt) {
+    string $key32, $algo16, string $data, int $attempt) {
     echo "triggered callback\n";
     var_dump($data);
     $nonce = str_repeat("\x42", 32);
