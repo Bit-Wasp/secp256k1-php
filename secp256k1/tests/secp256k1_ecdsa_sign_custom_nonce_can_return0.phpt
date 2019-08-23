@@ -15,7 +15,7 @@ $priv = \pack("H*", "31a84594060e103f5a63eb742bd46cf5f5900d8406e2726dedfc61c7cf4
 $ctx = secp256k1_context_create(SECP256K1_CONTEXT_SIGN | SECP256K1_CONTEXT_VERIFY);
 
 $hashFxn = function (&$nonce, string $msg,
-    string $key32, ?string $algo16, $data, int $attempt) {
+    string $key32, $algo16, $data, int $attempt) {
     echo "triggered callback\n";
     return 0;
 };
