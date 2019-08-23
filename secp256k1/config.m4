@@ -1,9 +1,34 @@
 dnl $Id$
 dnl config.m4 for extension secp256k1
 
-PHP_ARG_WITH(secp256k1, for secp256k1 support,
-dnl Make sure that the comment is aligned:
-[  --with-secp256k1             Include secp256k1 support])
+PHP_ARG_WITH([secp256k1],
+  [for secp256k1 support],
+  [AS_HELP_STRING([--with-secp256k1],
+               [Include secp256k1 support])])
+PHP_ARG_WITH([secp256k1-config],
+  [whether to enable advanced module configuration],
+  [AS_HELP_STRING([--with-secp256k1-config],
+      [Enable advanced module configuation])],
+  [no],
+  [no])
+PHP_ARG_WITH([module-recovery],
+  [whether to build secp256k1 with recovery support],
+  [AS_HELP_STRING([--with-module-recovery],
+      [Include recovery support])],
+  [no],
+  [no])
+PHP_ARG_WITH([module-ecdh],
+  [whether to build secp256k1 with ecdh support],
+  [AS_HELP_STRING([--with-module-ecdh],
+      [Include ecdh support])],
+  [no],
+  [no])
+PHP_ARG_WITH([module-schnorrsig],
+  [whether to build secp256k1 with schnorrsig support],
+  [AS_HELP_STRING([--with-module-schnorrsig],
+      [Include schnorrsig support])],
+  [no],
+  [no])
 
 if test "$PHP_SECP256K1" != "no"; then
   dnl Write more examples of tests here...
@@ -44,7 +69,42 @@ if test "$PHP_SECP256K1" != "no"; then
   ],[
     -L$SECP256K1_DIR/$PHP_LIBDIR -lm
   ])
-  
+
+  if test "$PHP_SECP256K1_CONFIG" = "yes"; then
+    if test "$PHP_MODULE_RECOVERY" = "yes"; then
+      PHP_CHECK_LIBRARY($LIBNAME,secp256k1_ecdsa_recover,
+      [
+        AC_DEFINE(SECP256K1_MODULE_RECOVERY, 1, [ ])
+      ],[
+         AC_MSG_ERROR([missing libraries for secp256k1 recovery support])
+      ],[
+      ])
+    fi
+
+    if test "$PHP_MODULE_ECDH" = "yes"; then
+      PHP_CHECK_LIBRARY($LIBNAME,secp256k1_ecdh,
+      [
+        AC_DEFINE(SECP256K1_MODULE_ECDH, 1, [ ])
+      ],[
+         AC_MSG_ERROR([missing libraries for secp256k1 ecdh support])
+      ],[
+      ])
+    fi
+
+    if test "$PHP_MODULE_SCHNORRSIG" = "yes"; then
+      PHP_CHECK_LIBRARY($LIBNAME,secp256k1_schnorrsig_verify,
+      [
+        AC_DEFINE(SECP256K1_MODULE_SCHNORRSIG, 1, [ ])
+      ],[
+         AC_MSG_ERROR([missing libraries for secp256k1 recovery support])
+      ],[])
+    fi
+  else
+    AC_DEFINE(SECP256K1_MODULE_RECOVERY, 1, [ ])
+    AC_DEFINE(SECP256K1_MODULE_ECDH, 1, [ ])
+    AC_DEFINE(SECP256K1_MODULE_SCHNORRSIG, 1, [ ])
+  fi
+
   PHP_SUBST(SECP256K1_SHARED_LIBADD)
 
   PHP_NEW_EXTENSION(secp256k1, secp256k1.c, $ext_shared,, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
