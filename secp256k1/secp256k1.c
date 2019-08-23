@@ -2033,7 +2033,7 @@ PHP_FUNCTION(secp256k1_schnorrsig_parse)
  * Create an ECDSA signature. */
 PHP_FUNCTION (secp256k1_schnorrsig_sign)
 {
-    zval *zCtx, *zSig, *zNData;
+    zval *zCtx, *zSig, *zNData = NULL;
     secp256k1_context *ctx;
     secp256k1_schnorrsig *newsig;
     zend_string *msg32, *seckey;
@@ -2069,7 +2069,11 @@ PHP_FUNCTION (secp256k1_schnorrsig_sign)
         noncefp = php_secp256k1_nonce_function_callback;
         calldata.fci = &fci;
         calldata.fcc = &fcc;
-        calldata.data = zNData;
+        if (zNData == NULL) {
+            calldata.data = NULL;
+        } else {
+            calldata.data = zNData;
+        }
         ndata = (void *) &calldata;
     } else {
         noncefp = secp256k1_nonce_function_bipschnorr;
