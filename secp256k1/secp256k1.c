@@ -1593,25 +1593,53 @@ PHP_FUNCTION(secp256k1_scratch_space_destroy)
 }
 /* }}} */
 
+static int php_nonce_function_extract_algo(zval *zAlgo16, unsigned char **algo16)
+{
+    switch (Z_TYPE_P(zAlgo16)) {
+        case IS_STRING:
+            if (Z_STRLEN_P(zAlgo16) != 16) {
+                return 0;
+            }
+            *algo16 = (unsigned char *) Z_STRVAL_P(zAlgo16);
+            return 1;
+        default:
+            *algo16 = NULL;
+            return 1;
+    }
+}
+
+static int php_nonce_function_extract_data(zval *zData, unsigned char **data)
+{
+    // read arbitrary data pointer. enforce expectations of secp256k1_nonce_function_bipschnorr.
+    switch (Z_TYPE_P(zData)) {
+        case IS_STRING:
+            if (Z_STRLEN_P(zData) != 32) {
+                return 0;
+            }
+            *data = (unsigned char *) Z_STRVAL_P(zData);
+            return 1;
+        case IS_NULL:
+            *data = NULL;
+            return 1;
+        default:
+            // rfc6979 expects a 32byte string or NULL.
+            return 0;
+    }
+}
+
 // php_nonce_function_rfc6979 provides a PHP-typed analog for secp256k1_nonce_function_rfc6979.
 static int php_nonce_function_rfc6979(zval *zNonce32, zend_string *zMsg32, zend_string *zKey32, zval *zAlgo16, zval *zData, unsigned int attempt)
 {
     unsigned char *nonce32 = emalloc(32);
-    unsigned char *data = NULL;
     unsigned char *algo16 = NULL;
-    int result = 0;
+    unsigned char *data = NULL;
+    int result;
 
-    // read arbitrary data pointer. enforce expectations of rfc6979.
-    if (zData != NULL && Z_TYPE_P(zData) != IS_NULL) {
-        if (Z_TYPE_P(zData) == IS_STRING && Z_STRLEN_P(zData) == 32) {
-            data = (unsigned char *) Z_STRVAL_P(zData);
-        } else {
-            return result;
-        }
+    if (!php_nonce_function_extract_algo(zAlgo16, &algo16)) {
+        return 0;
     }
-
-    if (Z_TYPE_P(zAlgo16) == IS_STRING) {
-        algo16 = (unsigned char *)Z_STRVAL_P(zAlgo16);
+    if (!php_nonce_function_extract_data(zData, &data)) {
+        return 0;
     }
 
     result = secp256k1_nonce_function_rfc6979(nonce32, (unsigned char *)zMsg32->val,
@@ -1622,6 +1650,7 @@ static int php_nonce_function_rfc6979(zval *zNonce32, zend_string *zMsg32, zend_
     } else {
         efree(nonce32);
     }
+
     return result;
 }
 
@@ -2243,7 +2272,7 @@ PHP_FUNCTION(secp256k1_schnorrsig_verify_batch)
 }
 /* }}} */
 
-// php_nonce_function_rfc6979 provides a PHP-typed analog for secp256k1_nonce_function_rfc6979.
+// php_nonce_function_bipschnorr provides a PHP-typed analog for secp256k1_nonce_function_rfc6979.
 static int php_nonce_function_bipschnorr(zval *zNonce32, zend_string *zMsg32, zend_string *zKey32, zval *zAlgo16, zval *zData, unsigned int attempt)
 {
     unsigned char *nonce32 = emalloc(32);
@@ -2251,18 +2280,11 @@ static int php_nonce_function_bipschnorr(zval *zNonce32, zend_string *zMsg32, ze
     unsigned char *algo16 = NULL;
     int result = 0;
 
-    // read arbitrary data pointer. enforce expectations of rfc6979.
-    if (zData != NULL && Z_TYPE_P(zData) != IS_NULL) {
-        if (Z_TYPE_P(zData) == IS_STRING && Z_STRLEN_P(zData) == 32) {
-            data = (unsigned char *) Z_STRVAL_P(zData);
-        } else {
-            // todo: research warnings/error callbacks
-            return result;
-        }
+    if (!php_nonce_function_extract_algo(zAlgo16, &algo16)) {
+        return 0;
     }
-
-    if (Z_TYPE_P(zAlgo16) == IS_STRING) {
-        algo16 = (unsigned char *)Z_STRVAL_P(zAlgo16);
+    if (!php_nonce_function_extract_data(zData, &data)) {
+        return 0;
     }
 
     result = secp256k1_nonce_function_bipschnorr(nonce32, (unsigned char *)zMsg32->val,
