@@ -5,7 +5,7 @@
 const SECP256K1_TYPE_CONTEXT = "secp256k1_context";
 const SECP256K1_TYPE_PUBKEY = "secp256k1_pubkey";
 const SECP256K1_TYPE_SIG = "secp256k1_ecdsa_signature";
-const SECP256K1_TYPE_RECOVERABLE_SIG = "secp256k1_ecdsa_recoverable_signature";
+const SECP256K1_TYPE_SCRATCH_SPACE = "secp256k1_scratch_space";
 const SECP256K1_CONTEXT_VERIFY = 257;
 const SECP256K1_CONTEXT_SIGN = 513;
 const SECP256K1_CONTEXT_NONE = 1;
@@ -16,3 +16,5 @@ const SECP256K1_TAG_PUBKEY_ODD = 3;
 const SECP256K1_TAG_PUBKEY_UNCOMPRESSED = 4;
 const SECP256K1_TAG_PUBKEY_HYBRID_EVEN = 6;
 const SECP256K1_TAG_PUBKEY_HYBRID_ODD = 7;
+const SECP256K1_TYPE_RECOVERABLE_SIG = "secp256k1_ecdsa_recoverable_signature";
+const SECP256K1_TYPE_SCHNORRSIG = "secp256k1_schnorrsig";
