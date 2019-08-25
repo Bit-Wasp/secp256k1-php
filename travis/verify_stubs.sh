@@ -9,19 +9,20 @@ if [ "${COVERAGE}" = "true" ]; then
 
     if [ $? -eq 0 ]
     then
-        echo "const file ok";
+        echo "const file ok"
     else
-        echo "const file not up to date";
-        exit -1;
+        echo "const file not up to date"
+        exit -1
     fi
 
     cmp --silent stubs/functions.php travis/stubs/output/functions.php
 
     if [ $? -eq 0 ]
     then
-        echo "functions file ok";
+        echo "functions file ok"
     else
-        echo "functions file not up to date";
-        exit -1;
+        echo "functions file not up to date"
+        diff stubs/functions.php travis/stubs/output/functions.php
+        exit -1
     fi
 fi

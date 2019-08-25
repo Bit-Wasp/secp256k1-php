@@ -139,11 +139,11 @@ function secp256k1_ecdsa_signature_normalize($context, &$ecdsaSignatureNormalize
  * @param resource|null $ecdsaSignatureOut
  * @param string $msg32
  * @param string $secretKey
- * @param  $noncefp
+ * @param callable|null $noncefp
  * @param  $ndata
  * @return int
  */
-function secp256k1_ecdsa_sign($context, &$ecdsaSignatureOut, string $msg32, string $secretKey, $noncefp, $ndata): int {}
+function secp256k1_ecdsa_sign($context, &$ecdsaSignatureOut, string $msg32, string $secretKey, ?callable $noncefp, $ndata): int {}
 /**
  * Verify an ECDSA secret key.
  * 
