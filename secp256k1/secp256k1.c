@@ -1105,14 +1105,14 @@ PHP_FUNCTION(secp256k1_ecdsa_verify) {
 PHP_FUNCTION (secp256k1_ecdsa_sign)
 {
     zval *zCtx, *zSig, *zData = NULL;
+    zend_string *msg32, *seckey;
     secp256k1_context *ctx;
     secp256k1_ecdsa_signature *newsig;
-    zend_string *msg32, *seckey;
-    secp256k1_nonce_function noncefp;
+    secp256k1_nonce_function noncefp = NULL;
+    void *ndata = NULL;
     zend_fcall_info fci = empty_fcall_info;
     zend_fcall_info_cache fcc = empty_fcall_info_cache;
     php_secp256k1_nonce_function_data calldata;
-    void* ndata;
     int result = 0;
 
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rz/SS|fz",
@@ -1146,9 +1146,6 @@ PHP_FUNCTION (secp256k1_ecdsa_sign)
             calldata.data = zData;
         }
         ndata = (void *) &calldata;
-    } else {
-        noncefp = secp256k1_nonce_function_default;
-        ndata = NULL;
     }
 
     newsig = (secp256k1_ecdsa_signature *) emalloc(sizeof(secp256k1_ecdsa_signature));
@@ -2114,14 +2111,14 @@ PHP_FUNCTION(secp256k1_schnorrsig_parse)
 PHP_FUNCTION (secp256k1_schnorrsig_sign)
 {
     zval *zCtx, *zSig, *zNData = NULL;
+    zend_string *msg32, *seckey;
     secp256k1_context *ctx;
     secp256k1_schnorrsig *newsig;
-    zend_string *msg32, *seckey;
-    secp256k1_nonce_function noncefp;
+    secp256k1_nonce_function noncefp = NULL;
     zend_fcall_info fci;
     zend_fcall_info_cache fcc;
     php_secp256k1_nonce_function_data calldata;
-    void* ndata;
+    void* ndata = NULL;
     int result = 0;
 
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rz/SS|fz",
@@ -2155,9 +2152,6 @@ PHP_FUNCTION (secp256k1_schnorrsig_sign)
             calldata.data = zNData;
         }
         ndata = (void *) &calldata;
-    } else {
-        noncefp = secp256k1_nonce_function_bipschnorr;
-        ndata = NULL;
     }
 
     newsig = (secp256k1_schnorrsig *) emalloc(sizeof(secp256k1_schnorrsig));
