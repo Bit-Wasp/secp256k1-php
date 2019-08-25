@@ -232,8 +232,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_secp256k1_ecdsa_sign, IS_LONG, 0)
     ZEND_ARG_TYPE_INFO(1, ecdsaSignatureOut, IS_RESOURCE, 1)
     ZEND_ARG_TYPE_INFO(0, msg32, IS_STRING, 0)
     ZEND_ARG_TYPE_INFO(0, secretKey, IS_STRING, 0)
-    //ZEND_ARG_CALLABLE_INFO(0, noncefp, 1)
-    ZEND_ARG_INFO(0, noncefp)
+    ZEND_ARG_CALLABLE_INFO(0, noncefp, 1)
     ZEND_ARG_INFO(0, ndata)
 ZEND_END_ARG_INFO();
 
@@ -1593,6 +1592,9 @@ PHP_FUNCTION(secp256k1_scratch_space_destroy)
 }
 /* }}} */
 
+// zAlgo16 is interpreted as null|string, and we assume the comes
+// from a function enforcing this convention. if it is a string type,
+// the length must equal 16 or the function returns a negative result.
 static int php_nonce_function_extract_algo(zval *zAlgo16, unsigned char **algo16)
 {
     switch (Z_TYPE_P(zAlgo16)) {
@@ -1608,6 +1610,10 @@ static int php_nonce_function_extract_algo(zval *zAlgo16, unsigned char **algo16
     }
 }
 
+// zData may be any type, however this function is only used in the rfc6979
+// and schnorrsig nonce functions, so it returns a negative result if
+// the value is not NULL or a string. if it's a string value, it's length
+// must be 32 bytes.
 static int php_nonce_function_extract_data(zval *zData, unsigned char **data)
 {
     // read arbitrary data pointer. enforce expectations of secp256k1_nonce_function_bipschnorr.
@@ -1630,18 +1636,18 @@ static int php_nonce_function_extract_data(zval *zData, unsigned char **data)
 // php_nonce_function_rfc6979 provides a PHP-typed analog for secp256k1_nonce_function_rfc6979.
 static int php_nonce_function_rfc6979(zval *zNonce32, zend_string *zMsg32, zend_string *zKey32, zval *zAlgo16, zval *zData, unsigned int attempt)
 {
-    unsigned char *nonce32 = emalloc(32);
+    unsigned char *nonce32;
     unsigned char *algo16 = NULL;
     unsigned char *data = NULL;
     int result;
 
     if (!php_nonce_function_extract_algo(zAlgo16, &algo16)) {
         return 0;
-    }
-    if (!php_nonce_function_extract_data(zData, &data)) {
+    } else if (!php_nonce_function_extract_data(zData, &data)) {
         return 0;
     }
 
+    nonce32 = emalloc(32);
     result = secp256k1_nonce_function_rfc6979(nonce32, (unsigned char *)zMsg32->val,
                                               (unsigned char *)zKey32->val, algo16, data, attempt);
     if (result) {
@@ -1664,10 +1670,10 @@ PHP_FUNCTION(secp256k1_nonce_function_rfc6979)
     zend_string *zMsg32, *zKey32;
     zval *zAlgo16 = NULL, *zData = NULL;
     long attempt;
-    int result = 0;
+    int result;
 
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z/SSzzl", &zNonce32, &zMsg32, &zKey32, &zAlgo16, &zData, &attempt) == FAILURE) {
-        RETURN_LONG(result);
+        RETURN_LONG(0);
     }
 
     result = php_nonce_function_rfc6979(zNonce32, zMsg32, zKey32, zAlgo16, zData, (unsigned int) attempt);
@@ -1685,9 +1691,8 @@ PHP_FUNCTION(secp256k1_nonce_function_default)
     zval *zAlgo16 = NULL, *zData = NULL;
     long attempt;
 
-    result = 0;
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z/SSzzl", &zNonce32, &zMsg32, &zKey32, &zAlgo16, &zData, &attempt) == FAILURE) {
-        RETURN_LONG(result);
+        RETURN_LONG(0);
     }
 
     result = php_nonce_function_rfc6979(zNonce32, zMsg32, zKey32, zAlgo16, zData, (unsigned int) attempt);
@@ -2028,18 +2033,18 @@ PHP_FUNCTION(secp256k1_schnorrsig_serialize)
     secp256k1_context *ctx;
     secp256k1_schnorrsig *sig;
     unsigned char sigout[COMPACT_SIGNATURE_LENGTH];
-    int result = 0;
+    int result;
 
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rz/r", &zCtx, &zSigOut, &zSchnorrSig) == FAILURE) {
-        RETURN_LONG(result);
+        RETURN_LONG(0);
     }
 
     if ((ctx = php_get_secp256k1_context(zCtx)) == NULL) {
-        RETURN_LONG(result);
+        RETURN_LONG(0);
     }
 
     if ((sig = php_get_secp256k1_schnorr_signature(zSchnorrSig)) == NULL) {
-        RETURN_LONG(result);
+        RETURN_LONG(0);
     }
 
     result = secp256k1_schnorrsig_serialize(ctx, sigout, sig);
@@ -2060,14 +2065,14 @@ PHP_FUNCTION(secp256k1_schnorrsig_parse)
     secp256k1_context *ctx;
     secp256k1_schnorrsig *sig;
     zend_string *sigin;
-    int result = 0;
+    int result;
 
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rz/S", &zCtx, &zSchnorrSig, &sigin) == FAILURE) {
-        RETURN_LONG(result);
+        RETURN_LONG(0);
     }
 
     if ((ctx = php_get_secp256k1_context(zCtx)) == NULL) {
-        RETURN_LONG(result);
+        RETURN_LONG(0);
     }
 
     if (sigin->len != COMPACT_SIGNATURE_LENGTH) {
@@ -2272,32 +2277,6 @@ PHP_FUNCTION(secp256k1_schnorrsig_verify_batch)
 }
 /* }}} */
 
-// php_nonce_function_bipschnorr provides a PHP-typed analog for secp256k1_nonce_function_rfc6979.
-static int php_nonce_function_bipschnorr(zval *zNonce32, zend_string *zMsg32, zend_string *zKey32, zval *zAlgo16, zval *zData, unsigned int attempt)
-{
-    unsigned char *nonce32 = emalloc(32);
-    unsigned char *data = NULL;
-    unsigned char *algo16 = NULL;
-    int result = 0;
-
-    if (!php_nonce_function_extract_algo(zAlgo16, &algo16)) {
-        return 0;
-    }
-    if (!php_nonce_function_extract_data(zData, &data)) {
-        return 0;
-    }
-
-    result = secp256k1_nonce_function_bipschnorr(nonce32, (unsigned char *)zMsg32->val,
-                                              (unsigned char *)zKey32->val, algo16, data, attempt);
-    if (result) {
-        zval_dtor(zNonce32);
-        ZVAL_STRINGL(zNonce32, (const char *) nonce32, 32);
-    } else {
-        efree(nonce32);
-    }
-    return result;
-}
-
 /* {{{ proto long secp256k1_nonce_function_bipschnorr(string &nonce32, string msg32, string key32, string algo16, data, long attempt)
  * An implementation of the nonce generation function as defined in BIP-schnorr.
  * If a data pointer is passed, it is assumed to be a pointer to 32 bytes of
@@ -2308,14 +2287,29 @@ PHP_FUNCTION(secp256k1_nonce_function_bipschnorr)
     zval *zNonce32;
     zend_string *zMsg32, *zKey32;
     zval *zAlgo16 = NULL, *zData = NULL;
+    unsigned char *nonce32 = emalloc(32);
+    unsigned char *algo16 = NULL;
+    unsigned char *data = NULL;
     long attempt;
 
-    result = 0;
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z/SSzzl", &zNonce32, &zMsg32, &zKey32, &zAlgo16, &zData, &attempt) == FAILURE) {
-        RETURN_LONG(result);
+        RETURN_LONG(0);
     }
 
-    result = php_nonce_function_bipschnorr(zNonce32, zMsg32, zKey32, zAlgo16, zData, (unsigned int) attempt);
+    if (!php_nonce_function_extract_algo(zAlgo16, &algo16)) {
+        RETURN_LONG(0);
+    } else if (!php_nonce_function_extract_data(zData, &data)) {
+        RETURN_LONG(0);
+    }
+
+    result = secp256k1_nonce_function_bipschnorr(nonce32, (unsigned char *)zMsg32->val,
+                                              (unsigned char *)zKey32->val, algo16, data, attempt);
+    if (result) {
+        zval_dtor(zNonce32);
+        ZVAL_STRINGL(zNonce32, (const char *) nonce32, 32);
+    } else {
+        efree(nonce32);
+    }
     RETURN_LONG(result);
 }
 /* }}} */
