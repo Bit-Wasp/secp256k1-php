@@ -1,5 +1,5 @@
 --TEST--
-secp256k1_nonce_function_default returns 0 if data is neither NULL, or a 32 byte string
+secp256k1_nonce_function_default returns 0 if data string length is not 32
 --SKIPIF--
 <?php
 if (!extension_loaded("secp256k1")) print "skip extension not loaded";

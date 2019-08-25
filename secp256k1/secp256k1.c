@@ -14,17 +14,30 @@
 
 static zend_class_entry *spl_ce_InvalidArgumentException;
 
+// secp256k1_scratch_space_wrapper embeds the scratch space
+// and the context which created it, as the function
+// secp256k1_scratch_space_destroy is called in dtor functions
+// which have no access to the context otherwise.
 typedef struct secp256k1_scratch_space_wrapper {
         secp256k1_context* ctx;
         secp256k1_scratch_space* scratch;
 } secp256k1_scratch_space_wrapper;
 
+// php_secp256k1_nonce_function_data embeds state required for secp256k1_ecdsa_sign to
+// call a userland PHP function, as well as containing an (optional) zval* to be
+// unpacked and used as arbitrary data to the custom nonce function
 typedef struct php_secp256k1_nonce_function_data {
     zend_fcall_info* fci;
     zend_fcall_info_cache* fcc;
     zval* data;
 } php_secp256k1_nonce_function_data;
 
+// php_secp256k1_nonce_function_callback is an implementation of secp256k1_nonce_function
+// designed to call a PHP land function to calculate a nonce for the signature algorithm.
+// it expects that the arbitrary *data is *php_secp256k1_nonce_function_data, so it has
+// sufficient context to call the embedded PHP function, and pass optional additional data
+// if present. it writes the nonce provided the PHP function to *nonce32 for the signing
+// algorithm to continue.
 static int php_secp256k1_nonce_function_callback(unsigned char *nonce32, const unsigned char *msg32,
                                const unsigned char *key32, const unsigned char *algo16,
                                void *data, unsigned int attempt) {
@@ -46,22 +59,21 @@ static int php_secp256k1_nonce_function_callback(unsigned char *nonce32, const u
     // receive the result, and pass in the x & y parameters.
     // arg 3 is owned by the caller of secp256k1_ecdh.
     ZVAL_NEW_REF(&args[0], &zvalout);
-
     ZVAL_STR(&args[1], zend_string_init((const char *) msg32, 32, 0));
     ZVAL_STR(&args[2], zend_string_init((const char *) key32, 32, 0));
     if (algo16 == NULL) {
         ZVAL_NULL(&args[3]);
     } else {
+        // This is impossible to test unless secp256k1 starts to use
+        // this value, which for ECDSA & schnorr are presently null.
         ZVAL_STR(&args[3], zend_string_init((const char *) algo16, strlen((const char *) algo16), 0));
     }
-
     if (callback->data != NULL) {
         zval* data = callback->data;
         args[4] = *data;
     } else {
         ZVAL_NULL(&args[4]);
     }
-
     ZVAL_LONG(&args[5], (zend_long) attempt);
 
     result = zend_call_function(callback->fci, callback->fcc) == SUCCESS;
@@ -90,9 +102,7 @@ static int php_secp256k1_nonce_function_callback(unsigned char *nonce32, const u
 
     // callback OK & length correct
     if (result) {
-        for (i = 0; i < 32; i++) {
-            nonce32[i] = (unsigned char)output_str->val[i];
-        }
+        memcpy(nonce32, output_str->val, 32);
     }
 
     // zval_dtor on our args. arg 3 is managed elsewhere.
@@ -659,6 +669,9 @@ static void secp256k1_schnorrsig_dtor(zend_resource * rsrc TSRMLS_DC)
     }
 }
 #endif
+
+// helper functions to extract pointers from resource zvals
+
 // attempt to read a sec256k1_context* from the provided resource zval
 static secp256k1_context* php_get_secp256k1_context(zval* pcontext) {
     return (secp256k1_context *)zend_fetch_resource2_ex(pcontext, SECP256K1_CTX_RES_NAME, le_secp256k1_ctx, -1);
@@ -694,12 +707,9 @@ static secp256k1_schnorrsig* php_get_secp256k1_schnorr_signature(zval *psig) {
 #endif
 
 PHP_MINIT_FUNCTION(secp256k1) {
-
-
     REGISTER_STRING_CONSTANT("SECP256K1_TYPE_CONTEXT", SECP256K1_CTX_RES_NAME, CONST_CS | CONST_PERSISTENT);
     REGISTER_STRING_CONSTANT("SECP256K1_TYPE_PUBKEY", SECP256K1_PUBKEY_RES_NAME, CONST_CS | CONST_PERSISTENT);
     REGISTER_STRING_CONSTANT("SECP256K1_TYPE_SIG", SECP256K1_SIG_RES_NAME, CONST_CS | CONST_PERSISTENT);
-
     REGISTER_STRING_CONSTANT("SECP256K1_TYPE_SCRATCH_SPACE", SECP256K1_SCRATCH_SPACE_RES_NAME, CONST_CS | CONST_PERSISTENT);
 
     /** Flags to pass to secp256k1_context_create */
@@ -1898,22 +1908,22 @@ PHP_FUNCTION(secp256k1_ecdsa_recover)
 /* Begin EcDH module functions */
 #ifdef SECP256K1_MODULE_ECDH
 
-typedef struct php_callback {
+typedef struct php_secp256k1_hash_function_data {
     zend_fcall_info* fci;
     zend_fcall_info_cache* fcc;
     long output_len;
     zval* data;
-} php_callback;
+} php_secp256k1_hash_function_data;
 
-static int trigger_callback(unsigned char *output, const unsigned char *x,
+static int php_secp256k1_hash_function(unsigned char *output, const unsigned char *x,
                             const unsigned char *y, void *data) {
-    php_callback* callback;
+    php_secp256k1_hash_function_data* callback;
     zend_string* output_str;
     zval retval, zvalout;
     zval args[4];
     int result, i;
 
-    callback = (php_callback*) data;
+    callback = (php_secp256k1_hash_function_data*) data;
     callback->fci->size = sizeof(*(callback->fci));
     callback->fci->object = NULL;
     callback->fci->retval = &retval;
@@ -1947,7 +1957,9 @@ static int trigger_callback(unsigned char *output, const unsigned char *x,
         }
     }
 
-    // there's more! what if the length doesn't match? avoid.
+    // ensure the resulting string has a length matching callback->output_len,
+    // as in secp256k1_ecdh we allocate exactly that many bytes. if the length
+    // doesn't match, cancel the operation
     if (result) {
         output_str = Z_STR_P(Z_REFVAL(args[0]));
         if (output_str->len != callback->output_len) {
@@ -1957,9 +1969,7 @@ static int trigger_callback(unsigned char *output, const unsigned char *x,
 
     // callback OK & length correct
     if (result) {
-        for (i = 0; i < output_str->len; i++) {
-            output[i] = (unsigned char)output_str->val[i];
-        }
+        memcpy(output, output_str->val, output_str->len);
     }
 
     // zval_dtor on our args. arg 3 is managed elsewhere.
@@ -1970,7 +1980,7 @@ static int trigger_callback(unsigned char *output, const unsigned char *x,
     return result;
 }
 
-/* {{{ proto int secp256k1_ecdh(resource context, string &result, resource pubKey, string key32)
+/* {{{ proto int secp256k1_ecdh(resource context, string &result, resource pubKey, string key32, callable hashfp, int output_len, data)
  * Compute an EC Diffie-Hellman secret in constant time. */
 PHP_FUNCTION(secp256k1_ecdh)
 {
@@ -1982,7 +1992,7 @@ PHP_FUNCTION(secp256k1_ecdh)
     long output_len = 32;
     zend_fcall_info fci;
     zend_fcall_info_cache fcc;
-    php_callback callback;
+    php_secp256k1_hash_function_data callback;
     int result = 0;
 
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rz/rS|flz",
@@ -1998,6 +2008,10 @@ PHP_FUNCTION(secp256k1_ecdh)
         RETURN_LONG(result);
     }
 
+    // in C codebases, the ecdh var would be allocated before calling secp256k1_ecdh.
+    // PHP does not have a way pre-allocate memory in this way, so we allocate it
+    // here. where a custom hashfp is provided, the output_len must equal the size of
+    // the data to be written by the hashfp. ex, 32 bytes if a sha256 hash is returned.
     unsigned char resultChars[output_len];
     memset(resultChars, 0, output_len);
     if (ZEND_NUM_ARGS() > 4) {
@@ -2005,7 +2019,7 @@ PHP_FUNCTION(secp256k1_ecdh)
         callback.fcc = &fcc;
         callback.output_len = output_len;
         callback.data = data;
-        result = secp256k1_ecdh(ctx, resultChars, pubkey, (unsigned char *) privKey->val, trigger_callback, (void*) &callback);
+        result = secp256k1_ecdh(ctx, resultChars, pubkey, (unsigned char *) privKey->val, php_secp256k1_hash_function, (void*) &callback);
     } else {
         result = secp256k1_ecdh(ctx, resultChars, pubkey, (unsigned char *) privKey->val, NULL, NULL);
     }
@@ -2287,7 +2301,7 @@ PHP_FUNCTION(secp256k1_nonce_function_bipschnorr)
     zval *zNonce32;
     zend_string *zMsg32, *zKey32;
     zval *zAlgo16 = NULL, *zData = NULL;
-    unsigned char *nonce32 = emalloc(32);
+    unsigned char *nonce32;
     unsigned char *algo16 = NULL;
     unsigned char *data = NULL;
     long attempt;
@@ -2302,6 +2316,7 @@ PHP_FUNCTION(secp256k1_nonce_function_bipschnorr)
         RETURN_LONG(0);
     }
 
+    nonce32 = emalloc(32);
     result = secp256k1_nonce_function_bipschnorr(nonce32, (unsigned char *)zMsg32->val,
                                               (unsigned char *)zKey32->val, algo16, data, attempt);
     if (result) {
