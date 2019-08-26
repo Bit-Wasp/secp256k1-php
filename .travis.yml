@@ -4,9 +4,8 @@ sudo: required
 
 env:
   global:
-   - SECP256K1_REMOTE=https://github.com/jonasnick/secp256k1.git
-#   - SECP256K1_COMMIT=fa3301713549d118e57ebe6551d062903ddd6b63
-   - SECP256K1_COMMIT=a228e2f54d64692230ccb2937b12dd746c5157ed
+   - SECP256K1_REMOTE=https://github.com/bitcoin-core/secp256k1.git
+   - SECP256K1_COMMIT=fa3301713549d118e57ebe6551d062903ddd6b63
    - DOCKER_CACHE_DIR=/home/travis/docker
 
 cache:
@@ -16,12 +15,30 @@ cache:
 matrix:
   include:
     - php: 7.3
-      env: COVERAGE=true PHPQA_PHP_VERSION=7.3.7
+      env:
+       - COVERAGE=true
+       - PHPQA_PHP_VERSION=7.3.7
+       - SECP256K1_REMOTE=https://github.com/jonasnick/secp256k1.git
+       - SECP256K1_COMMIT=a228e2f54d64692230ccb2937b12dd746c5157ed
+       - SECP256K1_CONFIGURE="--enable-module-ecdh --enable-module-recovery --enable-module-schnorrsig"
+       - EXT_SECP256K1_CONFIGURE="--with-secp256k1-config --with-module-recovery --with-module-ecdh --with-module-schnorrsig"
     - php: 7.3
-      env: VALGRIND=true PHPQA_PHP_VERSION=7.3.7
+      env:
+       - VALGRIND=true
+       - PHPQA_PHP_VERSION=7.3.7
+       - SECP256K1_REMOTE=https://github.com/jonasnick/secp256k1.git
+       - SECP256K1_COMMIT=a228e2f54d64692230ccb2937b12dd746c5157ed
+       - SECP256K1_CONFIGURE="--enable-module-ecdh --enable-module-recovery --enable-module-schnorrsig"
+       - EXT_SECP256K1_CONFIGURE="--with-secp256k1-config --with-module-recovery --with-module-ecdh --with-module-schnorrsig"
     - php: 7.2
+      env:
+       - SECP256K1_CONFIGURE="--enable-module-ecdh --enable-module-recovery"
     - php: 7.1
+      env:
+       - SECP256K1_CONFIGURE="--enable-module-ecdh --enable-module-recovery"
     - php: 7.0
+      env:
+       - SECP256K1_CONFIGURE="--enable-module-ecdh --enable-module-recovery"
 
 before_install:
   - sudo apt-get install -qq libssl-dev
@@ -34,11 +51,12 @@ install:
       && cd libsecp256k1 && git checkout $SECP256K1_COMMIT                        \
       && ./autogen.sh                                                             \
       && ./configure --enable-tests=no --enable-benchmark=no                      \
-             --enable-experimental --enable-module-{ecdh,recovery,schnorrsig}     \
+             --enable-experimental $SECP256K1_CONFIGURE     \
       && make -j$(nproc) && sudo make install && cd ..
   - |
       cd secp256k1 && phpize                                                      \
-      && ./configure && make -j$(nproc) && sudo make install                      \
+      && ./configure $EXT_SECP256K1_CONFIGURE                                     \
+      && make -j$(nproc) && sudo make install                                     \
       && cd ..
   - composer update
 
