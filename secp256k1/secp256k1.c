@@ -895,7 +895,7 @@ PHP_FUNCTION(secp256k1_ecdsa_signature_parse_der)
 
     sig = (secp256k1_ecdsa_signature *) emalloc(sizeof(secp256k1_ecdsa_signature));
     result = secp256k1_ecdsa_signature_parse_der(ctx, sig, (unsigned char *) sigin->val, sigin->len);
-    if (result == 1) {
+    if (result) {
         zval_dtor(zSig);
         ZVAL_RES(zSig, zend_register_resource(sig, le_secp256k1_sig));
     } else {
@@ -931,7 +931,7 @@ PHP_FUNCTION(secp256k1_ecdsa_signature_serialize_der)
     }
 
     result = secp256k1_ecdsa_signature_serialize_der(ctx, sigout, &sigoutlen, sig);
-    if (result == 1) {
+    if (result) {
         zval_dtor(zSigOut);
         ZVAL_STRINGL(zSigOut, (char *)&sigout, sigoutlen);
     }
@@ -965,7 +965,7 @@ PHP_FUNCTION(secp256k1_ecdsa_signature_parse_compact)
 
     sig = emalloc(sizeof(secp256k1_ecdsa_signature));
     result = secp256k1_ecdsa_signature_parse_compact(ctx, sig, (unsigned char *) input64->val);
-    if (result == 1) {
+    if (result) {
         zval_dtor(zSig);
         ZVAL_RES(zSig, zend_register_resource(sig, le_secp256k1_sig));
     } else {
@@ -1027,7 +1027,7 @@ PHP_FUNCTION(ecdsa_signature_parse_der_lax)
 
     sig = (secp256k1_ecdsa_signature *) emalloc(sizeof(secp256k1_ecdsa_signature));
     result = ecdsa_signature_parse_der_lax(ctx, sig, (unsigned char *) sigin->val, sigin->len);
-    if (result == 1) {
+    if (result) {
         zval_dtor(zSig);
         ZVAL_RES(zSig, zend_register_resource(sig, le_secp256k1_sig));
     } else {
@@ -1150,7 +1150,7 @@ PHP_FUNCTION (secp256k1_ecdsa_sign)
 
     newsig = (secp256k1_ecdsa_signature *) emalloc(sizeof(secp256k1_ecdsa_signature));
     result = secp256k1_ecdsa_sign(ctx, newsig, (unsigned char *) msg32->val, (unsigned char *) seckey->val, noncefp, ndata);
-    if (result == 1) {
+    if (result) {
         zval_dtor(zSig);
         ZVAL_RES(zSig, zend_register_resource(newsig, le_secp256k1_sig));
     } else {
@@ -1217,7 +1217,7 @@ PHP_FUNCTION(secp256k1_ec_pubkey_create)
 
     pubkey = (secp256k1_pubkey *) emalloc(sizeof(secp256k1_pubkey));
     result = secp256k1_ec_pubkey_create(ctx, pubkey, (unsigned char *)seckey->val);
-    if (result == 1) {
+    if (result) {
         zval_dtor(zPubKey);
         ZVAL_RES(zPubKey, zend_register_resource(pubkey, le_secp256k1_pubkey));
     } else {
@@ -1308,7 +1308,7 @@ PHP_FUNCTION(secp256k1_ec_pubkey_parse)
 
     pubkey = (secp256k1_pubkey *) emalloc(sizeof(secp256k1_pubkey));
     result = secp256k1_ec_pubkey_parse(ctx, pubkey, (unsigned char *)pubkeyin->val, pubkeyin->len);
-    if (result == 1) {
+    if (result) {
         zval_dtor(zPubKey);
         ZVAL_RES(zPubKey, zend_register_resource(pubkey, le_secp256k1_pubkey));
     } else {
@@ -1534,7 +1534,7 @@ PHP_FUNCTION(secp256k1_ec_pubkey_combine)
 
     combined = (secp256k1_pubkey *) emalloc(sizeof(secp256k1_pubkey));
     result = secp256k1_ec_pubkey_combine(ctx, combined, pubkeys, array_count);
-    if (result == 1) {
+    if (result) {
         zval_dtor(zPubkeyCombined);
         ZVAL_RES(zPubkeyCombined, zend_register_resource(combined, le_secp256k1_pubkey));
     } else {
@@ -1741,7 +1741,7 @@ PHP_FUNCTION(secp256k1_ecdsa_recoverable_signature_parse_compact)
 
     sig = emalloc(sizeof(secp256k1_ecdsa_recoverable_signature));
     result = secp256k1_ecdsa_recoverable_signature_parse_compact(ctx, sig, (unsigned char *)zSig64In->val, recid);
-    if (result == 1) {
+    if (result) {
         zval_dtor(zSig);
         ZVAL_RES(zSig, zend_register_resource(sig, le_secp256k1_recoverable_sig));
     } else {
@@ -1850,7 +1850,7 @@ PHP_FUNCTION(secp256k1_ecdsa_sign_recoverable)
 
     newsig = emalloc(sizeof(secp256k1_ecdsa_recoverable_signature));
     result = secp256k1_ecdsa_sign_recoverable(ctx, newsig, (const unsigned char *) msg32->val, (const unsigned char *) seckey->val, 0, 0);
-    if (result == 1) {
+    if (result) {
         zval_dtor(zSig);
         ZVAL_RES(zSig, zend_register_resource(newsig, le_secp256k1_recoverable_sig));
     } else {
@@ -2021,7 +2021,7 @@ PHP_FUNCTION(secp256k1_ecdh)
         result = secp256k1_ecdh(ctx, resultChars, pubkey, (unsigned char *) privKey->val, NULL, NULL);
     }
 
-    if (result == 1) {
+    if (result) {
         zval_dtor(zResult);
         ZVAL_STRINGL(zResult, (char *) resultChars, output_len);
     }
@@ -2059,7 +2059,7 @@ PHP_FUNCTION(secp256k1_schnorrsig_serialize)
     }
 
     result = secp256k1_schnorrsig_serialize(ctx, sigout, sig);
-    if (result == 1) {
+    if (result) {
         zval_dtor(zSigOut);
         ZVAL_STRINGL(zSigOut, (const char *)&sigout, COMPACT_SIGNATURE_LENGTH);
     }
@@ -2093,7 +2093,7 @@ PHP_FUNCTION(secp256k1_schnorrsig_parse)
 
     sig = (secp256k1_schnorrsig *) emalloc(sizeof(secp256k1_schnorrsig));
     result = secp256k1_schnorrsig_parse(ctx, sig, (const unsigned char *) sigin->val);
-    if (result == 1) {
+    if (result) {
         zval_dtor(zSchnorrSig);
         ZVAL_RES(zSchnorrSig, zend_register_resource(sig, le_secp256k1_schnorrsig));
     } else {
@@ -2157,7 +2157,7 @@ PHP_FUNCTION (secp256k1_schnorrsig_sign)
     newsig = (secp256k1_schnorrsig *) emalloc(sizeof(secp256k1_schnorrsig));
     result = secp256k1_schnorrsig_sign(ctx, newsig,
         (unsigned char *) msg32->val, (unsigned char *) seckey->val, noncefp, ndata);
-    if (result == 1) {
+    if (result) {
         zval_dtor(zSig);
         ZVAL_RES(zSig, zend_register_resource(newsig, le_secp256k1_schnorrsig));
     } else {
