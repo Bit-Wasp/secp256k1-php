@@ -11,19 +11,13 @@ rm configure && ./buildconf --force
     --build="$gnuArch" \
     --with-config-file-path="$PHP_INI_DIR" \
     --with-config-file-scan-dir="$PHP_INI_DIR/conf.d" \
-    --enable-ftp \
-    --enable-mbstring \
-    --enable-mysqlnd \
-    --with-zlib \
-    --enable-zip \
     --with-curl \
-    --with-libedit \
-    --with-openssl \
-    --with-gd \
+		--with-openssl \
     --with-secp256k1 \
-    --with-jpeg-dir \
-    --with-png-dir \
-    --with-pcre-regex \
+    --with-secp256k1-config \
+    --with-module-ecdh \
+    --with-module-recovery \
+    --with-module-schnorrsig \
     --with-libdir="lib/$debMultiarch" \
     $PHP_EXTRA_CONFIGURE_ARGS \
 && make -j "$(nproc)" \
