@@ -1,8 +1,14 @@
 /* $Id$ */
 #include <secp256k1.h>
+#ifdef SECP256K1_MODULE_ECDH
 #include <secp256k1_ecdh.h>
+#endif
+#ifdef SECP256K1_MODULE_RECOVERY
 #include <secp256k1_recovery.h>
+#endif
+#ifdef SECP256K1_MODULE_SCHNORRSIG
 #include <secp256k1_schnorrsig.h>
+#endif
 
 #ifndef PHP_SECP256K1_H
 #define PHP_SECP256K1_H
