@@ -44,11 +44,8 @@ RUN apt-get update && apt-get install -y \
 		git \
 		valgrind \
 		libedit2 \
-		libsqlite3-0 \
 		libxml2 \
 		xz-utils \
-        libjpeg-dev \
-        libpng-dev \
         libfreetype6-dev \
         libzip-dev \
 	--no-install-recommends && rm -r /var/lib/apt/lists/*
@@ -91,7 +88,6 @@ RUN set -xe \
 		$PHP_EXTRA_BUILD_DEPS \
 		libcurl4-openssl-dev \
 		libedit-dev \
-		libsqlite3-dev \
 		libssl-dev \
 		libxml2-dev \
 		nano \
@@ -116,18 +112,8 @@ RUN docker-php-source extract \
 		--build="$gnuArch" \
 		--with-config-file-path="$PHP_INI_DIR" \
 		--with-config-file-scan-dir="$PHP_INI_DIR/conf.d" \
-		--enable-ftp \
-		--enable-mbstring \
-		--enable-mysqlnd \
-		--enable-zip \
 		--with-curl \
-		--with-libedit \
 		--with-openssl \
-		--with-zlib \
-		--with-gd \
-        --with-jpeg-dir \
-        --with-png-dir \
-        --with-pcre-regex \
 		--with-libdir="lib/$debMultiarch" \
 		$PHP_EXTRA_CONFIGURE_ARGS \
 	&& make -j "$(nproc)" \
