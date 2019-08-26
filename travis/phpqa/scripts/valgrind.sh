@@ -17,6 +17,7 @@ rm configure && ./buildconf --force
     --with-secp256k1-config \
     --with-module-ecdh \
     --with-module-recovery \
+    --with-module-schnorrsig \
     --with-libdir="lib/$debMultiarch" \
     $PHP_EXTRA_CONFIGURE_ARGS \
 && make -j "$(nproc)" \
