@@ -4,8 +4,8 @@ sudo: required
 
 env:
   global:
-   - SECP256K1_REMOTE=https://github.com/bitcoin-core/secp256k1.git
-   - SECP256K1_COMMIT=fa3301713549d118e57ebe6551d062903ddd6b63
+   - SECP256K1_REMOTE=https://github.com/jonasnick/secp256k1.git
+   - SECP256K1_COMMIT=2e4ed392e1fd8cb7c64787bde9b67ddc0b463e3d
    - DOCKER_CACHE_DIR=/home/travis/docker
 
 cache:
@@ -19,7 +19,7 @@ matrix:
        - COVERAGE=true
        - PHPQA_PHP_VERSION=7.3.7
        - SECP256K1_REMOTE=https://github.com/jonasnick/secp256k1.git
-       - SECP256K1_COMMIT=a228e2f54d64692230ccb2937b12dd746c5157ed
+       - SECP256K1_COMMIT=2e4ed392e1fd8cb7c64787bde9b67ddc0b463e3d
        - SECP256K1_CONFIGURE="--enable-module-ecdh --enable-module-recovery --enable-module-schnorrsig"
        - EXT_SECP256K1_CONFIGURE="--with-secp256k1-config --with-module-recovery --with-module-ecdh --with-module-schnorrsig"
     - php: 7.3
@@ -27,7 +27,7 @@ matrix:
        - VALGRIND=true
        - PHPQA_PHP_VERSION=7.3.7
        - SECP256K1_REMOTE=https://github.com/jonasnick/secp256k1.git
-       - SECP256K1_COMMIT=a228e2f54d64692230ccb2937b12dd746c5157ed
+       - SECP256K1_COMMIT=2e4ed392e1fd8cb7c64787bde9b67ddc0b463e3d
        - SECP256K1_CONFIGURE="--enable-module-ecdh --enable-module-recovery --enable-module-schnorrsig"
        - EXT_SECP256K1_CONFIGURE="--with-secp256k1-config --with-module-recovery --with-module-ecdh --with-module-schnorrsig"
     - php: 7.2
