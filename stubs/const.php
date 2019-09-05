@@ -6,6 +6,7 @@ const SECP256K1_TYPE_CONTEXT = "secp256k1_context";
 const SECP256K1_TYPE_PUBKEY = "secp256k1_pubkey";
 const SECP256K1_TYPE_SIG = "secp256k1_ecdsa_signature";
 const SECP256K1_TYPE_SCRATCH_SPACE = "secp256k1_scratch_space";
+const SECP256K1_TYPE_XONLY_PUBKEY = "secp256k1_xonly_pubkey";
 const SECP256K1_CONTEXT_VERIFY = 257;
 const SECP256K1_CONTEXT_SIGN = 513;
 const SECP256K1_CONTEXT_NONE = 1;

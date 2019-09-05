@@ -304,6 +304,66 @@ function secp256k1_nonce_function_default(?string &$data, string $msg32, string 
  */
 function secp256k1_nonce_function_rfc6979(?string &$nonce32, string $msg32, string $key32, ?string $algo16, $data, int $attempt): int {}
 /**
+ * @param resource $context
+ * @param resource|null $pubkey
+ * @param string $seckey
+ * @return int
+ */
+function secp256k1_xonly_pubkey_create($context, &$pubkey, string $seckey): int {}
+/**
+ * @param resource $context
+ * @param resource|null $pubkey
+ * @param string $input32
+ * @return int
+ */
+function secp256k1_xonly_pubkey_parse($context, &$pubkey, string $input32): int {}
+/**
+ * @param resource $context
+ * @param string|null $output32
+ * @param resource $pubkey
+ * @return int
+ */
+function secp256k1_xonly_pubkey_serialize($context, ?string &$output32, $pubkey): int {}
+/**
+ * @param resource $context
+ * @param resource|null $xonly_pubkey
+ * @param int|null $sign
+ * @param resource $pubkey
+ * @return int
+ */
+function secp256k1_xonly_pubkey_from_pubkey($context, &$xonly_pubkey, ?int &$sign, $pubkey): int {}
+/**
+ * @param resource $context
+ * @param resource|null $pubkey
+ * @param resource $xonly_pubkey
+ * @param int $sign
+ * @return int
+ */
+function secp256k1_xonly_pubkey_to_pubkey($context, &$pubkey, $xonly_pubkey, int $sign): int {}
+/**
+ * @param resource $context
+ * @param string $seckey
+ * @param string $tweak32
+ * @return int
+ */
+function secp256k1_xonly_privkey_tweak_add($context, string &$seckey, string $tweak32): int {}
+/**
+ * @param resource $context
+ * @param resource|null $outputPubKey
+ * @param resource $internalPubKey
+ * @param string $tweak32
+ * @return int
+ */
+function secp256k1_xonly_pubkey_tweak_add($context, &$outputPubKey, $internalPubKey, string $tweak32): int {}
+/**
+ * @param resource $context
+ * @param resource $outputPubKey
+ * @param resource $internalPubKey
+ * @param string $tweak32
+ * @return int
+ */
+function secp256k1_xonly_pubkey_tweak_verify($context, $outputPubKey, $internalPubKey, string $tweak32): int {}
+/**
  * Parse a compact ECDSA signature (64 bytes + recovery id).
  * 
  * Returns: 1 when the signature could be parsed, 0 otherwise

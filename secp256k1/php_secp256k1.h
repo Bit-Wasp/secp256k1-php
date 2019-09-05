@@ -21,6 +21,7 @@ extern zend_module_entry secp256k1_module_entry;
 #define SECP256K1_PUBKEY_RES_NAME "secp256k1_pubkey"
 #define SECP256K1_SIG_RES_NAME "secp256k1_ecdsa_signature"
 #define SECP256K1_SCRATCH_SPACE_RES_NAME "secp256k1_scratch_space"
+#define SECP256K1_XONLY_PUBKEY_RES_NAME "secp256k1_xonly_pubkey"
 #ifdef SECP256K1_MODULE_RECOVERY
 #define SECP256K1_RECOVERABLE_SIG_RES_NAME "secp256k1_ecdsa_recoverable_signature"
 #endif
@@ -64,8 +65,8 @@ PHP_FUNCTION(secp256k1_ec_pubkey_parse);
 PHP_FUNCTION(secp256k1_ec_pubkey_serialize);
 
 PHP_FUNCTION(secp256k1_ec_privkey_tweak_add);
-PHP_FUNCTION(secp256k1_ec_privkey_tweak_mul);
 PHP_FUNCTION(secp256k1_ec_pubkey_tweak_add);
+PHP_FUNCTION(secp256k1_ec_privkey_tweak_mul);
 PHP_FUNCTION(secp256k1_ec_pubkey_tweak_mul);
 
 PHP_FUNCTION(secp256k1_ec_pubkey_combine);
@@ -75,6 +76,15 @@ PHP_FUNCTION(secp256k1_scratch_space_destroy);
 
 PHP_FUNCTION(secp256k1_nonce_function_default);
 PHP_FUNCTION(secp256k1_nonce_function_rfc6979);
+
+PHP_FUNCTION(secp256k1_xonly_pubkey_create);
+PHP_FUNCTION(secp256k1_xonly_pubkey_parse);
+PHP_FUNCTION(secp256k1_xonly_pubkey_serialize);
+PHP_FUNCTION(secp256k1_xonly_pubkey_from_pubkey);
+PHP_FUNCTION(secp256k1_xonly_pubkey_to_pubkey);
+PHP_FUNCTION(secp256k1_xonly_privkey_tweak_add);
+PHP_FUNCTION(secp256k1_xonly_pubkey_tweak_add);
+PHP_FUNCTION(secp256k1_xonly_pubkey_tweak_verify);
 
 /* Recovery module */
 #ifdef SECP256K1_MODULE_RECOVERY
