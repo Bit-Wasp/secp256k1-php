@@ -334,14 +334,6 @@ function secp256k1_xonly_pubkey_serialize($context, ?string &$output32, $pubkey)
 function secp256k1_xonly_pubkey_from_pubkey($context, &$xonly_pubkey, ?int &$sign, $pubkey): int {}
 /**
  * @param resource $context
- * @param resource|null $pubkey
- * @param resource $xonly_pubkey
- * @param int $sign
- * @return int
- */
-function secp256k1_xonly_pubkey_to_pubkey($context, &$pubkey, $xonly_pubkey, int $sign): int {}
-/**
- * @param resource $context
  * @param string $seckey
  * @param string $tweak32
  * @return int
@@ -350,19 +342,21 @@ function secp256k1_xonly_privkey_tweak_add($context, string &$seckey, string $tw
 /**
  * @param resource $context
  * @param resource|null $outputPubKey
+ * @param int|null $isPositive
  * @param resource $internalPubKey
  * @param string $tweak32
  * @return int
  */
-function secp256k1_xonly_pubkey_tweak_add($context, &$outputPubKey, $internalPubKey, string $tweak32): int {}
+function secp256k1_xonly_pubkey_tweak_add($context, &$outputPubKey, ?int &$isPositive, $internalPubKey, string $tweak32): int {}
 /**
  * @param resource $context
  * @param resource $outputPubKey
+ * @param int $isPositive
  * @param resource $internalPubKey
  * @param string $tweak32
  * @return int
  */
-function secp256k1_xonly_pubkey_tweak_verify($context, $outputPubKey, $internalPubKey, string $tweak32): int {}
+function secp256k1_xonly_pubkey_tweak_verify($context, $outputPubKey, int $isPositive, $internalPubKey, string $tweak32): int {}
 /**
  * Parse a compact ECDSA signature (64 bytes + recovery id).
  * 
