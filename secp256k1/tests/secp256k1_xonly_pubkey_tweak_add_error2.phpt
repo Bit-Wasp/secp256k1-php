@@ -23,8 +23,8 @@ echo get_resource_type($pubkey1) . PHP_EOL;
 $badCtx = tmpfile();
 
 set_error_handler(function($code, $str) { echo $str . PHP_EOL; });
-
-$result = secp256k1_xonly_pubkey_tweak_add($badCtx, $tweakedPub, $pubkey1, $tweakTwo);
+$isPositive = null;
+$result = secp256k1_xonly_pubkey_tweak_add($badCtx, $tweakedPub, $isPositive, $pubkey1, $tweakTwo);
 echo $result . PHP_EOL;
 
 ?>

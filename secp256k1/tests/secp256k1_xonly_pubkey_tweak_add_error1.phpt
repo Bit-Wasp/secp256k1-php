@@ -14,5 +14,5 @@ echo $result . PHP_EOL;
 
 ?>
 --EXPECT--
-secp256k1_xonly_pubkey_tweak_add() expects exactly 4 parameters, 0 given
+secp256k1_xonly_pubkey_tweak_add() expects exactly 5 parameters, 0 given
 0

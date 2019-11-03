@@ -27,17 +27,17 @@ $result = secp256k1_xonly_pubkey_create($ctx, $pubkey2, $privKey2);
 echo $result . PHP_EOL;
 echo get_resource_type($pubkey2) . PHP_EOL;
 
-
-$result = secp256k1_xonly_pubkey_tweak_add($ctx, $tweakedPub, $pubkey1, $tweakTwo);
+$isPositive = null;
+$result = secp256k1_xonly_pubkey_tweak_add($ctx, $tweakedPub, $isPositive, $pubkey1, $tweakTwo);
 echo $result . PHP_EOL;
 
-$result = secp256k1_ec_pubkey_serialize($ctx, $pubKey1Out, $tweakedPub, SECP256K1_EC_COMPRESSED);
+$result = secp256k1_xonly_pubkey_serialize($ctx, $pubKey1Out, $tweakedPub);
 echo $result . PHP_EOL;
 
 $result = secp256k1_xonly_pubkey_serialize($ctx, $pubKey2Out, $pubkey2);
 echo $result . PHP_EOL;
 
-if (substr($pubKey1Out, 1) === $pubKey2Out) {
+if ($pubKey1Out === $pubKey2Out) {
     echo "public keys equal";
 } else {
     echo bin2hex($pubKey1Out)." !== ".bin2hex($pubKey2Out)."\n";

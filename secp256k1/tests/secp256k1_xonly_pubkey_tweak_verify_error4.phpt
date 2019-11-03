@@ -20,12 +20,13 @@ $result = secp256k1_xonly_pubkey_create($ctx, $pubkey1, $privKey1);
 echo $result . PHP_EOL;
 echo get_resource_type($pubkey1) . PHP_EOL;
 
-$result = secp256k1_xonly_pubkey_tweak_add($ctx, $tweakedPub, $pubkey1, $tweak);
+$isPositive = null;
+$result = secp256k1_xonly_pubkey_tweak_add($ctx, $tweakedPub, $isPositive, $pubkey1, $tweak);
 echo $result . PHP_EOL;
 
 $badInternal = tmpfile();
 set_error_handler(function($code, $str) { echo $str . PHP_EOL; });
-$result = secp256k1_xonly_pubkey_tweak_verify($ctx, $tweakedPub, $badInternal, $tweak);
+$result = secp256k1_xonly_pubkey_tweak_verify($ctx, $tweakedPub, $isPositive, $badInternal, $tweak);
 echo $result.PHP_EOL;
 
 ?>

@@ -23,10 +23,11 @@ $result = secp256k1_xonly_pubkey_create($ctx, $pubkey1, $privKey1);
 echo $result . PHP_EOL;
 echo get_resource_type($pubkey1) . PHP_EOL;
 
-$expecting = "secp256k1_xonly_pubkey_tweak_add(): Parameter 4 should be 32 bytes";
+$expecting = "secp256k1_xonly_pubkey_tweak_add(): Parameter 5 should be 32 bytes";
 
+$isPositive = null;
 try {
-    secp256k1_xonly_pubkey_tweak_add($ctx, $tweakedPub, $pubkey1, $tweakEmpty);
+    secp256k1_xonly_pubkey_tweak_add($ctx, $tweakedPub, $isPositive, $pubkey1, $tweakEmpty);
 } catch (\Exception $e) {
     if ($e->getMessage() !== $expecting) {
         echo "ERROR\n";
@@ -35,7 +36,7 @@ try {
 }
 
 try {
-    secp256k1_xonly_pubkey_tweak_add($ctx, $tweakedPub, $pubkey1, $tweak31);
+    secp256k1_xonly_pubkey_tweak_add($ctx, $tweakedPub, $isPositive, $pubkey1, $tweak31);
 } catch (\Exception $e) {
     if ($e->getMessage() !== $expecting) {
         echo "ERROR\n";
@@ -44,7 +45,7 @@ try {
 }
 
 try {
-    secp256k1_xonly_pubkey_tweak_add($ctx, $tweakedPub, $pubkey1, $tweak33);
+    secp256k1_xonly_pubkey_tweak_add($ctx, $tweakedPub, $isPositive, $pubkey1, $tweak33);
 } catch (\Exception $e) {
     if ($e->getMessage() !== $expecting) {
         echo "ERROR\n";
@@ -56,6 +57,6 @@ try {
 --EXPECT--
 1
 secp256k1_xonly_pubkey
-secp256k1_xonly_pubkey_tweak_add(): Parameter 4 should be 32 bytes
-secp256k1_xonly_pubkey_tweak_add(): Parameter 4 should be 32 bytes
-secp256k1_xonly_pubkey_tweak_add(): Parameter 4 should be 32 bytes
+secp256k1_xonly_pubkey_tweak_add(): Parameter 5 should be 32 bytes
+secp256k1_xonly_pubkey_tweak_add(): Parameter 5 should be 32 bytes
+secp256k1_xonly_pubkey_tweak_add(): Parameter 5 should be 32 bytes

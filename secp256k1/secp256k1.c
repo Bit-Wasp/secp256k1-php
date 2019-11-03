@@ -455,6 +455,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_secp256k1_xonly_pubkey_tweak_add, I
 #endif
     ZEND_ARG_TYPE_INFO(0, context, IS_RESOURCE, 0)
     ZEND_ARG_TYPE_INFO(1, outputPubKey, IS_RESOURCE, 1)
+    ZEND_ARG_TYPE_INFO(1, isPositive, IS_LONG, 1)
     ZEND_ARG_TYPE_INFO(0, internalPubKey, IS_RESOURCE, 0)
     ZEND_ARG_TYPE_INFO(0, tweak32, IS_STRING, 0)
 ZEND_END_ARG_INFO();
@@ -466,6 +467,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_secp256k1_xonly_pubkey_tweak_verify
 #endif
     ZEND_ARG_TYPE_INFO(0, context, IS_RESOURCE, 0)
     ZEND_ARG_TYPE_INFO(0, outputPubKey, IS_RESOURCE, 0)
+    ZEND_ARG_TYPE_INFO(0, isPositive, IS_LONG, 0)
     ZEND_ARG_TYPE_INFO(0, internalPubKey, IS_RESOURCE, 0)
     ZEND_ARG_TYPE_INFO(0, tweak32, IS_STRING, 0)
 ZEND_END_ARG_INFO();
@@ -2024,14 +2026,14 @@ PHP_FUNCTION(secp256k1_xonly_privkey_tweak_add)
  * Tweak a public key by adding tweak times the generator to it. */
 PHP_FUNCTION(secp256k1_xonly_pubkey_tweak_add)
 {
-    zval *zCtx, *zOutputPubKey, *zInternalPubKey;
+    zval *zCtx, *zOutputPubKey, *zIsPositive, *zInternalPubKey;
     secp256k1_context *ctx;
-    secp256k1_pubkey *output_pubkey;
-    secp256k1_xonly_pubkey *internal_pubkey;
+    secp256k1_xonly_pubkey *output_pubkey, *internal_pubkey;
     zend_string *zTweak;
+    int is_positive;
     int result;
 
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rz/rS", &zCtx, &zOutputPubKey, &zInternalPubKey, &zTweak) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rz/z/rS", &zCtx, &zOutputPubKey, &zIsPositive, &zInternalPubKey, &zTweak) == FAILURE) {
         RETURN_LONG(0);
     }
 
@@ -2042,18 +2044,21 @@ PHP_FUNCTION(secp256k1_xonly_pubkey_tweak_add)
     }
 
     if (zTweak->len != SECRETKEY_LENGTH) {
-        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_xonly_pubkey_tweak_add(): Parameter 4 should be 32 bytes");
+        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_xonly_pubkey_tweak_add(): Parameter 5 should be 32 bytes");
         return;
     }
 
-    output_pubkey = emalloc(sizeof(secp256k1_pubkey));
-    result = secp256k1_xonly_pubkey_tweak_add(ctx, output_pubkey, internal_pubkey, (unsigned char *)zTweak->val);
+    output_pubkey = emalloc(sizeof(secp256k1_xonly_pubkey));
+    result = secp256k1_xonly_pubkey_tweak_add(ctx, output_pubkey, &is_positive, internal_pubkey, (unsigned char *)zTweak->val);
     if (result) {
         zval_dtor(zOutputPubKey);
-        ZVAL_RES(zOutputPubKey, zend_register_resource(output_pubkey, le_secp256k1_pubkey));
+        ZVAL_RES(zOutputPubKey, zend_register_resource(output_pubkey, le_secp256k1_xonly_pubkey));
+        zval_dtor(zIsPositive);
+        ZVAL_LONG(zIsPositive, is_positive);
     } else {
         efree(output_pubkey);
     }
+
     RETURN_LONG(result);
 }
 /* }}} */
@@ -2064,18 +2069,18 @@ PHP_FUNCTION(secp256k1_xonly_pubkey_tweak_verify)
 {
     zval *zCtx, *zOutputPubKey, *zInternalPubKey;
     secp256k1_context *ctx;
-    secp256k1_pubkey *output_pubkey;
-    secp256k1_xonly_pubkey *internal_pubkey;
+    secp256k1_xonly_pubkey *output_pubkey, *internal_pubkey;
+    zend_long is_positive;
     zend_string *zTweak32;
     int result;
 
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rrrS", &zCtx, &zOutputPubKey, &zInternalPubKey, &zTweak32) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rrlrS", &zCtx, &zOutputPubKey, &is_positive, &zInternalPubKey, &zTweak32) == FAILURE) {
         RETURN_LONG(0);
     }
 
     if ((ctx = php_get_secp256k1_context(zCtx)) == NULL) {
         RETURN_LONG(0);
-    } else if ((output_pubkey = php_get_secp256k1_pubkey(zOutputPubKey)) == NULL) {
+    } else if ((output_pubkey = php_get_secp256k1_xonly_pubkey(zOutputPubKey)) == NULL) {
         RETURN_LONG(0);
     }  else if ((internal_pubkey = php_get_secp256k1_xonly_pubkey(zInternalPubKey)) == NULL) {
         RETURN_LONG(0);
@@ -2086,7 +2091,7 @@ PHP_FUNCTION(secp256k1_xonly_pubkey_tweak_verify)
         return;
     }
 
-    result = secp256k1_xonly_pubkey_tweak_verify(ctx, output_pubkey, internal_pubkey, (unsigned char *)zTweak32->val);
+    result = secp256k1_xonly_pubkey_tweak_verify(ctx, output_pubkey, (int)is_positive, internal_pubkey, (unsigned char *)zTweak32->val);
 
     RETURN_LONG(result);
 }
