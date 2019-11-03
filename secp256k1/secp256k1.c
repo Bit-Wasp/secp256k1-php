@@ -428,17 +428,6 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_secp256k1_xonly_pubkey_from_pubkey,
 ZEND_END_ARG_INFO();
 
 #if (PHP_VERSION_ID >= 70000 && PHP_VERSION_ID <= 70200)
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_secp256k1_xonly_pubkey_to_pubkey, IS_LONG, NULL, 0)
-#else
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_secp256k1_xonly_pubkey_to_pubkey, IS_LONG, 0)
-#endif
-    ZEND_ARG_TYPE_INFO(0, context, IS_RESOURCE, 0)
-    ZEND_ARG_TYPE_INFO(1, pubkey, IS_RESOURCE, 1)
-    ZEND_ARG_TYPE_INFO(0, xonly_pubkey, IS_RESOURCE, 0)
-    ZEND_ARG_TYPE_INFO(0, sign, IS_LONG, 0)
-ZEND_END_ARG_INFO();
-
-#if (PHP_VERSION_ID >= 70000 && PHP_VERSION_ID <= 70200)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_secp256k1_xonly_privkey_tweak_add, IS_LONG, NULL, 0)
 #else
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_secp256k1_xonly_privkey_tweak_add, IS_LONG, 0)
@@ -668,7 +657,6 @@ const zend_function_entry secp256k1_functions[] = {
         PHP_FE(secp256k1_xonly_pubkey_parse,                 arginfo_secp256k1_xonly_pubkey_parse)
         PHP_FE(secp256k1_xonly_pubkey_serialize,             arginfo_secp256k1_xonly_pubkey_serialize)
         PHP_FE(secp256k1_xonly_pubkey_from_pubkey,           arginfo_secp256k1_xonly_pubkey_from_pubkey)
-        PHP_FE(secp256k1_xonly_pubkey_to_pubkey,             arginfo_secp256k1_xonly_pubkey_to_pubkey)
         PHP_FE(secp256k1_xonly_privkey_tweak_add,            arginfo_secp256k1_xonly_privkey_tweak_add)
         PHP_FE(secp256k1_xonly_pubkey_tweak_add,             arginfo_secp256k1_xonly_pubkey_tweak_add)
         PHP_FE(secp256k1_xonly_pubkey_tweak_verify,          arginfo_secp256k1_xonly_pubkey_tweak_verify)
@@ -1947,38 +1935,6 @@ PHP_FUNCTION(secp256k1_xonly_pubkey_from_pubkey)
         ZVAL_RES(zXOnlyPubKey, zend_register_resource(xonly_pubkey, le_secp256k1_xonly_pubkey));
         zval_dtor(zSign);
         ZVAL_LONG(zSign, sign);
-    }
-
-    RETURN_LONG(result);
-}
-/* }}} */
-
-/* {{{ proto int secp256k1_xonly_pubkey_to_pubkey(resource context, resource &pubkey, resource pubkey, int sign)
- * Convert a recoverable signature into a normal signature. */
-PHP_FUNCTION(secp256k1_xonly_pubkey_to_pubkey)
-{
-    zval *zCtx, *zXOnlyPubKey, *zPubKey;
-    secp256k1_context *ctx;
-    secp256k1_xonly_pubkey *xonly_pubkey;
-    secp256k1_pubkey *pubkey;
-    long sign;
-    int result;
-
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rz/rl", &zCtx, &zPubKey, &zXOnlyPubKey, &sign) == FAILURE) {
-        RETURN_LONG(0);
-    }
-
-    if ((ctx = php_get_secp256k1_context(zCtx)) == NULL) {
-        RETURN_LONG(0);
-    } else if ((xonly_pubkey = php_get_secp256k1_xonly_pubkey(zXOnlyPubKey)) == NULL) {
-        RETURN_LONG(0);
-    }
-
-    pubkey = emalloc(sizeof(secp256k1_pubkey));
-    result = secp256k1_xonly_pubkey_to_pubkey(ctx, pubkey, xonly_pubkey, sign);
-    if (result) {
-        zval_dtor(zPubKey);
-        ZVAL_RES(zPubKey, zend_register_resource(pubkey, le_secp256k1_pubkey));
     }
 
     RETURN_LONG(result);
