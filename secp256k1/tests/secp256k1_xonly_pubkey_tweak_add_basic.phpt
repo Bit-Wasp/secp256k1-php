@@ -27,8 +27,8 @@ $result = secp256k1_xonly_pubkey_create($ctx, $pubkey2, $privKey2);
 echo $result . PHP_EOL;
 echo get_resource_type($pubkey2) . PHP_EOL;
 
-$isPositive = null;
-$result = secp256k1_xonly_pubkey_tweak_add($ctx, $tweakedPub, $isPositive, $pubkey1, $tweakTwo);
+$hasSquareY = null;
+$result = secp256k1_xonly_pubkey_tweak_add($ctx, $tweakedPub, $hasSquareY, $pubkey1, $tweakTwo);
 echo $result . PHP_EOL;
 
 $result = secp256k1_xonly_pubkey_serialize($ctx, $pubKey1Out, $tweakedPub);

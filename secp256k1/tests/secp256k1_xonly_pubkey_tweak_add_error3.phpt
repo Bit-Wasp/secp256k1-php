@@ -17,8 +17,8 @@ $privKey1 = str_repeat("\x42", 32);
 
 $badKey = tmpfile();
 set_error_handler(function($code, $str) { echo $str . PHP_EOL; });
-$isPositive = null;
-$result = secp256k1_xonly_pubkey_tweak_add($ctx, $tweakedPub, $isPositive, $badKey, $tweakTwo);
+$hasSquareY = null;
+$result = secp256k1_xonly_pubkey_tweak_add($ctx, $tweakedPub, $hasSquareY, $badKey, $tweakTwo);
 echo $result . PHP_EOL;
 
 ?>
