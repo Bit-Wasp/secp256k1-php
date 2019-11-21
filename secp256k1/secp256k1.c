@@ -450,9 +450,9 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_secp256k1_xonly_pubkey_tweak_add, I
 ZEND_END_ARG_INFO();
 
 #if (PHP_VERSION_ID >= 70000 && PHP_VERSION_ID <= 70200)
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_secp256k1_xonly_pubkey_tweak_verify, IS_LONG, NULL, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_secp256k1_xonly_pubkey_tweak_test, IS_LONG, NULL, 0)
 #else
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_secp256k1_xonly_pubkey_tweak_verify, IS_LONG, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_secp256k1_xonly_pubkey_tweak_test, IS_LONG, 0)
 #endif
     ZEND_ARG_TYPE_INFO(0, context, IS_RESOURCE, 0)
     ZEND_ARG_TYPE_INFO(0, outputPubKey, IS_RESOURCE, 0)
@@ -659,7 +659,7 @@ const zend_function_entry secp256k1_functions[] = {
         PHP_FE(secp256k1_xonly_pubkey_from_pubkey,           arginfo_secp256k1_xonly_pubkey_from_pubkey)
         PHP_FE(secp256k1_xonly_privkey_tweak_add,            arginfo_secp256k1_xonly_privkey_tweak_add)
         PHP_FE(secp256k1_xonly_pubkey_tweak_add,             arginfo_secp256k1_xonly_pubkey_tweak_add)
-        PHP_FE(secp256k1_xonly_pubkey_tweak_verify,          arginfo_secp256k1_xonly_pubkey_tweak_verify)
+        PHP_FE(secp256k1_xonly_pubkey_tweak_test,            arginfo_secp256k1_xonly_pubkey_tweak_test)
         // secp256k1_recovery.h
 #ifdef SECP256K1_MODULE_RECOVERY
         PHP_FE(secp256k1_ecdsa_recoverable_signature_parse_compact, arginfo_secp256k1_ecdsa_recoverable_signature_parse_compact)
@@ -2019,9 +2019,9 @@ PHP_FUNCTION(secp256k1_xonly_pubkey_tweak_add)
 }
 /* }}} */
 
-/* {{{ proto int secp256k1_xonly_pubkey_tweak_verify(resource context, resource output_pubkey, resource internal_pubkey, string tweak32)
+/* {{{ proto int secp256k1_xonly_pubkey_tweak_test(resource context, resource output_pubkey, bool hasSquareY, resource internal_pubkey, string tweak32)
  * Tweak a public key by adding tweak times the generator to it. */
-PHP_FUNCTION(secp256k1_xonly_pubkey_tweak_verify)
+PHP_FUNCTION(secp256k1_xonly_pubkey_tweak_test)
 {
     zval *zCtx, *zOutputPubKey, *zInternalPubKey;
     secp256k1_context *ctx;
@@ -2043,11 +2043,11 @@ PHP_FUNCTION(secp256k1_xonly_pubkey_tweak_verify)
     }
 
     if (zTweak32->len != SECRETKEY_LENGTH) {
-        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_xonly_pubkey_tweak_verify(): Parameter 4 should be 32 bytes");
+        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "secp256k1_xonly_pubkey_tweak_test(): Parameter 5 should be 32 bytes");
         return;
     }
 
-    result = secp256k1_xonly_pubkey_tweak_verify(ctx, output_pubkey, (int)has_square_y, internal_pubkey, (unsigned char *)zTweak32->val);
+    result = secp256k1_xonly_pubkey_tweak_test(ctx, output_pubkey, (int)has_square_y, internal_pubkey, (unsigned char *)zTweak32->val);
 
     RETURN_LONG(result);
 }

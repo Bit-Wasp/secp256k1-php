@@ -1,5 +1,5 @@
 --TEST--
-secp256k1_xonly_pubkey_tweak_verify errors if output_pubkey is wrong type
+secp256k1_xonly_pubkey_tweak_test errors if output_pubkey is wrong type
 --SKIPIF--
 <?php
 if (!extension_loaded("secp256k1")) print "skip extension not loaded";
@@ -26,7 +26,7 @@ echo $result . PHP_EOL;
 
 set_error_handler(function($code, $str) { echo $str . PHP_EOL; });
 $badTweakedPub = tmpfile();
-$result = secp256k1_xonly_pubkey_tweak_verify($ctx, $badTweakedPub, $hasSquareY, $pubkey1, $tweak);
+$result = secp256k1_xonly_pubkey_tweak_test($ctx, $badTweakedPub, $hasSquareY, $pubkey1, $tweak);
 echo $result.PHP_EOL;
 
 ?>
@@ -34,5 +34,5 @@ echo $result.PHP_EOL;
 1
 secp256k1_xonly_pubkey
 1
-secp256k1_xonly_pubkey_tweak_verify(): supplied resource is not a valid secp256k1_xonly_pubkey resource
+secp256k1_xonly_pubkey_tweak_test(): supplied resource is not a valid secp256k1_xonly_pubkey resource
 0

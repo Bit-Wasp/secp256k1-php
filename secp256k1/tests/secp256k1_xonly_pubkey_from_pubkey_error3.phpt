@@ -14,7 +14,7 @@ $privKey = str_repeat("\x42", 32);
 
 $badPubKey = tmpfile();
 set_error_handler(function($code, $str) { echo $str . PHP_EOL; });
-$result = secp256k1_xonly_pubkey_from_pubkey($ctx, $xonlyPubKey, $sign, $badPubKey);
+$result = secp256k1_xonly_pubkey_from_pubkey($ctx, $xonlyPubKey, $hasSquareY, $badPubKey);
 echo $result . PHP_EOL;
 
 ?>

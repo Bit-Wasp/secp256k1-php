@@ -342,21 +342,21 @@ function secp256k1_xonly_privkey_tweak_add($context, string &$seckey, string $tw
 /**
  * @param resource $context
  * @param resource|null $outputPubKey
- * @param int|null $isPositive
+ * @param int|null $hasSquareY
  * @param resource $internalPubKey
  * @param string $tweak32
  * @return int
  */
-function secp256k1_xonly_pubkey_tweak_add($context, &$outputPubKey, ?int &$isPositive, $internalPubKey, string $tweak32): int {}
+function secp256k1_xonly_pubkey_tweak_add($context, &$outputPubKey, ?int &$hasSquareY, $internalPubKey, string $tweak32): int {}
 /**
  * @param resource $context
  * @param resource $outputPubKey
- * @param int $isPositive
+ * @param int $hasSquareY
  * @param resource $internalPubKey
  * @param string $tweak32
  * @return int
  */
-function secp256k1_xonly_pubkey_tweak_verify($context, $outputPubKey, int $isPositive, $internalPubKey, string $tweak32): int {}
+function secp256k1_xonly_pubkey_tweak_test($context, $outputPubKey, int $hasSquareY, $internalPubKey, string $tweak32): int {}
 /**
  * Parse a compact ECDSA signature (64 bytes + recovery id).
  * 

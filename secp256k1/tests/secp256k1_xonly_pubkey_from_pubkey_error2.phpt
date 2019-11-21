@@ -14,7 +14,7 @@ $privKey = str_repeat("\x41", 32);
 
 $pubkey = null;
 $xonlyPubKey = null;
-$sign = null;
+$hasSquareY = null;
 $pubkey2 = null;
 $result = secp256k1_ec_pubkey_create($ctx, $pubkey, $privKey);
 echo $result . PHP_EOL;
@@ -22,7 +22,7 @@ echo get_resource_type($pubkey) . PHP_EOL;
 
 $badCtx = tmpfile();
 set_error_handler(function($code, $str) { echo $str . PHP_EOL; });
-$result = secp256k1_xonly_pubkey_from_pubkey($badCtx, $xonlyPubKey, $sign, $pubkey);
+$result = secp256k1_xonly_pubkey_from_pubkey($badCtx, $xonlyPubKey, $hasSquareY, $pubkey);
 echo $result . PHP_EOL;
 
 ?>

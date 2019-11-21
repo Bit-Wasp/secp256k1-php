@@ -84,7 +84,7 @@ PHP_FUNCTION(secp256k1_xonly_pubkey_from_pubkey);
 PHP_FUNCTION(secp256k1_xonly_pubkey_to_pubkey);
 PHP_FUNCTION(secp256k1_xonly_privkey_tweak_add);
 PHP_FUNCTION(secp256k1_xonly_pubkey_tweak_add);
-PHP_FUNCTION(secp256k1_xonly_pubkey_tweak_verify);
+PHP_FUNCTION(secp256k1_xonly_pubkey_tweak_test);
 
 /* Recovery module */
 #ifdef SECP256K1_MODULE_RECOVERY

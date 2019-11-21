@@ -1,5 +1,5 @@
 --TEST--
-secp256k1_xonly_pubkey_tweak_verify works
+secp256k1_xonly_pubkey_tweak_test works
 --SKIPIF--
 <?php
 if (!extension_loaded("secp256k1")) print "skip extension not loaded";
@@ -25,10 +25,10 @@ $hasSquareY = null;
 $result = secp256k1_xonly_pubkey_tweak_add($ctx, $tweakedPub, $hasSquareY, $pubkey1, $tweak);
 echo $result . PHP_EOL;
 
-$result = secp256k1_xonly_pubkey_tweak_verify($ctx, $tweakedPub, $hasSquareY, $pubkey1, $tweakInvalid);
+$result = secp256k1_xonly_pubkey_tweak_test($ctx, $tweakedPub, $hasSquareY, $pubkey1, $tweakInvalid);
 echo $result.PHP_EOL;
 
-$result = secp256k1_xonly_pubkey_tweak_verify($ctx, $tweakedPub, $hasSquareY, $pubkey1, $tweak);
+$result = secp256k1_xonly_pubkey_tweak_test($ctx, $tweakedPub, $hasSquareY, $pubkey1, $tweak);
 echo $result.PHP_EOL;
 
 ?>

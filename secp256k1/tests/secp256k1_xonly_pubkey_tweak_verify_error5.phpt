@@ -1,5 +1,5 @@
 --TEST--
-secp256k1_xonly_pubkey_tweak_verify throws if tweak is not 32 bytes
+secp256k1_xonly_pubkey_tweak_test throws if tweak is not 32 bytes
 --SKIPIF--
 <?php
 if (!extension_loaded("secp256k1")) print "skip extension not loaded";
@@ -25,10 +25,10 @@ echo get_resource_type($pubkey1) . PHP_EOL;
 $hasSquareY = null;
 $result = secp256k1_xonly_pubkey_tweak_add($ctx, $tweakedPub, $hasSquareY, $pubkey1, $tweak);
 echo $result . PHP_EOL;
-$expecting = "secp256k1_xonly_pubkey_tweak_verify(): Parameter 4 should be 32 bytes";
+$expecting = "secp256k1_xonly_pubkey_tweak_test(): Parameter 5 should be 32 bytes";
 
 try {
-    secp256k1_xonly_pubkey_tweak_verify($ctx, $tweakedPub, $hasSquareY, $pubkey1, $tweakEmpty);
+    secp256k1_xonly_pubkey_tweak_test($ctx, $tweakedPub, $hasSquareY, $pubkey1, $tweakEmpty);
 } catch (\Exception $e) {
     if ($e->getMessage() !== $expecting) {
         echo "ERROR\n";
@@ -37,7 +37,7 @@ try {
 }
 
 try {
-    secp256k1_xonly_pubkey_tweak_verify($ctx, $tweakedPub, $hasSquareY, $pubkey1, $tweak31);
+    secp256k1_xonly_pubkey_tweak_test($ctx, $tweakedPub, $hasSquareY, $pubkey1, $tweak31);
 } catch (\Exception $e) {
     if ($e->getMessage() !== $expecting) {
         echo "ERROR\n";
@@ -46,7 +46,7 @@ try {
 }
 
 try {
-    secp256k1_xonly_pubkey_tweak_verify($ctx, $tweakedPub, $hasSquareY, $pubkey1, $tweak33);
+    secp256k1_xonly_pubkey_tweak_test($ctx, $tweakedPub, $hasSquareY, $pubkey1, $tweak33);
 } catch (\Exception $e) {
     if ($e->getMessage() !== $expecting) {
         echo "ERROR\n";
@@ -58,6 +58,6 @@ try {
 1
 secp256k1_xonly_pubkey
 1
-secp256k1_xonly_pubkey_tweak_verify(): Parameter 4 should be 32 bytes
-secp256k1_xonly_pubkey_tweak_verify(): Parameter 4 should be 32 bytes
-secp256k1_xonly_pubkey_tweak_verify(): Parameter 4 should be 32 bytes
+secp256k1_xonly_pubkey_tweak_test(): Parameter 5 should be 32 bytes
+secp256k1_xonly_pubkey_tweak_test(): Parameter 5 should be 32 bytes
+secp256k1_xonly_pubkey_tweak_test(): Parameter 5 should be 32 bytes
