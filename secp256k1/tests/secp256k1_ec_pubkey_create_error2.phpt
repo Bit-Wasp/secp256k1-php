@@ -1,5 +1,5 @@
 --TEST--
-secp256k1_ec_pubkey_create returns -1 if seckey isn't valid
+secp256k1_ec_pubkey_create returns 0 if seckey isn't valid
 --SKIPIF--
 <?php
 if (!extension_loaded("secp256k1")) print "skip extension not loaded";
