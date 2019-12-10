@@ -96,7 +96,7 @@ if test "$PHP_SECP256K1" != "no"; then
       [
         AC_DEFINE(SECP256K1_MODULE_SCHNORRSIG, 1, [ ])
       ],[
-         AC_MSG_ERROR([missing libraries for secp256k1 recovery support])
+         AC_MSG_ERROR([missing libraries for secp256k1 schnorrsig support])
       ],[])
     fi
   else
