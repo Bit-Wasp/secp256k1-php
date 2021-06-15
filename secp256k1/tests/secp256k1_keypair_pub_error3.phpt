@@ -3,7 +3,7 @@ secp256k1_keypair_pub errors if keypair is wrong resource type
 --SKIPIF--
 <?php
 if (!extension_loaded("secp256k1")) print "skip extension not loaded";
-if (!constant_exists("SECP256K1_XONLY_PUBKEY_RES_NAME")) print "skip no extrakeys support";
+if (!function_exists("secp256k1_keypair_create")) print "skip no extrakeys support";
 ?>
 --FILE--
 <?php

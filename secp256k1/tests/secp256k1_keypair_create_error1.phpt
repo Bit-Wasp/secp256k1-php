@@ -3,8 +3,7 @@ secp256k1_keypair_create errors if key parameter is not 32 bytes
 --SKIPIF--
 <?php
 if (!extension_loaded("secp256k1")) print "skip extension not loaded";
-if (!function_exists("secp256k1_schnorrsig_verify")) print "skip no schnorrsig support";
-?>
+if (!function_exists("secp256k1_keypair_create")) print "skip no extrakeys support";?>
 --FILE--
 <?php
 
