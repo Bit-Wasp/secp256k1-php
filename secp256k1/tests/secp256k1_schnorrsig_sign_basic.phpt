@@ -8,7 +8,7 @@ if (!function_exists("secp256k1_schnorrsig_verify")) print "skip no schnorrsig s
 --FILE--
 <?php
 
-$ctx = secp256k1_context_create(SECP256K1_CONTEXT_SIGN);
+$ctx = secp256k1_context_create(SECP256K1_CONTEXT_SIGN | SECP256K1_CONTEXT_VERIFY);
 
 //https://github.com/bitcoin/bips/blob/master/bip-0340/test-vectors.csv
 $privKey = hex2bin("0000000000000000000000000000000000000000000000000000000000000003");
@@ -38,6 +38,9 @@ echo $result . PHP_EOL;
 
 echo strtoupper(unpack("H*", $sig64)[1]) . PHP_EOL;
 
+$result = secp256k1_schnorrsig_verify($ctx, $sig64, $msg32, $xonlyPubKey);
+echo $result . PHP_EOL;
+
 ?>
 --EXPECT--
 1
@@ -46,3 +49,4 @@ echo strtoupper(unpack("H*", $sig64)[1]) . PHP_EOL;
 F9308A019258C31049344F85F89D5229B531C845836F99B08601F113BCE036F9
 1
 E907831F80848D1069A5371B402410364BDF1C5F8307B0084C55F1CE2DCA821525F66A4A85EA8B71E482A74F382D2CE5EBEEE8FDB2172F477DF4900D310536C0
+1
