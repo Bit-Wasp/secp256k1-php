@@ -18,23 +18,26 @@ matrix:
       env:
        - COVERAGE=true
        - PHPQA_PHP_VERSION=7.3.7
-       - SECP256K1_CONFIGURE="--enable-module-ecdh --enable-module-recovery --enable-module-schnorrsig"
-       - EXT_SECP256K1_CONFIGURE="--with-secp256k1-config --with-module-recovery --with-module-ecdh --with-module-schnorrsig"
+       - SECP256K1_CONFIGURE="--enable-module-ecdh --enable-module-recovery --enable-module-schnorrsig --enable-module-extrakeys"
+       - EXT_SECP256K1_CONFIGURE="--with-secp256k1-config --with-module-recovery --with-module-ecdh --with-module-schnorrsig --with-module-extrakeys"
     - php: 7.3
       env:
        - VALGRIND=true
        - PHPQA_PHP_VERSION=7.3.7
-       - SECP256K1_CONFIGURE="--enable-module-ecdh --enable-module-recovery --enable-module-schnorrsig"
-       - EXT_SECP256K1_CONFIGURE="--with-secp256k1-config --with-module-recovery --with-module-ecdh --with-module-schnorrsig"
+       - SECP256K1_CONFIGURE="--enable-module-ecdh --enable-module-recovery --enable-module-schnorrsig --enable-module-extrakeys"
+       - EXT_SECP256K1_CONFIGURE="--with-secp256k1-config --with-module-recovery --with-module-ecdh --with-module-schnorrsig --with-module-extrakeys"
     - php: 7.2
       env:
-       - SECP256K1_CONFIGURE="--enable-module-ecdh --enable-module-recovery"
+       - SECP256K1_CONFIGURE="--enable-module-ecdh --enable-module-recovery --enable-module-schnorrsig --enable-module-extrakeys"
+       - EXT_SECP256K1_CONFIGURE="--with-secp256k1-config --with-module-recovery --with-module-ecdh --with-module-schnorrsig --with-module-extrakeys"
     - php: 7.1
       env:
-       - SECP256K1_CONFIGURE="--enable-module-ecdh --enable-module-recovery"
+       - SECP256K1_CONFIGURE="--enable-module-ecdh --enable-module-recovery --enable-module-schnorrsig --enable-module-extrakeys"
+       - EXT_SECP256K1_CONFIGURE="--with-secp256k1-config --with-module-recovery --with-module-ecdh --with-module-schnorrsig --with-module-extrakeys"
     - php: 7.0
       env:
-       - SECP256K1_CONFIGURE="--enable-module-ecdh --enable-module-recovery"
+       - SECP256K1_CONFIGURE="--enable-module-ecdh --enable-module-recovery --enable-module-schnorrsig --enable-module-extrakeys"
+       - EXT_SECP256K1_CONFIGURE="--with-secp256k1-config --with-module-recovery --with-module-ecdh --with-module-schnorrsig --with-module-extrakeys"
 
 before_install:
   - sudo apt-get install -qq libssl-dev
