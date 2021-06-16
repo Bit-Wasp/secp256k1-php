@@ -19,6 +19,7 @@ rm configure && ./buildconf --force
     --with-module-ecdh \
     --with-module-recovery \
     --with-module-schnorrsig \
+    --with-module-extrakeys \
     --with-libdir="lib/$debMultiarch" \
     $PHP_EXTRA_CONFIGURE_ARGS \
 && make -j "$(nproc)" \
