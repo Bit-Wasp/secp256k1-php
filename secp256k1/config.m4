@@ -29,6 +29,12 @@ PHP_ARG_WITH([module-schnorrsig],
       [Include schnorrsig support])],
   [no],
   [no])
+PHP_ARG_WITH([module-extrakeys],
+  [whether to build secp256k1 with extrakeys support],
+  [AS_HELP_STRING([--with-module-extrakeys],
+      [Include extrakeys support])],
+  [no],
+  [no])
 
 if test "$PHP_SECP256K1" != "no"; then
   dnl Write more examples of tests here...
@@ -91,12 +97,21 @@ if test "$PHP_SECP256K1" != "no"; then
       ])
     fi
 
+    if test "$PHP_MODULE_EXTRAKEYS" = "yes"; then
+      PHP_CHECK_LIBRARY($LIBNAME,secp256k1_xonly_pubkey_parse,
+      [
+        AC_DEFINE(SECP256K1_MODULE_EXTRAKEYS, 1, [ ])
+      ],[
+         AC_MSG_ERROR([missing libraries for secp256k1 extrakeys support])
+      ],[])
+    fi
+
     if test "$PHP_MODULE_SCHNORRSIG" = "yes"; then
       PHP_CHECK_LIBRARY($LIBNAME,secp256k1_schnorrsig_verify,
       [
         AC_DEFINE(SECP256K1_MODULE_SCHNORRSIG, 1, [ ])
       ],[
-         AC_MSG_ERROR([missing libraries for secp256k1 recovery support])
+         AC_MSG_ERROR([missing libraries for secp256k1 schnorrsig support])
       ],[])
     fi
   else

@@ -6,8 +6,8 @@ ARG BUILD_PHP_SHA256="0d42089729be7b2bb0308cbe189c2782f9cb4b07078c8a235495be5874
 ARG BUILD_CHECK_SIGNATURE=true
 ARG BUILD_CUSTOM_URL=''
 ARG BUILD_REPO_URL=''
-ARG BUILD_SECP256K1_REPO="https://github.com/jonasnick/secp256k1.git"
-ARG BUILD_SECP256K1_COMMIT="a228e2f54d64692230ccb2937b12dd746c5157ed"
+ARG BUILD_SECP256K1_REPO="https://github.com/bitcoin-core/secp256k1.git"
+ARG BUILD_SECP256K1_COMMIT="efad3506a8937162e8010f5839fdf3771dfcf516"
 
 ENV PHPIZE_DEPS \
 		autoconf \
@@ -27,7 +27,7 @@ ENV PHP_INI_DIR /usr/local/etc/php
 ENV PHP_CFLAGS="-fstack-protector-strong -fpic -fpie -O2"
 ENV PHP_CPPFLAGS="$PHP_CFLAGS"
 ENV PHP_LDFLAGS="-Wl,-O1 -Wl,--hash-style=both -pie"
-ENV SECP256K1_CONFIGURE_FLAGS="--enable-benchmark=no --enable-tests=no --enable-experimental --enable-module-ecdh --enable-module-recovery --enable-module-schnorrsig"
+ENV SECP256K1_CONFIGURE_FLAGS="--enable-benchmark=no --enable-tests=no --enable-experimental --enable-module-ecdh --enable-module-recovery --enable-module-extrakeys --enable-module-schnorrsig"
 ENV GPG_KEYS="$BUILD_GPG_KEYS"
 ENV PHP_VERSION="$BUILD_PHP_VERSION"
 ENV PHP_URL="https://secure.php.net/get/php-$PHP_VERSION.tar.xz/from/this/mirror"

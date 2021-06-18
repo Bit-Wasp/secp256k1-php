@@ -24,8 +24,13 @@ extern zend_module_entry secp256k1_module_entry;
 #ifdef SECP256K1_MODULE_RECOVERY
 #define SECP256K1_RECOVERABLE_SIG_RES_NAME "secp256k1_ecdsa_recoverable_signature"
 #endif
+
+#ifdef SECP256K1_MODULE_EXTRAKEYS
+#define SECP256K1_XONLY_PUBKEY_RES_NAME "secp256k1_xonly_pubkey"
+#define SECP256K1_KEYPAIR_RES_NAME "secp256k1_keypair"
+#endif
+
 #ifdef SECP256K1_MODULE_SCHNORRSIG
-#define SECP256K1_SCHNORRSIG_RES_NAME "secp256k1_schnorrsig"
 #endif
 
 #ifdef ZTS
@@ -35,6 +40,7 @@ extern zend_module_entry secp256k1_module_entry;
 #endif
 
 #define MAX_SIGNATURE_LENGTH 72
+#define SCHNORRSIG_LENGTH 64
 #define COMPACT_SIGNATURE_LENGTH 64
 #define PUBKEY_COMPRESSED_LENGTH 33
 #define PUBKEY_UNCOMPRESSED_LENGTH 65
@@ -90,14 +96,26 @@ PHP_FUNCTION(secp256k1_ecdsa_recoverable_signature_parse_compact);
 PHP_FUNCTION(secp256k1_ecdh);
 #endif /* end of ecdh module */
 
+
+/* extrakeys module */
+#ifdef SECP256K1_MODULE_EXTRAKEYS
+PHP_FUNCTION(secp256k1_xonly_pubkey_parse);
+PHP_FUNCTION(secp256k1_xonly_pubkey_serialize);
+PHP_FUNCTION(secp256k1_xonly_pubkey_from_pubkey);
+PHP_FUNCTION(secp256k1_xonly_pubkey_tweak_add);
+PHP_FUNCTION(secp256k1_xonly_pubkey_tweak_add_check);
+PHP_FUNCTION(secp256k1_keypair_create);
+PHP_FUNCTION(secp256k1_keypair_sec);
+PHP_FUNCTION(secp256k1_keypair_pub);
+PHP_FUNCTION(secp256k1_keypair_xonly_pub);
+PHP_FUNCTION(secp256k1_keypair_xonly_tweak_add);
+#endif /* end of schnorrsig module */
+
 /* schnorr module */
 #ifdef SECP256K1_MODULE_SCHNORRSIG
-PHP_FUNCTION(secp256k1_schnorrsig_serialize);
-PHP_FUNCTION(secp256k1_schnorrsig_parse);
 PHP_FUNCTION(secp256k1_schnorrsig_sign);
 PHP_FUNCTION(secp256k1_schnorrsig_verify);
-PHP_FUNCTION(secp256k1_schnorrsig_verify_batch);
-PHP_FUNCTION(secp256k1_nonce_function_bipschnorr);
+PHP_FUNCTION(secp256k1_nonce_function_bip340);
 #endif /* end of schnorrsig module */
 
 #endif	/* PHP_SECP256K1_H */

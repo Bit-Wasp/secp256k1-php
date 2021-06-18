@@ -1,5 +1,5 @@
 --TEST--
-secp256k1_schnorrsig_sign works a user provided nonce function, no additional data
+secp256k1_schnorrsig_sign works a user provided nonce function, with no additional data
 --SKIPIF--
 <?php
 if (!extension_loaded("secp256k1")) print "skip extension not loaded";
@@ -9,31 +9,34 @@ if (!function_exists("secp256k1_schnorrsig_verify")) print "skip no schnorrsig s
 <?php
 
 $ctx = secp256k1_context_create(SECP256K1_CONTEXT_SIGN);
-$privKey = str_repeat("\x90", 32);
-//0262cd4a67842524034e9b3f313feab032bdb4858588c193bc26ce9f380321ef79
 
 $hashFxn = function (&$nonce, string $msg,
-    string $key32, $algo16, $data, int $attempt) {
+    string $key32, string $xonlyPk32, string $algo16, $data) {
     echo "triggered callback\n";
-    $nonce = str_repeat("\x42", 32);
+    var_dump($data);
+    $nonce = hex2bin("1d2dc1652fee3ad08434469f9ad30536a5787feccfa308e8fb396c8030dd1c69");
     return 1;
 };
 
-$msg32 = hash('sha256', "some message", true);
 $sig = null;
-$sigOut = '';
+$output = '';
+$privKey = hex2bin("0000000000000000000000000000000000000000000000000000000000000003");
+$msg32 = hex2bin("0000000000000000000000000000000000000000000000000000000000000000");
+$auxRand = hex2bin("0000000000000000000000000000000000000000000000000000000000000000");
 
-$result = secp256k1_schnorrsig_sign($ctx, $sig, $msg32, $privKey, $hashFxn, NULL);
+$keypair = null;
+$result = secp256k1_keypair_create($ctx, $keypair, $privKey);
 echo $result.PHP_EOL;
 
-$result = secp256k1_schnorrsig_serialize($ctx, $sigOut, $sig);
+$result = secp256k1_schnorrsig_sign($ctx, $sig, $msg32, $keypair, $hashFxn, NULL);
 echo $result.PHP_EOL;
 
-echo unpack("H*", $sigOut)[1].PHP_EOL;
+echo strtoupper(unpack("H*", $sig)[1]).PHP_EOL;
 
 ?>
 --EXPECT--
+1
 triggered callback
+NULL
 1
-1
-24653eac434488002cc06bbfb7f10fe18991e35f9fe4302dbea6d2353dc0ab1c76badaec2bc699660d7a17f3457c5e4aeef226a5890676675cc25b7ee7a25de2
+E907831F80848D1069A5371B402410364BDF1C5F8307B0084C55F1CE2DCA821525F66A4A85EA8B71E482A74F382D2CE5EBEEE8FDB2172F477DF4900D310536C0
