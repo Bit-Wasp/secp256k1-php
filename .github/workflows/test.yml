@@ -1,0 +1,62 @@
+name: GitHub Actions Demo
+on: [push]
+jobs:
+  Explore-GitHub-Actions:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
+      - run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by GitHub!"
+      - run: echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
+      - name: Check out repository code
+        uses: actions/checkout@v2
+      - run: echo "💡 The ${{ github.repository }} repository has been cloned to the runner."
+      - run: echo "🖥️ The workflow is now ready to test your code on the runner."
+      - name: List files in the repository
+        run: |
+          ls ${{ github.workspace }}
+      - run: echo "🍏 This job's status is ${{ job.status }}."
+
+#on:
+#  # Trigger the workflow on push or pull request,
+#  # but only for the main branch
+#  push:
+#    branches:
+#      - master
+#  pull_request:
+#    branches:
+#      - master
+#  # Also trigger on page_build, as well as release created events
+#  page_build:
+#  release:
+#    types: # This configuration does not affect the page_build event above
+#      - created
+#
+#env:
+#  SECP256K1_REMOTE: "https://github.com/bitcoin-core/secp256k1.git"
+#  SECP256K1_COMMIT: efad3506a8937162e8010f5839fdf3771dfcf516
+#  SECP256K1_CONFIGURE: "--enable-module-ecdh --enable-module-recovery --enable-module-schnorrsig --enable-module-extrakeys"
+#  EXT_SECP256K1_CONFIGURE: "--with-secp256k1-config --with-module-recovery --with-module-ecdh --with-module-schnorrsig --with-module-extrakeys"
+#
+#jobs:
+#  test:
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: Checkout code
+#        uses: actions/checkout@v2
+#      - run: ./gradlew check --info
+#      - run: git clone https://github.com/bitcoin-core/secp256k1.git libsecp256k1
+#      - run: cd libsecp256k1 && git checkout efad3506a8937162e8010f5839fdf3771dfcf516                        \
+#          && ./autogen.sh                                                             \
+#          && ./configure --enable-tests=no --enable-benchmark=no                      \
+#          --enable-experimental --enable-module-ecdh --enable-module-recovery --enable-module-schnorrsig --enable-module-extrakeys     \
+#          && make -j$(nproc) && sudo make install && cd ..
+#      - run: cd secp256k1 && phpize                                                   \
+#          && ./configure --with-secp256k1-config --with-module-recovery --with-module-ecdh --with-module-schnorrsig --with-module-extrakeys                                     \
+#          && make -j$(nproc) && sudo make install                                     \
+#          && cd ..
+#      - run: composer update
+#      - run: travis/verify_stubs.sh
+#      - run: cd secp256k1/ && REPORT_EXIT_STATUS=1 make test || (find tests/*.log -type f -exec cat {} + ; exit 1) && cd ..
+#      - run: travis/run_coverage_test.sh
+#      - run: travis/run_valgrind_test.sh
+#      - run: travis/validate_examples.sh
