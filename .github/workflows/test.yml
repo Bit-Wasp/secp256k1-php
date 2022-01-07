@@ -20,7 +20,7 @@ jobs:
         with:
           php-version: ${{ matrix.php-versions }}
       - run: cd /tmp && git clone ${SECP256K1_REMOTE} libsecp256k1 && cd libsecp256k1 && git checkout ${SECP256K1_COMMIT} && ./autogen.sh && ./configure ${SECP256K1_CONFIGURE} && make -j$(nproc) && sudo make install
-      - run: cd secp256k1 && php -v && phpize && ./configure --with-secp256k1-config --with-module-recovery --with-module-ecdh --with-module-schnorrsig --with-module-extrakeys && make -j$(nproc) && sudo make install
+      - run: cd secp256k1 && php -v && phpize && ./configure ${EXT_SECP256K1_CONFIGURE} && make -j$(nproc) && sudo make install
       - run: composer update
       - run: travis/verify_stubs.sh
       - run: cd secp256k1/ && REPORT_EXIT_STATUS=1 make test || (find tests/*.log -type f -exec cat {} + ; exit 1) && cd ..
