@@ -17,4 +17,5 @@ const SECP256K1_TAG_PUBKEY_UNCOMPRESSED = 4;
 const SECP256K1_TAG_PUBKEY_HYBRID_EVEN = 6;
 const SECP256K1_TAG_PUBKEY_HYBRID_ODD = 7;
 const SECP256K1_TYPE_RECOVERABLE_SIG = "secp256k1_ecdsa_recoverable_signature";
-const SECP256K1_TYPE_SCHNORRSIG = "secp256k1_schnorrsig";
+const SECP256K1_TYPE_XONLY_PUBKEY = "secp256k1_xonly_pubkey";
+const SECP256K1_TYPE_KEYPAIR = "secp256k1_keypair";

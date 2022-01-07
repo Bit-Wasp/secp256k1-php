@@ -1,0 +1,29 @@
+name: Test extension
+on: [push]
+env:
+  SECP256K1_REMOTE: "https://github.com/bitcoin-core/secp256k1.git"
+  SECP256K1_COMMIT: efad3506a8937162e8010f5839fdf3771dfcf516
+  SECP256K1_CONFIGURE: "--enable-tests=no --enable-benchmark=no --enable-experimental --enable-module-ecdh --enable-module-recovery --enable-module-schnorrsig --enable-module-extrakeys"
+  EXT_SECP256K1_CONFIGURE: "--with-secp256k1-config --with-module-recovery --with-module-ecdh --with-module-schnorrsig --with-module-extrakeys"
+jobs:
+  test:
+    runs-on: ubuntu-18.04
+    strategy:
+      matrix:
+        operating-system: [ubuntu-latest]
+        php-versions: ['7.0', '7.1', '7.2', '7.3', '7.4']
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-versions }}
+      - run: cd /tmp && git clone ${SECP256K1_REMOTE} libsecp256k1 && cd libsecp256k1 && git checkout ${SECP256K1_COMMIT} && ./autogen.sh && ./configure ${SECP256K1_CONFIGURE} && make -j$(nproc) && sudo make install
+      - run: cd secp256k1 && php -v && phpize && ./configure ${EXT_SECP256K1_CONFIGURE} && make -j$(nproc) && sudo make install
+      - run: composer update
+      - run: travis/verify_stubs.sh
+      - run: cd secp256k1/ && REPORT_EXIT_STATUS=1 make test || (find tests/*.log -type f -exec cat {} + ; exit 1) && cd ..
+      - run: travis/run_coverage_test.sh
+      - run: travis/run_valgrind_test.sh
+      - run: travis/validate_examples.sh

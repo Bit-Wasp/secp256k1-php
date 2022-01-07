@@ -395,42 +395,78 @@ function secp256k1_ecdsa_recover($context, &$ecPublicKey, $ecdsaRecoverableSigna
  */
 function secp256k1_ecdh($context, string &$result, $ecPublicKey, string $privKey, ?callable $hashfxn, ?int $outputLen, $data): int {}
 /**
- * Serialize a Schnorr signature.
- * 
- *  Returns: 1
- *  Args:    ctx: a secp256k1 context object
- *  Out:   out64: pointer to a 64-byte array to store the serialized signature
- *  In:      sig: pointer to the signature
- * 
- *  See secp256k1_schnorrsig_parse for details about the encoding.
  * @param resource $context
- * @param string|null $sigout
- * @param resource $schnorrsig
+ * @param resource|null $pubkey
+ * @param string $input32
  * @return int
  */
-function secp256k1_schnorrsig_serialize($context, ?string &$sigout, $schnorrsig): int {}
+function secp256k1_xonly_pubkey_parse($context, &$pubkey, string $input32): int {}
 /**
- * Parse a Schnorr signature.
- * 
- *  Returns: 1 when the signature could be parsed, 0 otherwise.
- *  Args:    ctx: a secp256k1 context object
- *  Out:     sig: pointer to a signature object
- *  In:     in64: pointer to the 64-byte signature to be parsed
- * 
- * The signature is serialized in the form R||s, where R is a 32-byte public
- * key (x-coordinate only; the y-coordinate is considered to be the unique
- * y-coordinate satisfying the curve equation that is a quadratic residue)
- * and s is a 32-byte big-endian scalar.
- * 
- * After the call, sig will always be initialized. If parsing failed or the
- * encoded numbers are out of range, signature validation with it is
- * guaranteed to fail for every message and public key.
  * @param resource $context
- * @param resource|null $sigout
- * @param string $sigin
+ * @param string|null $pubkey
  * @return int
  */
-function secp256k1_schnorrsig_parse($context, &$sigout, string $sigin): int {}
+function secp256k1_xonly_pubkey_serialize($context, ?string &$pubkey): int {}
+/**
+ * @param resource $context
+ * @param resource|null $pubkey
+ * @param int|null $pk_parity
+ * @return int
+ */
+function secp256k1_xonly_pubkey_from_pubkey($context, &$pubkey, ?int &$pk_parity): int {}
+/**
+ * @param resource $context
+ * @param resource|null $output_pubkey
+ * @param resource $internal_pubkey
+ * @param string $tweak
+ * @return int
+ */
+function secp256k1_xonly_pubkey_tweak_add($context, &$output_pubkey, $internal_pubkey, string $tweak): int {}
+/**
+ * @param resource $context
+ * @param string $tweaked_pubkey32
+ * @param int $tweaked_pubkey_parity
+ * @param resource $internal_pubkey
+ * @param string $tweak32
+ * @return int
+ */
+function secp256k1_xonly_pubkey_tweak_add_check($context, string $tweaked_pubkey32, int $tweaked_pubkey_parity, $internal_pubkey, string $tweak32): int {}
+/**
+ * @param resource $context
+ * @param resource|null $keypair
+ * @param string $seckey
+ * @return int
+ */
+function secp256k1_keypair_create($context, &$keypair, string $seckey): int {}
+/**
+ * @param resource $context
+ * @param string|null $seckey
+ * @param resource $keypair
+ * @return int
+ */
+function secp256k1_keypair_sec($context, ?string &$seckey, $keypair): int {}
+/**
+ * @param resource $context
+ * @param resource|null $pubkey
+ * @param resource $keypair
+ * @return int
+ */
+function secp256k1_keypair_pub($context, &$pubkey, $keypair): int {}
+/**
+ * @param resource $context
+ * @param resource|null $pubkey
+ * @param int|null $pk_parity
+ * @param resource $keypair
+ * @return int
+ */
+function secp256k1_keypair_xonly_pub($context, &$pubkey, ?int &$pk_parity, $keypair): int {}
+/**
+ * @param resource $context
+ * @param resource $keypair
+ * @param string $tweak32
+ * @return int
+ */
+function secp256k1_keypair_xonly_tweak_add($context, &$keypair, string $tweak32): int {}
 /**
  * Create a Schnorr signature.
  * 
@@ -442,14 +478,14 @@ function secp256k1_schnorrsig_parse($context, &$sigout, string $sigin): int {}
  *        noncefp: pointer to a nonce generation function. If NULL, secp256k1_nonce_function_bipschnorr is used
  *          ndata: pointer to arbitrary data used by the nonce generation function (can be NULL)
  * @param resource $context
- * @param resource|null $ecdsaSignatureOut
+ * @param resource|null $sig64
  * @param string $msg32
- * @param string $secretKey
+ * @param resource $keypair
  * @param callable|null $noncefp
  * @param  $ndata
  * @return int
  */
-function secp256k1_schnorrsig_sign($context, &$ecdsaSignatureOut, string $msg32, string $secretKey, ?callable $noncefp, $ndata): int {}
+function secp256k1_schnorrsig_sign($context, &$sig64, string $msg32, $keypair, ?callable $noncefp, $ndata): int {}
 /**
  * Verify a Schnorr signature.
  * 
@@ -460,44 +496,19 @@ function secp256k1_schnorrsig_sign($context, &$ecdsaSignatureOut, string $msg32,
  *          msg32: the 32-byte message being verified (cannot be NULL)
  *         pubkey: pointer to a public key to verify with (cannot be NULL)
  * @param resource $context
- * @param resource $schnorrsig
+ * @param string $sig64
  * @param string $msg32
  * @param resource $pubkey
  * @return int
  */
-function secp256k1_schnorrsig_verify($context, $schnorrsig, string $msg32, $pubkey): int {}
+function secp256k1_schnorrsig_verify($context, string $sig64, string $msg32, $pubkey): int {}
 /**
- * Verifies a set of Schnorr signatures.
- * 
- *  Returns 1 if all succeeded, 0 otherwise. In particular, returns 1 if n_sigs is 0.
- * 
- *   Args:    ctx: a secp256k1 context object, initialized for verification.
- *        scratch: scratch space used for the multiexponentiation
- *   In:      sig: array of signatures, or NULL if there are no signatures
- *          msg32: array of messages, or NULL if there are no signatures
- *             pk: array of public keys, or NULL if there are no signatures
- *         n_sigs: number of signatures in above arrays. Must be smaller than
- *                 2^31 and smaller than half the maximum size_t value. Must be 0
- *                 if above arrays are NULL.
- * @param resource $context
- * @param resource $scratch
- * @param array $pubkeys
- * @param array $msg32s
- * @param array $sigs
- * @param int $numsigs
- * @return int
- */
-function secp256k1_schnorrsig_verify_batch($context, $scratch, array $pubkeys, array $msg32s, array $sigs, int $numsigs): int {}
-/**
- * An implementation of the nonce generation function as defined in BIP-schnorr.
- *  If a data pointer is passed, it is assumed to be a pointer to 32 bytes of
- *  extra entropy.
  * @param string|null $nonce32
  * @param string $msg32
  * @param string $key32
- * @param string|null $algo16
+ * @param string $xonly_pk32
+ * @param string $algo16
  * @param  $data
- * @param int $attempt
  * @return int
  */
-function secp256k1_nonce_function_bipschnorr(?string &$nonce32, string $msg32, string $key32, ?string $algo16, $data, int $attempt): int {}
+function secp256k1_nonce_function_bip340(?string &$nonce32, string $msg32, string $key32, string $xonly_pk32, string $algo16, $data): int {}
