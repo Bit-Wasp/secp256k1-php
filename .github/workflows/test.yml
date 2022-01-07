@@ -5,7 +5,6 @@ env:
   SECP256K1_COMMIT: efad3506a8937162e8010f5839fdf3771dfcf516
   SECP256K1_CONFIGURE: "--enable-tests=no --enable-benchmark=no --enable-experimental --enable-module-ecdh --enable-module-recovery --enable-module-schnorrsig --enable-module-extrakeys"
   EXT_SECP256K1_CONFIGURE: "--with-secp256k1-config --with-module-recovery --with-module-ecdh --with-module-schnorrsig --with-module-extrakeys"
-  VALGRIND: "true"
 jobs:
   test:
     runs-on: ubuntu-18.04
